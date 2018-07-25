@@ -7,10 +7,10 @@ Make sure that both your gcc and g++ version are not lower than 5.
 
 0. [Install ROS](http://wiki.ros.org/ROS/Installation), recommand to choose the one has the longest support term.
 1. Copy the whole file folder named *motion_planning_alpha* to the *<path>* you want it stays.
-2. In your terminal, run command ```$ cd <path>/motion_planning_alpha/catkin_ws/```
-3. In your terminal, run command ```$ catkin_make```
-4. In your terminal, run command ```$ echo "source <path>/motion_planning_alpha/catkin_ws/devel/setup.bash" >> ~/.bashrc```
-5. 开一个terminal，输入```$ roscore```
+2. In your terminal, run command ```(~)$ cd <path>/motion_planning_alpha/catkin_ws/```
+3. In your terminal, run command ```(catkin_ws)$ catkin_make```
+4. In your terminal, run command ```(catkin_ws)$ echo "source <path>/motion_planning_alpha/catkin_ws/devel/setup.bash" >> ~/.bashrc```
+5. If it is the first you run the program ```(catkin_ws)$ roscore```
 6. 每次更改代码之后都要: ```<path>/motion_planning_alpha/catkin_ws$ catkin_make```
 7. 开启motion planner: ```$ ~/Desktop/ROS/catkin_ws/src/motion_planner$ rosrun motion_planner motion_planner```
 8. 开启global planner ```$ ~/Desktop/ROS/catkin_ws/src/global_planner$ rosrun global_planner planner.py```
