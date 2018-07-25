@@ -1,0 +1,8 @@
+# 纬度
+float64 latitude
+# 经度
+float64 longitude
+
+# 地图坐标，单位 m
+float32 x
+float32 y
