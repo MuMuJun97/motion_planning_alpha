@@ -10,27 +10,13 @@ Make sure that both your gcc and g++ version are not lower than 5.
 2. In your terminal, run command ```$ cd <path>/motion_planning_alpha/catkin_ws/```
 3. In your terminal, run command ```$ catkin_make```
 4. In your terminal, run command ```$ echo "source <path>/motion_planning_alpha/catkin_ws/devel/setup.bash" >> ~/.bashrc```
-
-开一个terminal，输入
-	roscore
-
-每次更改代码之后都要：
-~/Desktop/ROS/catkin_ws$ catkin_make
-
-开启motion planner
-~/Desktop/ROS/catkin_ws/src/motion_planner$ rosrun motion_planner motion_planner
-
-开启global planner
-~/Desktop/ROS/catkin_ws/src/global_planner$ rosrun global_planner planner.py
-
-发送一次route map信息
-~/Desktop/ROS/catkin_ws/src/global_planner$ rosbag play routemap.bag
-
-发送位置信息
-rostopic pub /localization/location autopilot_msgs/Location  '{stamp: now, frame_id: map}' '11290.4667969' '8706.98730469' '[0.0, 0.0, 0.0, 0.0]' '23.067371' '113.3795204' '[0.0, 0.0, 0.0, 0.0]'
-
-发送目标信息
-rostopic pub /route/goal autopilot_msgs/RoutePath  '{stamp: now, frame_id: map}' '[{latitude: 23.0677242, longitude: 113.3795769, x: 11296.2177734, y: 8746.04199219}]' '[0.0]'
+5. 开一个terminal，输入```$ roscore```
+6. 每次更改代码之后都要: ```<path>/motion_planning_alpha/catkin_ws$ catkin_make```
+7. 开启motion planner: ```$ ~/Desktop/ROS/catkin_ws/src/motion_planner$ rosrun motion_planner motion_planner```
+8. 开启global planner ```$ ~/Desktop/ROS/catkin_ws/src/global_planner$ rosrun global_planner planner.py```
+9. 发送一次route map信息: ```$ ~/Desktop/ROS/catkin_ws/src/global_planner$ rosbag play routemap.bag```
+10. 发送位置信息: ```$ rostopic pub /localization/location autopilot_msgs/Location  '{stamp: now, frame_id: map}' '11290.4667969' '8706.98730469' '[0.0, 0.0, 0.0, 0.0]' '23.067371' '113.3795204' '[0.0, 0.0, 0.0, 0.0]'```
+11. 发送目标信息: ```$ rostopic pub /route/goal autopilot_msgs/RoutePath  '{stamp: now, frame_id: map}' '[{latitude: 23.0677242, longitude: 113.3795769, x: 11296.2177734, y: 8746.04199219}]' '[0.0]'```
 
 
 ## Overview
