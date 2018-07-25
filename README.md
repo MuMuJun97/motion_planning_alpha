@@ -9,9 +9,9 @@ Make sure that both your gcc and g++ version are not lower than 5.
 1. Copy the whole file folder named *motion_planning_alpha* to the *<path>* you want it stays.
 2. In your terminal, run command ```(~)$ cd <path>/motion_planning_alpha/```
 3. In your terminal, run command ```(motion_planning_alpha)$ catkin_make```
- 3.1. if it fails, do more three times tries.
- 3.2. if still fail, run command ```(motion_planning_alpha)$ roscore```, then ```(motion_planning_alpha)$ catkin_make```.
- 3.3. if the above method also fail, google why.
+ 1. if it fails, do more three times tries.
+ 2. if still fail, run command ```(motion_planning_alpha)$ roscore```, then ```(motion_planning_alpha)$ catkin_make```.
+ 3. if the above method also fail, google why.
 4. In your terminal, run command ```(motion_planning_alpha)$ echo "source <path>/motion_planning_alpha/devel/setup.bash" >> ~/.bashrc```
 ### Run
 1. Run the whole program ```(motion_planning_alpha)$ roscore```
