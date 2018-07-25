@@ -2,7 +2,7 @@
 
 ## Using
 
-All Followings had been ran on both Ubuntu16.0 and Ubuntu18.04 OS. They are recommended. But other OSs maybe also fine.
+>All Followings had been ran on both Ubuntu16.0 and Ubuntu18.04 OS. They are recommended. But other OSs maybe also fine.
 Make sure that both your gcc and g++ version are not lower than 5.
 
 0. [Install ROS](http://wiki.ros.org/ROS/Installation), recommand to choose the one has the longest support term.
