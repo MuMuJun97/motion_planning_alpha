@@ -1,5 +1,16 @@
 # Motion_Planning_alpha
+
 ## Using
+
+All Followings had been ran on both Ubuntu16.0 and Ubuntu18.04 OS. They are recommended. But other OSs maybe also fine.
+Make sure that both your gcc and g++ version are not lower than 5.
+
+0. [Install ROS](http://wiki.ros.org/ROS/Installation), recommand to choose the one has the longest support term.
+1. Copy the whole file folder named *motion_planning_alpha* to the *<path>* you want it stays.
+2. In your terminal, run command ```$ cd <path>/motion_planning_alpha/catkin_ws/```
+3. In your terminal, run command ```$ catkin_make```
+4. In your terminal, run command ```$ echo "source <path>/motion_planning_alpha/catkin_ws/devel/setup.bash" >> ~/.bashrc```
+
 开一个terminal，输入
 	roscore
 
@@ -23,11 +34,14 @@ rostopic pub /route/goal autopilot_msgs/RoutePath  '{stamp: now, frame_id: map}'
 
 
 ## Overview
+
 <div align=center> 
 <img src="https://github.com/TroubleLi/Motion_Planning_alpha/blob/master/docs/graph.svg" 
 width="500" alt="IMG LOST" title="IN GOD WE TRUST"/>
 </div>
+
 ## 坐标变换树
+
 <div align=center> 
 <img src="https://github.com/TroubleLi/Motion_Planning_alpha/blob/master/docs/tf_tree.svg" 
 width="500" alt="IMG LOST" title="IN GOD WE TRUST"/>
