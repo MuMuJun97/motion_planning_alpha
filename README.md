@@ -14,8 +14,8 @@ Make sure that both your gcc and g++ version are not lower than 5.
  <br>3.3. if the above method also fail, google why.
 4. In your terminal, run command ```(motion_planning_alpha)$ echo "source <path>/motion_planning_alpha/devel/setup.bash" >> ~/.bashrc```
 ### Run
-1. Run the whole program ```(motion_planning_alpha)$ roscore```
-2. 每次更改代码之后都要: ```(motion_planning_alpha)$ catkin_make```
+1. To start ROS services ```(motion_planning_alpha)$ roscore```
+2. 每次更改代码之后都要: ```(motion_planning_alpha)$ catkin_make``` and ```(motion_planning_alpha)$ source devel/setup.bash```
 3. 开启motion planner: ```(motion_planning_alpha)$ rosrun motion_planner motion_planner```
 4. 开启global planner ```(motion_planning_alpha)$ rosrun global_planner planner.py```
 5. 发送一次route map信息: ```(motion_planning_alpha)$ rosbag play routemap.bag```
