@@ -7,16 +7,16 @@ Make sure that both your gcc and g++ version are not lower than 5.
 
 0. [Install ROS](http://wiki.ros.org/ROS/Installation), recommand to choose the one has the longest support term.
 1. Copy the whole file folder named *motion_planning_alpha* to the *<path>* you want it stays.
-2. In your terminal, run command ```(~)$ cd <path>/motion_planning_alpha/catkin_ws/```
-3. In your terminal, run command ```(catkin_ws)$ catkin_make```
-4. In your terminal, run command ```(catkin_ws)$ echo "source <path>/motion_planning_alpha/catkin_ws/devel/setup.bash" >> ~/.bashrc```
-5. If it is the first you run the program ```(catkin_ws)$ roscore```
-6. 每次更改代码之后都要: ```<path>/motion_planning_alpha/catkin_ws$ catkin_make```
-7. 开启motion planner: ```$ ~/Desktop/ROS/catkin_ws/src/motion_planner$ rosrun motion_planner motion_planner```
-8. 开启global planner ```$ ~/Desktop/ROS/catkin_ws/src/global_planner$ rosrun global_planner planner.py```
-9. 发送一次route map信息: ```$ ~/Desktop/ROS/catkin_ws/src/global_planner$ rosbag play routemap.bag```
-10. 发送位置信息: ```$ rostopic pub /localization/location autopilot_msgs/Location  '{stamp: now, frame_id: map}' '11290.4667969' '8706.98730469' '[0.0, 0.0, 0.0, 0.0]' '23.067371' '113.3795204' '[0.0, 0.0, 0.0, 0.0]'```
-11. 发送目标信息: ```$ rostopic pub /route/goal autopilot_msgs/RoutePath  '{stamp: now, frame_id: map}' '[{latitude: 23.0677242, longitude: 113.3795769, x: 11296.2177734, y: 8746.04199219}]' '[0.0]'```
+2. In your terminal, run command ```(~)$ cd <path>/motion_planning_alpha/```
+3. In your terminal, run command ```(motion_planning_alpha)$ catkin_make```
+4. In your terminal, run command ```(motion_planning_alpha)$ echo "source <path>/motion_planning_alpha/devel/setup.bash" >> ~/.bashrc```
+5. If it is the first you run the program ```(motion_planning_alpha)$ roscore```
+6. 每次更改代码之后都要: ```(motion_planning_alpha)$ catkin_make```
+7. 开启motion planner: ```(motion_planning_alpha)$ rosrun motion_planner motion_planner```
+8. 开启global planner ```(motion_planning_alpha)$ rosrun global_planner planner.py```
+9. 发送一次route map信息: ```(motion_planning_alpha)$ rosbag play routemap.bag```
+10. 发送位置信息: ```(motion_planning_alpha)$ rostopic pub /localization/location autopilot_msgs/Location  '{stamp: now, frame_id: map}' '11290.4667969' '8706.98730469' '[0.0, 0.0, 0.0, 0.0]' '23.067371' '113.3795204' '[0.0, 0.0, 0.0, 0.0]'```
+11. 发送目标信息: ```(motion_planning_alpha)$ rostopic pub /route/goal autopilot_msgs/RoutePath  '{stamp: now, frame_id: map}' '[{latitude: 23.0677242, longitude: 113.3795769, x: 11296.2177734, y: 8746.04199219}]' '[0.0]'```
 
 
 ## Overview
