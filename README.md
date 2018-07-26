@@ -16,6 +16,7 @@ Make sure that both your gcc and g++ version are not lower than 5.
 ### Run
 1. To start ROS services ```(motion_planning_alpha)$ roscore```
 2. 每次更改代码之后都要: ```(motion_planning_alpha)$ catkin_make``` and ```(motion_planning_alpha)$ source devel/setup.bash```
+2.1 every time you create new msg or srv, run ```(motion_planning_alpha)$ catkin_make install```
 3. 开启motion planner: ```(motion_planning_alpha)$ rosrun motion_planner motion_planner```
 4. 开启global planner ```(motion_planning_alpha)$ rosrun global_planner planner.py```
 5. 发送一次route map信息: ```(motion_planning_alpha)$ rosbag play routemap.bag```
