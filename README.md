@@ -4,19 +4,25 @@
 
 >All Followings had been ran on both Ubuntu16.0 and Ubuntu18.04 OS. They are recommended. But other OSs maybe also fine.
 Make sure that both your gcc and g++ version are not lower than 5.
-
+### Bulid and set environment
 0. [Install ROS](http://wiki.ros.org/ROS/Installation), recommand to choose the one has the longest support term.
 1. Copy the whole file folder named *motion_planning_alpha* to the *<path>* you want it stays.
 2. In your terminal, run command ```(~)$ cd <path>/motion_planning_alpha/```
 3. In your terminal, run command ```(motion_planning_alpha)$ catkin_make```
+ <br>3.1. if it fails, do more three times tries.
+ <br>3.2. if still fail, run command ```(motion_planning_alpha)$ roscore```, then ```(motion_planning_alpha)$ catkin_make```.
+ <br>3.3. if the above method also fail, google why.
 4. In your terminal, run command ```(motion_planning_alpha)$ echo "source <path>/motion_planning_alpha/devel/setup.bash" >> ~/.bashrc```
-5. If it is the first you run the program ```(motion_planning_alpha)$ roscore```
-6. 每次更改代码之后都要: ```(motion_planning_alpha)$ catkin_make```
-7. 开启motion planner: ```(motion_planning_alpha)$ rosrun motion_planner motion_planner```
-8. 开启global planner ```(motion_planning_alpha)$ rosrun global_planner planner.py```
-9. 发送一次route map信息: ```(motion_planning_alpha)$ rosbag play routemap.bag```
-10. 发送位置信息: ```(motion_planning_alpha)$ rostopic pub /localization/location autopilot_msgs/Location  '{stamp: now, frame_id: map}' '11290.4667969' '8706.98730469' '[0.0, 0.0, 0.0, 0.0]' '23.067371' '113.3795204' '[0.0, 0.0, 0.0, 0.0]'```
-11. 发送目标信息: ```(motion_planning_alpha)$ rostopic pub /route/goal autopilot_msgs/RoutePath  '{stamp: now, frame_id: map}' '[{latitude: 23.0677242, longitude: 113.3795769, x: 11296.2177734, y: 8746.04199219}]' '[0.0]'```
+### Run
+1. To start ROS services ```(motion_planning_alpha)$ roscore```
+2. 每次更改代码之后都要: ```(motion_planning_alpha)$ catkin_make``` and ```(motion_planning_alpha)$ source devel/setup.bash```
+<br>2.1 every time you create new msg or srv, run ```(motion_planning_alpha)$ catkin_make install```
+<br>2.2 if you create a new code file, run ```(<path>)$ chmod +x <your_new_code_file>``` then  run ```(motion_planning_alpha)$ catkin_make``` 
+3. 开启motion planner: ```(motion_planning_alpha)$ rosrun motion_planner motion_planner```
+4. 开启global planner ```(motion_planning_alpha)$ rosrun global_planner planner.py```
+5. 发送一次route map信息: ```(motion_planning_alpha)$ rosbag play routemap.bag```
+6. 发送位置信息: ```(motion_planning_alpha)$ rostopic pub /localization/location autopilot_msgs/Location  '{stamp: now, frame_id: map}' '11290.4667969' '8706.98730469' '[0.0, 0.0, 0.0, 0.0]' '23.067371' '113.3795204' '[0.0, 0.0, 0.0, 0.0]'```
+7. 发送目标信息: ```(motion_planning_alpha)$ rostopic pub /route/goal autopilot_msgs/RoutePath  '{stamp: now, frame_id: map}' '[{latitude: 23.0677242, longitude: 113.3795769, x: 11296.2177734, y: 8746.04199219}]' '[0.0]'```
 
 
 ## Overview
