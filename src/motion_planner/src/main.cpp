@@ -24,6 +24,7 @@ vector<type_road_point> reference_path; //global path
 vector<type_road_point> sample_nodes;
 type_road_point vehicle_loc; // coordinate 
 vehicle_velocity vehicle_vel; //speed
+GripMap grip_map;
 
 //TODO get the global path and srtore it in a vector.
 void reference_path_callback(const autopilot_msgs::RoutePath::ConstPtr& msg)
@@ -66,12 +67,15 @@ void vehicle_state_callback(const autopilot_msgs::MotionState::ConstPtr& msg)
     ROS_INFO("Listener:Get the vehicle location");
 }
 
-/*
+
 void grid_map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
-    //to do
+    grip_map.width = msg->info.width;
+    grip_map.height = msg->info.height;
+    grip_map.resolution = msg->info.resolution;
+    cout<<"GRIP_MAP: "<<grip_map.width<<"  "<<grip_map.height<<"  "<<endl;
 }
-
+/*
 void static_obstacle_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
     //to do
@@ -147,7 +151,7 @@ int main(int argc, char** argv)
 {
 	ros::init(argc,argv,"motion_planner");
 	ros::NodeHandle nh;
-    //ros::Subscriber grid_map_sub = nh.subscribe("/map/grid_map", 1000, grid_map_callback);
+    ros::Subscriber grid_map_sub = nh.subscribe("/map", 1000, grid_map_callback);
     //ros::Subscriber route_map_sub = nh.subscribe("/map/route_map", 1000, route_map_callback);
 	ros::Subscriber reference_path_sub = nh.subscribe("/route/path", 1000, reference_path_callback);
 	ros::Subscriber vehicle_state_sub = nh.subscribe("/localization/motion_state", 1000, vehicle_state_callback);

@@ -5,6 +5,9 @@
 #include "tree_util.hh"
 #include "Clothoid.h"
 #include "dubins.h"
+
+using namespace std;
+
 typedef struct type_road_point
 {
     double x;
@@ -42,4 +45,13 @@ typedef struct vehicle_velocity
     double vy;
     double vz;
 }vehicle_velocity;
+
+typedef struct GripMap
+{
+    vector<int> data;
+    unsigned long width;
+    unsigned long height;
+    double resolution;
+}GripMap;
+
 #endif // TYPE_VARIABLES_HPP
