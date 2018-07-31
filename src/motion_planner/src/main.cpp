@@ -24,8 +24,8 @@ vector<type_road_point> reference_path; //global path
 vector<type_road_point> sample_nodes;
 type_road_point vehicle_loc; // coordinate 
 vehicle_velocity vehicle_vel; //speed
-//to do
 
+//TODO get the global path and srtore it in a vector.
 void reference_path_callback(const autopilot_msgs::RoutePath::ConstPtr& msg)
 {
     for(int i = 0; i < msg->goals.size(); i++)
@@ -49,6 +49,7 @@ void reference_path_callback(const autopilot_msgs::RoutePath::ConstPtr& msg)
     ROS_INFO("Listener:Get the global path");
 }
 
+// TODO get the vehicle current state
 void vehicle_state_callback(const autopilot_msgs::MotionState::ConstPtr& msg)
 {
     //set the location
@@ -82,6 +83,7 @@ void dynamic_obstacle_callback(const delphi_esr_msgs::EsrTrack::ConstPtr& msg)
 }
 */
 
+//TODO show built tree and sampled nodes
 void show_tree(tree<type_node_point> m_tree)
 {
     plot_utility gp;
@@ -116,9 +118,11 @@ void show_tree(tree<type_node_point> m_tree)
         //cout << "samp_nodes: " << it3->x << " " << it3->y << endl;
         samp_nodes.push_back(make_pair(it3->x, it3->y));
     }
-    gp.plot_tree_for_thesis(refer_path, refer_path2, treedata, samp_nodes, "tree.png");
+    gp.plot_tree_for_thesis(refer_path, refer_path2, treedata, samp_nodes, "tree.pdf");
+    cout << "plot the tree" << endl;
 }
 
+//TODO show built real path and given reference path
 void show_path(vector<type_road_point> path)
 {
     plot_utility gp;
@@ -135,8 +139,8 @@ void show_path(vector<type_road_point> path)
         //cout << "refer_path: " << it1->x << " " << it1->y << endl;
         refer_path.push_back(make_pair(it1->x, it1->y));
     }
-    gp.plot_1d_data_withoriginal(real_path, refer_path, "rpath.png");
-    gp.plot_random_point(real_path, "path_point.png");
+    gp.plot_1d_data_withoriginal(real_path, refer_path, "rpath.pdf");
+    gp.plot_random_point(real_path, "path_point.pdf");
 }
 
 int main(int argc, char** argv)
