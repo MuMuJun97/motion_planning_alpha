@@ -46,10 +46,14 @@ bool fun_simple::collision_check(type_road_point point)
     return false;
 
 }
-void fun_simple:: update_info(type_road_point global_coordinate, std::vector<type_road_point> reference_path,double current_speed)
+void fun_simple:: update_info(
+    type_road_point global_coordinate, 
+    std::vector<type_road_point> reference_path,
+    double current_speed, GridMap grid_map)
 {
     global_coord=global_coordinate;
     local_reference_path=reference_path;
+    local_grid_map = grid_map;
     speed=current_speed;
 }
 bool fun_simple::is_goal(type_node_point node)

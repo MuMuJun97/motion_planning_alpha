@@ -46,12 +46,12 @@ typedef struct vehicle_velocity
     double vz;
 }vehicle_velocity;
 
-typedef struct GripMap
+typedef struct GridMap
 {
     vector<int> data;
     unsigned long width;
     unsigned long height;
     double resolution;
-}GripMap;
+}GridMap;
 
 #endif // TYPE_VARIABLES_HPP

@@ -24,7 +24,10 @@ public:
      * update the infomation include:
      * reference path,global coordinate, current speed.
      */
-    void update_info(type_road_point global_coordinate, std::vector<type_road_point> reference_path,double current_speed);
+    void update_info(
+        type_road_point global_coordinate, 
+        std::vector<type_road_point> reference_path,
+        double current_speed,GridMap grid_map);
     /*
      * add new node into the tree
      */
@@ -60,6 +63,10 @@ public:
        * reference path
        */
       std::vector<type_road_point> local_reference_path;
+      /*
+       * grip map
+       */
+      GridMap local_grid_map;
       /*
        * current speed.
        */

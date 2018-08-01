@@ -24,7 +24,7 @@ vector<type_road_point> reference_path; //global path
 vector<type_road_point> sample_nodes;
 type_road_point vehicle_loc; // coordinate 
 vehicle_velocity vehicle_vel; //speed
-GripMap grip_map;
+GridMap grid_map;
 
 //TODO get the global path and srtore it in a vector.
 void reference_path_callback(const autopilot_msgs::RoutePath::ConstPtr& msg)
@@ -38,11 +38,15 @@ void reference_path_callback(const autopilot_msgs::RoutePath::ConstPtr& msg)
         rp.longitude = msg->goals[i].longitude;
         if(i != msg->goals.size()-1)
         {
-            rp.angle = atan((msg->goals[i+1].y - msg->goals[i].y)/(msg->goals[i+1].x - msg->goals[i].x));
+            rp.angle = atan(
+                (msg->goals[i+1].y - msg->goals[i].y)/
+                (msg->goals[i+1].x - msg->goals[i].x));
         }
         else
         {
-            rp.angle = atan((msg->goals[i].y - msg->goals[i-1].y)/(msg->goals[i].x - msg->goals[i-1].x));
+            rp.angle = atan(
+                (msg->goals[i].y - msg->goals[i-1].y)/
+                (msg->goals[i].x - msg->goals[i-1].x));
         }
         reference_path.push_back(rp);
         cout << rp.x << " " << rp.y << endl;
@@ -58,7 +62,9 @@ void vehicle_state_callback(const autopilot_msgs::MotionState::ConstPtr& msg)
     vehicle_loc.longitude = msg->gps.longitude;
     vehicle_loc.x = msg->odom.pose.pose.position.x;
     vehicle_loc.y = msg->odom.pose.pose.position.y;
-    vehicle_loc.angle = atan(msg->odom.pose.pose.orientation.y/msg->odom.pose.pose.orientation.x);
+    vehicle_loc.angle = atan(
+        msg->odom.pose.pose.orientation.
+        y/msg->odom.pose.pose.orientation.x);
     //set the velocity
     vehicle_vel.vx = msg->odom.twist.twist.linear.x;  //vx
     vehicle_vel.vy = msg->odom.twist.twist.linear.y;  //vy
@@ -67,13 +73,25 @@ void vehicle_state_callback(const autopilot_msgs::MotionState::ConstPtr& msg)
     ROS_INFO("Listener:Get the vehicle location");
 }
 
-
+//TODO get the grid map and store into a gridMap object.
 void grid_map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
-    grip_map.width = msg->info.width;
-    grip_map.height = msg->info.height;
-    grip_map.resolution = msg->info.resolution;
-    cout<<"GRIP_MAP: "<<grip_map.width<<"  "<<grip_map.height<<"  "<<endl;
+    //TODO store grid map's width, height, resolution and data. 
+    grid_map.width = msg->info.width;
+    grid_map.height = msg->info.height;
+    grid_map.resolution = msg->info.resolution;
+    for(int i=0;i<grid_map.width*grid_map.height;i++){
+        grid_map.data.push_back(msg->data[i]);
+    }
+    //TODO print given width, height, resolution and data for checking.
+    cout<<"grid_MAP: "<<grid_map.width<<"  "<<grid_map.height<<"  "<<endl;
+    for(int i=0;i<grid_map.height;i++){
+        cout<<"<"<<i<<"th row>";
+        for(int j=0;j<grid_map.width;j++){
+            cout<<grid_map.data[i*grid_map.width+j]<<" ";
+        }
+        cout<<"</"<<i<<"th row>"<<endl;
+    }
 }
 /*
 void static_obstacle_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
@@ -109,7 +127,8 @@ void show_tree(tree<type_node_point> m_tree)
         {
             //cout << "tree" << endl;
             vector<pair<double,double>> limb;
-            limb.push_back(make_pair(m_tree.parent(it2)->x, m_tree.parent(it2)->y));
+            limb.push_back(make_pair(m_tree.parent(it2)->x, 
+                           m_tree.parent(it2)->y));
             limb.push_back(make_pair(it2->x, it2->y));
             treedata.push_back(limb);
         }
@@ -122,11 +141,12 @@ void show_tree(tree<type_node_point> m_tree)
         //cout << "samp_nodes: " << it3->x << " " << it3->y << endl;
         samp_nodes.push_back(make_pair(it3->x, it3->y));
     }
-    gp.plot_tree_for_thesis(refer_path, refer_path2, treedata, samp_nodes, "tree.pdf");
+    gp.plot_tree_for_thesis(refer_path, refer_path2, treedata, 
+                            samp_nodes, "tree.pdf");
     cout << "plot the tree" << endl;
 }
 
-//TODO show built real path and given reference path
+//TODO print built real path and given reference path into PDF files.
 void show_path(vector<type_road_point> path)
 {
     plot_utility gp;
@@ -151,17 +171,24 @@ int main(int argc, char** argv)
 {
 	ros::init(argc,argv,"motion_planner");
 	ros::NodeHandle nh;
-    ros::Subscriber grid_map_sub = nh.subscribe("/map", 1000, grid_map_callback);
-    //ros::Subscriber route_map_sub = nh.subscribe("/map/route_map", 1000, route_map_callback);
-	ros::Subscriber reference_path_sub = nh.subscribe("/route/path", 1000, reference_path_callback);
-	ros::Subscriber vehicle_state_sub = nh.subscribe("/localization/motion_state", 1000, vehicle_state_callback);
-    //ros::Subscriber static_obstacle_sub = nh.subscribe("/detection/static_obstacle_grid", 1000, static_obstacle_callback);
-    //ros::Subscriber dynamic_obstacle_sub = nh.subscribe("/detection/dynamic_obstacle", 1000, dynamic_obstacle_callback);
-    ros::Publisher way_points_pub = nh.advertise<autopilot_msgs::WayPoints>("/planner/way_points",1000);
+    ros::Subscriber grid_map_sub = nh.subscribe(
+        "/map", 1000, grid_map_callback);
+    //ros::Subscriber route_map_sub = nh.subscribe(
+        //"/map/route_map", 1000, route_map_callback);
+	ros::Subscriber reference_path_sub = nh.subscribe(
+        "/route/path", 1000, reference_path_callback);
+	ros::Subscriber vehicle_state_sub = nh.subscribe(
+        "/localization/motion_state", 1000, vehicle_state_callback);
+    // ros::Subscriber static_obstacle_sub = nh.subscribe(
+    //     "/detection/static_obstacle_grid", 1000, static_obstacle_callback);
+    // ros::Subscriber dynamic_obstacle_sub = nh.subscribe(
+    //     "/detection/dynamic_obstacle", 1000, dynamic_obstacle_callback);
+    ros::Publisher way_points_pub = nh.advertise<autopilot_msgs::WayPoints>(
+        "/planner/way_points",1000);
 	
     
-    
-    //load the global path, and search 30m ahead to get a reference path and save it into reference_path.
+    //load the global path, and search 30m ahead to get a reference path 
+    //and save it into reference_path.
 
     fun_simple* p_fun_main;
     p_fun_main = new fun_simple;
@@ -178,26 +205,24 @@ int main(int argc, char** argv)
     p_propegate_main = new propegating_methods();
     p_propegate_main->p_func_method_propegating = &p_fun_main;
 
-    
-    //cout << "place 1" << endl;
+    //TODO set up the planner
 
-
-    //set up the planner
-
-    cout << "I'm comming!!!" << endl;
+    cout << "Motion Planning Node is Running..." << endl;
     bool flag = true;
     ros::Rate loop_rate(5);  
     while (nh.ok()) {
         ros::spinOnce();
-        if(reference_path.size())
+        if(reference_path.size() && grid_map.data.size())
         {
-            //set up the planner
             vehicle_loc.x = 11290.4667969;
             vehicle_loc.y = 8706.98730469;
             vehicle_loc.angle = reference_path[0].angle;
             double speed = 5;
-            //double speed = sqrt(vehicle_vel.vx*vehicle_vel.vx + vehicle_vel.vy*vehicle_vel.vy);
-            p_fun_main->update_info(vehicle_loc, reference_path, speed);  //shiliang
+            //double speed = sqrt(
+                //vehicle_vel.vx*vehicle_vel.vx + 
+                //vehicle_vel.vy*vehicle_vel.vy);
+            p_fun_main->update_info(
+                vehicle_loc, reference_path, speed, grid_map);
             p_fun_main->setup();
             p_fun_main->initialize_tree();
             sample_nodes.clear();
@@ -207,7 +232,8 @@ int main(int argc, char** argv)
             while(true)
             {
                 n++;
-                bool flag_sample=p_sample_main->sampling_nearby_reference_path(p_fun_main->local_reference_path);
+                bool flag_sample=p_sample_main->sampling_nearby_reference_path(
+                    p_fun_main->local_reference_path);
                 //cout << "I'm here!!!" << endl;
                 if (flag_sample)
                 {
