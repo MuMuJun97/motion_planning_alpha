@@ -15,37 +15,20 @@ fun_simple::~fun_simple()
 
 bool fun_simple::collision_check(type_road_point point)
 {
-    //to do
-    
-//    MatrixXd P(2,4);
-//    car_model.imu_location=point;
-//    generate_four_corner_of_car(P,car_model);
-//    double minx=P.block(0,0,1,4).minCoeff();
-//    double maxx=P.block(0,0,1,4).maxCoeff();
-//    if (minx<-3.5)
-//        return true;
-//    if (maxx>3.5)
-//        return true;
-//    P*=100.0;
-//    //P=ceil(P);
-//    Path subj, clip;
-//    Paths solution;
-//    for(int i=0;i<4;i++)
-//    {
-//        clip.push_back(IntPoint(P(0,i),P(1,i)));
-//        subj.push_back(IntPoint(100*(*bp)->obstacles[i][0],100*(*bp)->obstacles[i][1]));
-//    }
-//    Clipper c;
-//    c.AddPath(subj, ptSubject, true);
-//    c.AddPath(clip, ptClip, true);
-//    c.Execute(ctIntersection, solution, pftNonZero, pftNonZero);
-//    if (!solution.empty())
-//    {
-//        return true;
-//    }
+    unsigned long point_height = point.x / local_grid_map.resolution;
+    unsigned long point_width = point.y / local_grid_map.resolution;
+    if (local_grid_map.width > point_width 
+        && local_grid_map.height > point_height)
+    {
+        if (local_grid_map.data.at(
+            point_height*local_grid_map.width + point_width) > 100)
+        {
+            return true;
+        }
+    }
     return false;
-
 }
+
 void fun_simple:: update_info(
     type_road_point global_coordinate, 
     std::vector<type_road_point> reference_path,

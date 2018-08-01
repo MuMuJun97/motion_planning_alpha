@@ -80,14 +80,17 @@ void grid_map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
     grid_map.width = msg->info.width;
     grid_map.height = msg->info.height;
     grid_map.resolution = msg->info.resolution;
-    for(int i=0;i<grid_map.width*grid_map.height;i++){
+    for(int i=0;i<grid_map.width*grid_map.height;i++)
+    {
         grid_map.data.push_back(msg->data[i]);
     }
     //TODO print given width, height, resolution and data for checking.
     cout<<"grid_MAP: "<<grid_map.width<<"  "<<grid_map.height<<"  "<<endl;
-    for(int i=0;i<grid_map.height;i++){
+    for(int i=0;i<grid_map.height;i++)
+    {
         cout<<"<"<<i<<"th row>";
-        for(int j=0;j<grid_map.width;j++){
+        for(int j=0;j<grid_map.width;j++)
+        {
             cout<<grid_map.data[i*grid_map.width+j]<<" ";
         }
         cout<<"</"<<i<<"th row>"<<endl;
@@ -167,14 +170,14 @@ void show_path(vector<type_road_point> path)
     gp.plot_random_point(real_path, "path_point.pdf");
 }
 
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 	ros::init(argc,argv,"motion_planner");
 	ros::NodeHandle nh;
     ros::Subscriber grid_map_sub = nh.subscribe(
         "/map", 1000, grid_map_callback);
-    //ros::Subscriber route_map_sub = nh.subscribe(
-        //"/map/route_map", 1000, route_map_callback);
+    // ros::Subscriber route_map_sub = nh.subscribe(
+    //     "/map/route_map", 1000, route_map_callback);
 	ros::Subscriber reference_path_sub = nh.subscribe(
         "/route/path", 1000, reference_path_callback);
 	ros::Subscriber vehicle_state_sub = nh.subscribe(
@@ -187,83 +190,92 @@ int main(int argc, char** argv)
         "/planner/way_points",1000);
 	
     
-    //load the global path, and search 30m ahead to get a reference path 
-    //and save it into reference_path.
+    // TODO load the global path, and search 30m ahead to get a reference path 
+    //      and save it into reference_path.
 
+    // TODO Creat tree-expanding-related utility object.
     fun_simple* p_fun_main;
     p_fun_main = new fun_simple;
+    // TODO Creat node-sampling-related utility object.
     sampling_methods* p_sample_main;
     p_sample_main = new sampling_methods;
     p_sample_main->p_func_from_sampling = &p_fun_main;
-
+    // TODO Creat parent-searching-related utility object.
     searching_parent_methods* p_search_main;
     p_search_main = new searching_parent_methods;
     p_search_main->p_func_methods_searching_parent = &p_fun_main;
     p_search_main->p_sampling_methods_searching_parent = &p_sample_main;
-
+    // TODO Creat curve-propegating-related utility object
     propegating_methods* p_propegate_main;
     p_propegate_main = new propegating_methods();
     p_propegate_main->p_func_method_propegating = &p_fun_main;
 
-    //TODO set up the planner
-
-    cout << "Motion Planning Node is Running..." << endl;
     bool flag = true;
-    ros::Rate loop_rate(5);  
+    // TODO Set working frequency of motion planning node.
+    ros::Rate loop_rate(5);
+    // TODO Toost that motion planning node is running.
+    cout << "Motion Planning Node is Running..." << endl;
+
+    // TODO node-sampling, parent-searching, curve-propegation, node-adding,
+    //      collision-checking, path-selecting and other related works. 
     while (nh.ok()) {
         ros::spinOnce();
         if(reference_path.size() && grid_map.data.size())
         {
+            // TODO Initialize related parameters
             vehicle_loc.x = 11290.4667969;
             vehicle_loc.y = 8706.98730469;
             vehicle_loc.angle = reference_path[0].angle;
             double speed = 5;
-            //double speed = sqrt(
-                //vehicle_vel.vx*vehicle_vel.vx + 
-                //vehicle_vel.vy*vehicle_vel.vy);
+            // TODO Initialize tree-expanding-related utility object
             p_fun_main->update_info(
                 vehicle_loc, reference_path, speed, grid_map);
             p_fun_main->setup();
             p_fun_main->initialize_tree();
+            // TODO Initialize vector for storing sampled nodes.
             sample_nodes.clear();
-            //show_path(reference_path);
-            //iterate
+            // TODO Initialize work-iteration-time counter,
+            //      For each time n hits up 1000, output a path. 
             int n=0;
+            // TODO node-sampling, parent-searching, curve-propegation,
+            //      node-adding, collision-checking and other related works.
             while(true)
             {
+                if (n == 1000) break;
                 n++;
+                // TODO Node-sampling and collision-checking.
                 bool flag_sample=p_sample_main->sampling_nearby_reference_path(
                     p_fun_main->local_reference_path);
-                //cout << "I'm here!!!" << endl;
+
                 if (flag_sample)
                 {
-                    //cout << "Catch me !!!" << endl;
-                    bool flag_search_parent = p_search_main->searching_parent_node();
+                    // TODO Parent-searching.
+                    bool flag_search_parent =\
+                        p_search_main->searching_parent_node();
+
                     if (flag_search_parent)
                     {
-                        //cout << "parent_node: " << p_search_main->parent_node->x << endl;
                         type_node_point new_node;
-                        bool flag_prop = p_propegate_main->curve_propegation(p_search_main->parent_node, p_sample_main->sample_node, new_node);
-                        //cout << "cost: " << new_node.cost << endl;
+                        // TODO Curve-propegation and collision-checking.
+                        bool flag_prop = p_propegate_main->curve_propegation(
+                            p_search_main->parent_node, 
+                            p_sample_main->sample_node, new_node);
+
                         sample_nodes.push_back(p_sample_main->sample_node);
-                        //cout << "sample_node  " << p_sample_main->sample_node.x << " " << p_sample_main->sample_node.y << endl;
-                        /*for(int m = 0; m < 100000; m++)
-                        {
-                            for(int t = 0; t < 100000; t++);
-                        }*/
+
                         if(flag_prop)
                         {
-                            //cout << "AHA!!!" << endl;
-                            //cout << "new_node     " << new_node.x << " " << new_node.y << endl;
+                            // TODO Node-adding.
                             if(p_fun_main->add_node_into_tree(new_node))
                             {
-                                //cout << "parent_node: " << p_search_main->parent_node->x << ";  new_node: " << new_node.x << endl;
-                                p_fun_main->m_tree.append_child(p_search_main->parent_node, new_node);
+                                p_fun_main->m_tree.append_child(
+                                    p_search_main->parent_node, new_node);
                             }
                         }
                     }
 
                 }
+                // TODO Path-selecting and other related works
                 if (n%1000==0)
                 {
                     cout << n << endl;
@@ -276,25 +288,20 @@ int main(int argc, char** argv)
                         show_tree(p_fun_main->m_tree);
                         cout << "the best path is :" << endl;
                         vector<type_road_point>::iterator iter;
-                        for(iter = p_fun_main->selected_path.begin(); iter != p_fun_main->selected_path.end(); iter++)
+                        for(
+                            iter = p_fun_main->selected_path.begin(); 
+                            iter != p_fun_main->selected_path.end(); 
+                            iter++)
                         {
-                            cout << "x: " << (*iter).x << ", y:" << (*iter).y << endl;
+                            cout << "x: " << (*iter).x << \
+                            ", y:" << (*iter).y << endl;
                         }
                         break;
                     }
                 }
-                if (n == 1000) break;
             }
 
         }
-        /*if(p_fun_main->selected_path.size())
-        {
-            for(int i = 0; i < p_fun_main->selected_path.size(); i++)
-            {
-                cout << i << " " << p_fun_main->selected_path[i].x << " " << p_fun_main->selected_path[i].y << endl;
-            }
-        }*/
-        //way_points_pub.publish("llll");  
         loop_rate.sleep();  
     }
     
