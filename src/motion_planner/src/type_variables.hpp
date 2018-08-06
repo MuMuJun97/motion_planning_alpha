@@ -48,7 +48,7 @@ typedef struct vehicle_velocity
 
 typedef struct GridMap
 {
-    vector<int> data;
+    vector<short> data;
     unsigned long width;
     unsigned long height;
     double resolution;

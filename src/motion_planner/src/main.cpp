@@ -76,25 +76,23 @@ void vehicle_state_callback(const autopilot_msgs::MotionState::ConstPtr& msg)
 //TODO get the grid map and store into a gridMap object.
 void grid_map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
-    //TODO store grid map's width, height, resolution and data. 
+    //TODO Store grid map's width, height, resolution and data. 
     grid_map.width = msg->info.width;
     grid_map.height = msg->info.height;
     grid_map.resolution = msg->info.resolution;
+    //TODO Print given width, height and resolution for checking.
+    cout<<"GRID_MAP: "<<grid_map.width<<"  "<<grid_map.height<<"  "<<endl;
+    //TODO Store grid map's data.
+    cout << "Printing grid_map.data which doesn't equal -1:" << endl;
     for(int i=0;i<grid_map.width*grid_map.height;i++)
     {
         grid_map.data.push_back(msg->data[i]);
-    }
-    //TODO print given width, height, resolution and data for checking.
-    cout<<"grid_MAP: "<<grid_map.width<<"  "<<grid_map.height<<"  "<<endl;
-    for(int i=0;i<grid_map.height;i++)
-    {
-        cout<<"<"<<i<<"th row>";
-        for(int j=0;j<grid_map.width;j++)
+        if (grid_map.data.at(i) != -1)
         {
-            cout<<grid_map.data[i*grid_map.width+j]<<" ";
+            cout << grid_map.data.at(i) << "_";
         }
-        cout<<"</"<<i<<"th row>"<<endl;
     }
+    cout << endl << "Printing grid_map.data Done" << endl;
 }
 /*
 void static_obstacle_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
