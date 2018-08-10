@@ -26,6 +26,10 @@
 5. 发送一次route map信息: ```(motion_planning_alpha)$ rosbag play routemap.bag```
 6. 发送位置信息: ```(motion_planning_alpha)$ rostopic pub /localization/location autopilot_msgs/Location  '{stamp: now, frame_id: map}' '11290.4667969' '8706.98730469' '[0.0, 0.0, 0.0, 0.0]' '23.067371' '113.3795204' '[0.0, 0.0, 0.0, 0.0]'```
 7. 发送目标信息: ```(motion_planning_alpha)$ rostopic pub /route/goal autopilot_msgs/RoutePath  '{stamp: now, frame_id: map}' '[{latitude: 23.0677242, longitude: 113.3795769, x: 11296.2177734, y: 8746.04199219}]' '[0.0]'```
+8. Publish the grid map
+ <br>```$ roslaunch segmentation.launch```
+ <br>```$ rosbag paly <your_3d_map>```
+ <br>```$ rviz #to visualization for debug```
 
 # Theory Related
 ## Overview
