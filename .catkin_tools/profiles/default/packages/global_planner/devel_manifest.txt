@@ -1,0 +1,4 @@
+global_planner
+/home/slam/trouble/motion_planning_alpha/devel/.private/global_planner/share/global_planner/cmake/global_plannerConfig-version.cmake /home/slam/trouble/motion_planning_alpha/devel/share/global_planner/cmake/global_plannerConfig-version.cmake
+/home/slam/trouble/motion_planning_alpha/devel/.private/global_planner/share/global_planner/cmake/global_plannerConfig.cmake /home/slam/trouble/motion_planning_alpha/devel/share/global_planner/cmake/global_plannerConfig.cmake
+/home/slam/trouble/motion_planning_alpha/devel/.private/global_planner/lib/pkgconfig/global_planner.pc /home/slam/trouble/motion_planning_alpha/devel/lib/pkgconfig/global_planner.pc

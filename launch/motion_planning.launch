@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+
+  <!-- Ground segmentation -->
+  <node name="ground_segmentation_config" pkg="linefit_ground_segmentation_ros" type="ground_segmentation_node">
+    <rosparam command="load" file="$(find linefit_ground_segmentation_ros)/launch/segmentation_params.yaml"/>
+    <param name="input_topic" value="/velodyne_points" />
+    <param name="ground_output_topic" value="ground_cloud" />
+    <param name="obstacle_output_topic" value="obstacle_cloud" />
+  </node>
+
+  <node pkg="linefit_ground_segmentation_ros" name="ground_segmentation_node" type="ground_segmentation_node" />
+  <node pkg="simple" name="grid_test" type="grid_test" />
+
+  <node pkg="global_planner" name="global_planner" type="planner.py"/>
+
+  <node pkg="motion_planner" name="motion_planner" type="motion_planner"/>
+
+
+
+</launch>

@@ -1,0 +1,9 @@
+obstacle_ws/src/vision_opencv/cv_bridge
+/home/slam/trouble/motion_planning_alpha/devel/.private/cv_bridge/share/cv_bridge/cmake/cv_bridgeConfig-version.cmake /home/slam/trouble/motion_planning_alpha/devel/share/cv_bridge/cmake/cv_bridgeConfig-version.cmake
+/home/slam/trouble/motion_planning_alpha/devel/.private/cv_bridge/share/cv_bridge/cmake/cv_bridgeConfig.cmake /home/slam/trouble/motion_planning_alpha/devel/share/cv_bridge/cmake/cv_bridgeConfig.cmake
+/home/slam/trouble/motion_planning_alpha/devel/.private/cv_bridge/share/cv_bridge/cmake/cv_bridge-extras.cmake /home/slam/trouble/motion_planning_alpha/devel/share/cv_bridge/cmake/cv_bridge-extras.cmake
+/home/slam/trouble/motion_planning_alpha/devel/.private/cv_bridge/lib/libcv_bridge.so /home/slam/trouble/motion_planning_alpha/devel/lib/libcv_bridge.so
+/home/slam/trouble/motion_planning_alpha/devel/.private/cv_bridge/lib/python2.7/dist-packages/cv_bridge/__init__.py /home/slam/trouble/motion_planning_alpha/devel/lib/python2.7/dist-packages/cv_bridge/__init__.py
+/home/slam/trouble/motion_planning_alpha/devel/.private/cv_bridge/lib/python2.7/dist-packages/cv_bridge/boost/cv_bridge_boost.so /home/slam/trouble/motion_planning_alpha/devel/lib/python2.7/dist-packages/cv_bridge/boost/cv_bridge_boost.so
+/home/slam/trouble/motion_planning_alpha/devel/.private/cv_bridge/lib/python2.7/dist-packages/cv_bridge/boost/__init__.py /home/slam/trouble/motion_planning_alpha/devel/lib/python2.7/dist-packages/cv_bridge/boost/__init__.py
+/home/slam/trouble/motion_planning_alpha/devel/.private/cv_bridge/lib/pkgconfig/cv_bridge.pc /home/slam/trouble/motion_planning_alpha/devel/lib/pkgconfig/cv_bridge.pc

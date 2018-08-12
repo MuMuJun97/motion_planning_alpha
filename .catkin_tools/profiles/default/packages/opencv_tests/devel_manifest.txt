@@ -1,0 +1,4 @@
+obstacle_ws/src/vision_opencv/opencv_tests
+/home/slam/trouble/motion_planning_alpha/devel/.private/opencv_tests/share/opencv_tests/cmake/opencv_testsConfig.cmake /home/slam/trouble/motion_planning_alpha/devel/share/opencv_tests/cmake/opencv_testsConfig.cmake
+/home/slam/trouble/motion_planning_alpha/devel/.private/opencv_tests/share/opencv_tests/cmake/opencv_testsConfig-version.cmake /home/slam/trouble/motion_planning_alpha/devel/share/opencv_tests/cmake/opencv_testsConfig-version.cmake
+/home/slam/trouble/motion_planning_alpha/devel/.private/opencv_tests/lib/pkgconfig/opencv_tests.pc /home/slam/trouble/motion_planning_alpha/devel/lib/pkgconfig/opencv_tests.pc
