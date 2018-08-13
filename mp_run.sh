@@ -4,8 +4,6 @@ catkin_make
 
 echo "source ~/trouble/motion_planning_alpha/devel/setup.bash" >> ~/.bashrc
 
-rviz rviz
-
 {
 gnome-terminal -t "roscore" -x bash -c "roscore;exec bash"
 }&

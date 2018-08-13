@@ -15,13 +15,19 @@ fun_simple::~fun_simple()
 
 bool fun_simple::collision_check(type_road_point point)
 {
-    unsigned long point_height = point.x / local_grid_map.resolution;
-    unsigned long point_width = point.y / local_grid_map.resolution;
-    if (local_grid_map.width > point_width 
-        && local_grid_map.height > point_height)
+    // TODO 
+    unsigned long point_height = \
+        (local_grid_map.height / 2 - point.x - global_coord.x) / \
+        local_grid_map.resolution;
+    unsigned long point_width = \
+        (point.y + local_grid_map.width / 2 - global_coord.y) / \
+        local_grid_map.resolution;
+
+    if (local_grid_map.width > point_width && 
+        local_grid_map.height > point_height)
     {
         if (local_grid_map.data.at(
-            point_height*local_grid_map.width + point_width) > 100)
+            point_height*local_grid_map.width + point_width) > 10)
         {
             return true;
         }
