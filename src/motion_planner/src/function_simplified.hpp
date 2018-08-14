@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <random>
+#include <math.h>
 #include "utility_func.hpp"
 using namespace Clothoid;
 using namespace Eigen;
