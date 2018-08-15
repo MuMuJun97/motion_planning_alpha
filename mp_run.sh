@@ -41,5 +41,5 @@ sleep 1s
 gnome-terminal -t "target" --tab -- bash -c "rostopic pub \
 /route/goal autopilot_msgs/RoutePath '{stamp: now, frame_id: map}' \
 '[{latitude: 23.0677242, longitude: 113.3795769, \
-x: 11296.2177734, y: 8746.04199219}]' '[0.0]';exec bash"
+x: 11296.2177734, y: 8786.04199219}]' '[0.0]';exec bash"
 }

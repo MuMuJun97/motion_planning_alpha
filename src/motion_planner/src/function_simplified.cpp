@@ -54,7 +54,7 @@ bool fun_simple::is_goal(type_node_point node)
     type_road_point ps;
     ps = transform_from_node_to_point(node);
     goal_point.x = 11296.2177734;
-    goal_point.y = 8746.04199219;
+    goal_point.y = 8786.04199219;
     if(norm_sqrt(ps, goal_point) < goal_size)
     {
         //std::cout << "goal point : " << goal_point.x << " " << goal_point.y << std::endl;
@@ -162,7 +162,7 @@ bool fun_simple::search_best_path()
         double min_cost = 100000000;
         for(it=m_tree.begin();it!=m_tree.end();it++)
         {
-            double distance_to_goal = it->cost + sqrt(
+            double distance_to_goal = sqrt(
                 pow((it->x - goal_point.x),2) + pow((it->y - goal_point.y),2));
             if (distance_to_goal < min_cost)
             {
@@ -179,6 +179,7 @@ bool fun_simple::search_best_path()
     for (int i = 0; i < save_goal_nodes.size(); i++)
     {
         std::cout << "save_goal_nodes.size(): " << save_goal_nodes.size() << std::endl;
+        std::cout << save_goal_nodes.at(i)->x << save_goal_nodes.at(i)->y << std::endl;
         it = save_goal_nodes[i];
         path.clear();
         while (it != m_tree.begin() && it != NULL)

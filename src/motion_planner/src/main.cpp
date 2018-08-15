@@ -231,7 +231,7 @@ int main (int argc, char** argv)
            ! got_grid_map_flag ||
            ! got_refer_path_flag)
         {
-            cout << "Waiting for information for motion planning" << endl;
+            //cout << "Waiting for information for motion planning" << endl;
             continue;
         }else{
             got_vehicle_state_flag = false;
@@ -260,8 +260,11 @@ int main (int argc, char** argv)
             cout << "Starting  Propagating tree" << endl;
             ros::Duration timeout(0.07); // Timeout of 0.07 seconds
             ros::Time start_time = ros::Time::now();
+            int n = 0;
             while(ros::Time::now() - start_time < timeout) 
             {
+                n++;
+                cout << "loop times:" << n << endl;
             // TODO Node-sampling and collision-checking.
                 bool flag_sample=p_sample_main->sampling_nearby_reference_path(
                     p_fun_main->local_reference_path);
@@ -320,7 +323,6 @@ int main (int argc, char** argv)
                     cout << "x: " << (*iter).x << \
                     ", y:" << (*iter).y << endl;
                 }
-                break;
             }
             cout << "Finished  Repropagating \n"<< \
                     "Starting  Publishing the path to Controller" << endl;
