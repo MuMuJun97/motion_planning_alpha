@@ -310,7 +310,7 @@ int main (int argc, char** argv)
             // TODO Path-selecting and other related works
             if(flag && p_fun_main->search_best_path())
             {
-                ROS_INFO("Finished  Searching best path")
+                ROS_INFO("Finished  Searching best path");
                 ROS_INFO("Starting  Repropagating");
                 ros::spinOnce();
                 p_fun_main->repropagating(vehicle_loc);
@@ -337,34 +337,34 @@ int main (int argc, char** argv)
             for (int i = 0; i < p_fun_main->selected_path.size(); i++)
             {
                 //TODO transform map coordination to WGS coordination.
-                map2wgs.request.x = p_fun_main->selected_path.at(i).x;
-                map2wgs.request.y = p_fun_main->selected_path.at(i).y;
-                if (map_to_wgs_client.call(map2wgs))
-                {
-                    p_fun_main->selected_path.at(i).longitude = \
-                        map2wgs.response.longitude;
-                    p_fun_main->selected_path.at(i).latitude = \
-                        map2wgs.response.latitude;
-                    ROS_INFO(
-                        "Got WG2: (%f, %f) from Map: (%f, %f)", 
-                        p_fun_main->selected_path.at(i).latitude, 
-                        p_fun_main->selected_path.at(i).longitude, 
-                        p_fun_main->selected_path.at(i).x, 
-                        p_fun_main->selected_path.at(i).y);
+                // map2wgs.request.x = p_fun_main->selected_path.at(i).x;
+                // map2wgs.request.y = p_fun_main->selected_path.at(i).y;
+                // if (map_to_wgs_client.call(map2wgs))
+                // {
+                //     p_fun_main->selected_path.at(i).longitude = \
+                //         map2wgs.response.longitude;
+                //     p_fun_main->selected_path.at(i).latitude = \
+                //         map2wgs.response.latitude;
+                //     ROS_INFO(
+                //         "Got WG2: (%f, %f) from Map: (%f, %f)", 
+                //         p_fun_main->selected_path.at(i).latitude, 
+                //         p_fun_main->selected_path.at(i).longitude, 
+                //         p_fun_main->selected_path.at(i).x, 
+                //         p_fun_main->selected_path.at(i).y);
                     
-                    waypoints_msg.points[i].x = \
-                        p_fun_main->selected_path.at(i).x;
-                    waypoints_msg.points[i].y = \
-                        p_fun_main->selected_path.at(i).y;
-                    waypoints_msg.points[i].longitude = \
-                        p_fun_main->selected_path.at(i).longitude;
-                    waypoints_msg.points[i].latitude = \
-                        p_fun_main->selected_path.at(i).latitude;
-                }
-                else
-                {
-                    ROS_ERROR("Failed to call service Map2WGS");
-                }
+                //     waypoints_msg.points[i].x = \
+                //         p_fun_main->selected_path.at(i).x;
+                //     waypoints_msg.points[i].y = \
+                //         p_fun_main->selected_path.at(i).y;
+                //     waypoints_msg.points[i].longitude = \
+                //         p_fun_main->selected_path.at(i).longitude;
+                //     waypoints_msg.points[i].latitude = \
+                //         p_fun_main->selected_path.at(i).latitude;
+                // }
+                // else
+                // {
+                //     ROS_ERROR("Failed to call service Map2WGS");
+                // }
             }
             way_points_pub.publish(waypoints_msg);
 
