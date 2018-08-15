@@ -25,6 +25,9 @@ vector<type_road_point> sample_nodes;
 type_road_point vehicle_loc; // coordinate 
 vehicle_velocity vehicle_vel; //speed
 GridMap grid_map;
+bool got_refer_path_flag = false, \
+     got_grid_map_flag = false, \
+     got_vehicle_state_flag = false;
 
 //TODO get the global path and srtore it in a vector.
 void reference_path_callback(const autopilot_msgs::RoutePath::ConstPtr& msg)
@@ -52,6 +55,7 @@ void reference_path_callback(const autopilot_msgs::RoutePath::ConstPtr& msg)
         cout << rp.x << " " << rp.y << endl;
     }
     ROS_INFO("Listener:Get the global path");
+    got_refer_path_flag = true;
 }
 
 // TODO get the vehicle current state
@@ -71,6 +75,7 @@ void vehicle_state_callback(const autopilot_msgs::MotionState::ConstPtr& msg)
     vehicle_vel.vz = msg->odom.twist.twist.angular.z; //vth
     
     ROS_INFO("Listener:Get the vehicle location");
+    got_vehicle_state_flag = true;
 }
 
 //TODO get the grid map and store into a gridMap object.
@@ -95,6 +100,7 @@ void grid_map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
         }
         cout<<"</"<<i<<"th row>"<<endl;
     }
+    got_grid_map_flag = true;
 }
 /*
 void static_obstacle_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
@@ -212,38 +218,51 @@ int main (int argc, char** argv)
 
     bool flag = true;
     // TODO Set working frequency of motion planning node.
-    ros::Rate loop_rate(5);
+    ros::Rate loop_rate(10);
     // TODO Toost that motion planning node is running.
     cout << "Motion Planning Node is Running..." << endl;
 
     // TODO node-sampling, parent-searching, curve-propegation, node-adding,
     //      collision-checking, path-selecting and other related works. 
-    while (nh.ok()) {
+    while (nh.ok()) 
+    {
         ros::spinOnce();
-        if(reference_path.size() && grid_map.data.size())
+        if( got_vehicle_state_flag ||
+           ! got_grid_map_flag ||
+           ! got_refer_path_flag)
         {
-            // TODO Initialize related parameters
-            vehicle_loc.x = 11290.4667969;
-            vehicle_loc.y = 8706.98730469;
-            vehicle_loc.angle = reference_path[0].angle;
-            double speed = 5;
-            // TODO Initialize tree-expanding-related utility object
-            p_fun_main->update_info(
-                vehicle_loc, reference_path, speed, grid_map);
-            p_fun_main->setup();
-            p_fun_main->initialize_tree();
-            // TODO Initialize vector for storing sampled nodes.
-            sample_nodes.clear();
-            // TODO Initialize work-iteration-time counter,
-            //      For each time n hits up 1000, output a path. 
-            int n=0;
-            // TODO node-sampling, parent-searching, curve-propegation,
-            //      node-adding, collision-checking and other related works.
-            while(true)
+            cout << "Waiting for information for motion planning" << endl;
+            continue;
+        }else{
+            got_vehicle_state_flag = false;
+            got_grid_map_flag = false;
+            got_refer_path_flag = false;
+        }
+        // TODO Initialize related parameters
+        vehicle_loc.x = 11290.4667969;
+        vehicle_loc.y = 8706.98730469;
+        vehicle_loc.angle = reference_path[0].angle;
+        double speed = 5;
+        // TODO Initialize tree-expanding-related utility object
+        p_fun_main->update_info(
+            vehicle_loc, reference_path, speed, grid_map);
+        p_fun_main->setup();
+        p_fun_main->initialize_tree();
+        // TODO Initialize vector for storing sampled nodes.
+        sample_nodes.clear();
+        // TODO Initialize work-iteration-time counter,
+        //      For each time n hits up 1000, output a path. 
+        int n=0;
+        // TODO node-sampling, parent-searching, curve-propegation,
+        //      node-adding, collision-checking and other related works.
+        while(true)
+        {
+            cout << "Starting  Propagating tree" << endl;
+            ros::Duration timeout(0.07); // Timeout of 0.07 seconds
+            ros::Time start_time = ros::Time::now();
+            while(ros::Time::now() - start_time < timeout) 
             {
-                if (n == 1000) break;
-                n++;
-                // TODO Node-sampling and collision-checking.
+            // TODO Node-sampling and collision-checking.
                 bool flag_sample=p_sample_main->sampling_nearby_reference_path(
                     p_fun_main->local_reference_path);
 
@@ -257,7 +276,8 @@ int main (int argc, char** argv)
                     {
                         type_node_point new_node;
                         // TODO Curve-propegation and collision-checking.
-                        bool flag_prop = p_propegate_main->curve_propegation(
+                        bool flag_prop = p_propegate_main->curve_propegation
+                        (
                             p_search_main->parent_node, 
                             p_sample_main->sample_node, new_node);
 
@@ -275,35 +295,49 @@ int main (int argc, char** argv)
                     }
 
                 }
-                // TODO Path-selecting and other related works
-                if (n%1000==0)
-                {
-                    cout << n << endl;
-                    if(flag && p_fun_main->search_best_path())
-                    {
-                        
-                        flag = false;
-                        cout << "found the path" << endl;
-                        show_path(p_fun_main->selected_path);
-                        show_tree(p_fun_main->m_tree);
-                        cout << "the best path is :" << endl;
-                        vector<type_road_point>::iterator iter;
-                        for(
-                            iter = p_fun_main->selected_path.begin(); 
-                            iter != p_fun_main->selected_path.end(); 
-                            iter++)
-                        {
-                            cout << "x: " << (*iter).x << \
-                            ", y:" << (*iter).y << endl;
-                        }
-                        break;
-                    }
-                }
             }
 
+            cout << "Finished  Propagating tree \n"<< \
+                    "Starting  Searching best path" << endl;
+
+            // TODO Path-selecting and other related works
+            if(flag && p_fun_main->search_best_path())
+            {
+                cout << "Finished  Searching best path \n"<< \
+                    "Starting  Repropagating" << endl;
+                p_fun_main->repropagating(vehicle_loc);
+                flag = false;
+                cout << "found the path" << endl;
+                show_path(p_fun_main->selected_path);
+                show_tree(p_fun_main->m_tree);
+                cout << "the best path is :" << endl;
+                vector<type_road_point>::iterator iter;
+                for(
+                    iter = p_fun_main->selected_path.begin(); 
+                    iter != p_fun_main->selected_path.end(); 
+                    iter++)
+                {
+                    cout << "x: " << (*iter).x << \
+                    ", y:" << (*iter).y << endl;
+                }
+                break;
+            }
+            cout << "Finished  Repropagating \n"<< \
+                    "Starting  Publishing the path to Controller" << endl;
+            
+            autopilot_msgs::WayPoints waypoints_msg;
+            for (int i = 0; i < p_fun_main->selected_path.size(); i++)
+            {
+                waypoints_msg.points[i].x = p_fun_main->selected_path.at(i).x;
+                waypoints_msg.points[i].y = p_fun_main->selected_path.at(i).y;
+            }
+            way_points_pub.publish(waypoints_msg);
+
+            cout << "Finished  Publishing the path to Controller" << endl;
         }
-        loop_rate.sleep();  
+
     }
-    
+    loop_rate.sleep();
+
     return 0;
 }

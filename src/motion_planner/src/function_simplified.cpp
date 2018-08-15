@@ -256,4 +256,63 @@ bool fun_simple::search_best_path()
     std::reverse(selected_path.begin(), selected_path.end());
     return true;
 }
+
+bool fun_simple::repropagating(type_road_point vehicle_loc)
+{
+    //TODO store the updated vehicle location.
+    type_road_point vehicle_loc_updated = vehicle_loc;
+
+    double k ,dk ,L;
+    double cost = 0;
+    int index = -1, selected_index = -1;
+    std::vector<std::pair<double,int> > save_cost;
+    std::vector<double> X,Y,Theta;
+
+    //TODO calculate the cost from updated vehicle location to each points in 
+    //     selected path.
+    for(int i = 0; i < selected_path.size(); i++)
+    {
+        type_road_point tps;
+        tps.x = selected_path.at(i).x;
+        tps.y = selected_path.at(i).y;
+        tps.angle = selected_path.at(i).angle;
+        buildClothoid(
+            vehicle_loc_updated.x,
+            vehicle_loc_updated.y,
+            vehicle_loc_updated.angle,
+            tps.x, tps.y, tps.angle, k, dk, L);
+        cost = L * fun_simple::weight_length + dk * fun_simple::weight_dk + \
+                dk * L * fun_simple::weight_diff_curvature;
+        index = i;
+        save_cost.push_back(std::make_pair(cost, index));
+    }
+    //TODO search and pick up the point that is nearest to vehicle.
+    std::sort(save_cost.begin(), save_cost.end(),smalltogreat);
+    selected_index = save_cost.begin()->second;
+    //TODO delete the useless points in the selected path.
+    selected_path.erase(
+        selected_path.begin(), 
+        selected_path.begin()+selected_index);
+    //TODO generate additional points on the trajectory from updated vehicle location 
+    //     to the nearest point.
+    pointsOnClothoid(
+        vehicle_loc_updated.x, 
+        vehicle_loc_updated.y,
+        vehicle_loc_updated.angle,
+        selected_path.at(selected_index).x, 
+        selected_path.at(selected_index).y, 
+        selected_path.at(selected_index).angle,
+        30,X,Y,Theta);
+    //TODO add the additional points to the selected path
+    for(int k = X.size()-1; k >= 0; k--)
+    {
+        type_road_point tps;
+        tps.x = X[k];
+        tps.y = Y[k];
+        tps.angle = Theta[k];
+        selected_path.insert(selected_path.begin(),tps);
+    }
+    return true;
+}
+
 }
