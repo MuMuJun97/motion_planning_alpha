@@ -16,6 +16,7 @@
 #include "autopilot_msgs/WayPoints.h"
 #include "autopilot_msgs/RouteMap.h"
 #include "autopilot_msgs/RouteEdge.h"
+#include "autopilot_msgs/Map2WGS.h"
 
 using namespace std;
 using namespace func_simplified;
@@ -93,10 +94,13 @@ void grid_map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
     cout<<"grid_MAP: "<<grid_map.width<<"  "<<grid_map.height<<"  "<<endl;
     for(int i=0;i<grid_map.height;i++)
     {
-        cout<<"<"<<i<<"th row>";
+        cout<<"<"<<i<<"th row>: ";
         for(int j=0;j<grid_map.width;j++)
         {
-            cout<<grid_map.data[i*grid_map.width+j]<<" ";
+            if (grid_map.data[i*grid_map.width+j] > 0) 
+            {
+                cout<<grid_map.data[i*grid_map.width+j]<<" ";
+            }
         }
         cout<<"</"<<i<<"th row>"<<endl;
     }
@@ -194,6 +198,9 @@ int main (int argc, char** argv)
     //     "/detection/dynamic_obstacle", 1000, dynamic_obstacle_callback);
     ros::Publisher way_points_pub = nh.advertise<autopilot_msgs::WayPoints>(
         "/planner/way_points",1000);
+
+    ros::ServiceClient map_to_wgs_client = \
+        nh.serviceClient<autopilot_msgs::Map2WGS>("/map/map_to_wgs");
 	
     
     // TODO load the global path, and search 30m ahead to get a reference path 
@@ -220,7 +227,7 @@ int main (int argc, char** argv)
     // TODO Set working frequency of motion planning node.
     ros::Rate loop_rate(10);
     // TODO Toost that motion planning node is running.
-    cout << "Motion Planning Node is Running..." << endl;
+    ROS_INFO("Motion Planning Node is Running...");
 
     // TODO node-sampling, parent-searching, curve-propegation, node-adding,
     //      collision-checking, path-selecting and other related works. 
@@ -231,7 +238,7 @@ int main (int argc, char** argv)
            ! got_grid_map_flag ||
            ! got_refer_path_flag)
         {
-            //cout << "Waiting for information for motion planning" << endl;
+            ROS_INFO_STREAM_ONCE("Waiting for information for motion planning");
             continue;
         }else{
             got_vehicle_state_flag = false;
@@ -257,14 +264,11 @@ int main (int argc, char** argv)
         //      node-adding, collision-checking and other related works.
         while(true)
         {
-            cout << "Starting  Propagating tree" << endl;
+            ROS_INFO("Starting  Propagating tree");
             ros::Duration timeout(0.07); // Timeout of 0.07 seconds
             ros::Time start_time = ros::Time::now();
-            int n = 0;
             while(ros::Time::now() - start_time < timeout) 
             {
-                n++;
-                cout << "loop times:" << n << endl;
             // TODO Node-sampling and collision-checking.
                 bool flag_sample=p_sample_main->sampling_nearby_reference_path(
                     p_fun_main->local_reference_path);
@@ -300,14 +304,15 @@ int main (int argc, char** argv)
                 }
             }
 
-            cout << "Finished  Propagating tree \n"<< \
-                    "Starting  Searching best path" << endl;
+            ROS_INFO("Finished  Propagating tree");
+            ROS_INFO("Starting  Searching best path");
 
             // TODO Path-selecting and other related works
             if(flag && p_fun_main->search_best_path())
             {
-                cout << "Finished  Searching best path \n"<< \
-                    "Starting  Repropagating" << endl;
+                ROS_INFO("Finished  Searching best path")
+                ROS_INFO("Starting  Repropagating");
+                ros::spinOnce();
                 p_fun_main->repropagating(vehicle_loc);
                 flag = false;
                 cout << "found the path" << endl;
@@ -324,18 +329,46 @@ int main (int argc, char** argv)
                     ", y:" << (*iter).y << endl;
                 }
             }
-            cout << "Finished  Repropagating \n"<< \
-                    "Starting  Publishing the path to Controller" << endl;
+            ROS_INFO("Finished  Repropagating");
+            ROS_INFO("Starting  Publishing the path to Controller");
             
             autopilot_msgs::WayPoints waypoints_msg;
+            autopilot_msgs::Map2WGS map2wgs;
             for (int i = 0; i < p_fun_main->selected_path.size(); i++)
             {
-                waypoints_msg.points[i].x = p_fun_main->selected_path.at(i).x;
-                waypoints_msg.points[i].y = p_fun_main->selected_path.at(i).y;
+                //TODO transform map coordination to WGS coordination.
+                map2wgs.request.x = p_fun_main->selected_path.at(i).x;
+                map2wgs.request.y = p_fun_main->selected_path.at(i).y;
+                if (map_to_wgs_client.call(map2wgs))
+                {
+                    p_fun_main->selected_path.at(i).longitude = \
+                        map2wgs.response.longitude;
+                    p_fun_main->selected_path.at(i).latitude = \
+                        map2wgs.response.latitude;
+                    ROS_INFO(
+                        "Got WG2: (%f, %f) from Map: (%f, %f)", 
+                        p_fun_main->selected_path.at(i).latitude, 
+                        p_fun_main->selected_path.at(i).longitude, 
+                        p_fun_main->selected_path.at(i).x, 
+                        p_fun_main->selected_path.at(i).y);
+                    
+                    waypoints_msg.points[i].x = \
+                        p_fun_main->selected_path.at(i).x;
+                    waypoints_msg.points[i].y = \
+                        p_fun_main->selected_path.at(i).y;
+                    waypoints_msg.points[i].longitude = \
+                        p_fun_main->selected_path.at(i).longitude;
+                    waypoints_msg.points[i].latitude = \
+                        p_fun_main->selected_path.at(i).latitude;
+                }
+                else
+                {
+                    ROS_ERROR("Failed to call service Map2WGS");
+                }
             }
             way_points_pub.publish(waypoints_msg);
 
-            cout << "Finished  Publishing the path to Controller" << endl;
+            ROS_INFO("Finished  Publishing the path to Controller");
         }
 
     }

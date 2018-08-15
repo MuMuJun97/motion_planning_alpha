@@ -2,7 +2,7 @@
 
 catkin_make
 
-echo "source ~/trouble/motion_planning_alpha/devel/setup.bash" >> ~/.bashrc
+source ~/trouble/motion_planning_alpha/devel/setup.bash
 
 {
 gnome-terminal -t "roscore" -x bash -c "roscore;exec bash"
