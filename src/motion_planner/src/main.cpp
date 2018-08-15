@@ -310,7 +310,7 @@ int main (int argc, char** argv)
             // TODO Path-selecting and other related works
             if(flag && p_fun_main->search_best_path())
             {
-                ROS_INFO("Finished  Searching best path")
+                ROS_INFO("Finished  Searching best path");
                 ROS_INFO("Starting  Repropagating");
                 ros::spinOnce();
                 p_fun_main->repropagating(vehicle_loc);
