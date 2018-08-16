@@ -17,6 +17,11 @@ sleep 1s
 {
 gnome-terminal -t "global" --tab -- bash -c "rosrun global_planner planner.py;exec bash"
 }&
+
+sleep 1s
+{
+gnome-terminal -t "map_server" --tab -- bash -c "roslaunch autopilot_map_server load_route_map_with_rviz.launch"
+}&
  
 sleep 1s
 {

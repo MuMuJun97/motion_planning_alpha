@@ -185,19 +185,19 @@ int main (int argc, char** argv)
 	ros::init(argc,argv,"motion_planner");
 	ros::NodeHandle nh;
     ros::Subscriber grid_map_sub = nh.subscribe(
-        "/map", 1000, grid_map_callback);
+        "/map", 1, grid_map_callback);
     // ros::Subscriber route_map_sub = nh.subscribe(
     //     "/map/route_map", 1000, route_map_callback);
 	ros::Subscriber reference_path_sub = nh.subscribe(
-        "/route/path", 1000, reference_path_callback);
+        "/route/path", 10, reference_path_callback);
 	ros::Subscriber vehicle_state_sub = nh.subscribe(
-        "/localization/motion_state", 1000, vehicle_state_callback);
+        "/localization/motion_state", 1, vehicle_state_callback);
     // ros::Subscriber static_obstacle_sub = nh.subscribe(
     //     "/detection/static_obstacle_grid", 1000, static_obstacle_callback);
     // ros::Subscriber dynamic_obstacle_sub = nh.subscribe(
     //     "/detection/dynamic_obstacle", 1000, dynamic_obstacle_callback);
     ros::Publisher way_points_pub = nh.advertise<autopilot_msgs::WayPoints>(
-        "/planner/way_points",1000);
+        "/planner/way_points",10);
 
     ros::ServiceClient map_to_wgs_client = \
         nh.serviceClient<autopilot_msgs::Map2WGS>("/map/map_to_wgs");
@@ -229,11 +229,13 @@ int main (int argc, char** argv)
     // TODO Toost that motion planning node is running.
     ROS_INFO("Motion Planning Node is Running...");
 
+    ros::AsyncSpinner spinner(0);
+    spinner.start();
+
     // TODO node-sampling, parent-searching, curve-propegation, node-adding,
     //      collision-checking, path-selecting and other related works. 
     while (nh.ok()) 
     {
-        ros::spinOnce();
         if( got_vehicle_state_flag ||
            ! got_grid_map_flag ||
            ! got_refer_path_flag)
@@ -315,18 +317,17 @@ int main (int argc, char** argv)
                 ros::spinOnce();
                 p_fun_main->repropagating(vehicle_loc);
                 flag = false;
-                cout << "found the path" << endl;
+                ROS_INFO("Found the path");
                 show_path(p_fun_main->selected_path);
                 show_tree(p_fun_main->m_tree);
-                cout << "the best path is :" << endl;
+                ROS_INFO("The best path is :");
                 vector<type_road_point>::iterator iter;
                 for(
                     iter = p_fun_main->selected_path.begin(); 
                     iter != p_fun_main->selected_path.end(); 
                     iter++)
                 {
-                    cout << "x: " << (*iter).x << \
-                    ", y:" << (*iter).y << endl;
+                    ROS_INFO("(x: %f, y: %f)", (*iter).x, (*iter).y);
                 }
             }
             ROS_INFO("Finished  Repropagating");
@@ -352,14 +353,12 @@ int main (int argc, char** argv)
                         p_fun_main->selected_path.at(i).x, 
                         p_fun_main->selected_path.at(i).y);
                     
-                    waypoints_msg.points[i].x = \
-                        p_fun_main->selected_path.at(i).x;
-                    waypoints_msg.points[i].y = \
-                        p_fun_main->selected_path.at(i).y;
-                    waypoints_msg.points[i].longitude = \
-                        p_fun_main->selected_path.at(i).longitude;
-                    waypoints_msg.points[i].latitude = \
-                        p_fun_main->selected_path.at(i).latitude;
+                    autopilot_msgs::RouteNode routenode;
+                    routenode.latitude = p_fun_main->selected_path.at(i).latitude;
+                    routenode.longitude = p_fun_main->selected_path.at(i).longitude;
+                    routenode.x = p_fun_main->selected_path.at(i).x;
+                    routenode.y = p_fun_main->selected_path.at(i).y;
+                    waypoints_msg.points.push_back(routenode);
                 }
                 else
                 {
