@@ -352,7 +352,7 @@ int main (int argc, char** argv)
                         p_fun_main->selected_path.at(i).longitude, 
                         p_fun_main->selected_path.at(i).x, 
                         p_fun_main->selected_path.at(i).y);
-                    
+
                     autopilot_msgs::RouteNode routenode;
                     routenode.latitude = p_fun_main->selected_path.at(i).latitude;
                     routenode.longitude = p_fun_main->selected_path.at(i).longitude;
