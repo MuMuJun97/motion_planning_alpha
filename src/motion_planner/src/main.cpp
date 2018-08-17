@@ -70,10 +70,10 @@ void vehicle_state_callback(const autopilot_msgs::MotionState::ConstPtr& msg)
     vehicle_loc.x = msg->odom.pose.pose.position.x;
     vehicle_loc.y = msg->odom.pose.pose.position.y;
 
-    double w = odom.pose.pose.orientation.w;
-    double x = odom.pose.pose.orientation.x;
-    double y = odom.pose.pose.orientation.y;
-    double z = odom.pose.pose.orientation.z;
+    double w = msg->odom.pose.pose.orientation.w;
+    double x = msg->odom.pose.pose.orientation.x;
+    double y = msg->odom.pose.pose.orientation.y;
+    double z = msg->odom.pose.pose.orientation.z;
     vehicle_loc.angle = atan( 2 * (w * x + y * z) / (1 - 2 * (x * x + y * y)) );
     //set the velocity
     vehicle_vel.vx = msg->odom.twist.twist.linear.x;  //vx
