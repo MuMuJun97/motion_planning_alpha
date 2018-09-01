@@ -30,6 +30,8 @@ bool got_refer_path_flag = false, \
      got_grid_map_flag = false, \
      got_vehicle_state_flag = false;
 
+double PROPAGATION_TIME = 0.07;
+
 //TODO get the global path and srtore it in a vector.
 void reference_path_callback(const autopilot_msgs::RoutePath::ConstPtr& msg)
 {
@@ -67,9 +69,12 @@ void vehicle_state_callback(const autopilot_msgs::MotionState::ConstPtr& msg)
     vehicle_loc.longitude = msg->gps.longitude;
     vehicle_loc.x = msg->odom.pose.pose.position.x;
     vehicle_loc.y = msg->odom.pose.pose.position.y;
-    vehicle_loc.angle = atan(
-        msg->odom.pose.pose.orientation.
-        y/msg->odom.pose.pose.orientation.x);
+
+    double w = msg->odom.pose.pose.orientation.w;
+    double x = msg->odom.pose.pose.orientation.x;
+    double y = msg->odom.pose.pose.orientation.y;
+    double z = msg->odom.pose.pose.orientation.z;
+    vehicle_loc.angle = atan( 2 * (w * x + y * z) / (1 - 2 * (x * x + y * y)) );
     //set the velocity
     vehicle_vel.vx = msg->odom.twist.twist.linear.x;  //vx
     vehicle_vel.vy = msg->odom.twist.twist.linear.y;  //vy
@@ -189,7 +194,7 @@ int main (int argc, char** argv)
     // ros::Subscriber route_map_sub = nh.subscribe(
     //     "/map/route_map", 1000, route_map_callback);
 	ros::Subscriber reference_path_sub = nh.subscribe(
-        "/route/path", 10, reference_path_callback);
+        "/route/path", 1, reference_path_callback);
 	ros::Subscriber vehicle_state_sub = nh.subscribe(
         "/localization/motion_state", 1, vehicle_state_callback);
     // ros::Subscriber static_obstacle_sub = nh.subscribe(
@@ -197,7 +202,7 @@ int main (int argc, char** argv)
     // ros::Subscriber dynamic_obstacle_sub = nh.subscribe(
     //     "/detection/dynamic_obstacle", 1000, dynamic_obstacle_callback);
     ros::Publisher way_points_pub = nh.advertise<autopilot_msgs::WayPoints>(
-        "/planner/way_points",10);
+        "/planner/way_points",1);
 
     ros::ServiceClient map_to_wgs_client = \
         nh.serviceClient<autopilot_msgs::Map2WGS>("/map/map_to_wgs");
@@ -252,9 +257,16 @@ int main (int argc, char** argv)
         vehicle_loc.y = 8706.98730469;
         vehicle_loc.angle = reference_path[0].angle;
         double speed = 5;
+        type_road_point predicted_vehicle_loc;
+        predicted_vehicle_loc.x = \
+            vehicle_loc.x + vehicle_vel.vx * PROPAGATION_TIME;
+        predicted_vehicle_loc.y = \
+            vehicle_loc.y + vehicle_vel.vy * PROPAGATION_TIME;
+        predicted_vehicle_loc.angle = vehicle_loc.angle;
+
         // TODO Initialize tree-expanding-related utility object
         p_fun_main->update_info(
-            vehicle_loc, reference_path, speed, grid_map);
+            predicted_vehicle_loc, reference_path, speed, grid_map);
         p_fun_main->setup();
         p_fun_main->initialize_tree();
         // TODO Initialize vector for storing sampled nodes.
@@ -267,7 +279,7 @@ int main (int argc, char** argv)
         while(true)
         {
             ROS_INFO("Starting  Propagating tree");
-            ros::Duration timeout(0.07); // Timeout of 0.07 seconds
+            ros::Duration timeout(PROPAGATION_TIME); // Timeout of 0.07 seconds
             ros::Time start_time = ros::Time::now();
             while(ros::Time::now() - start_time < timeout) 
             {
@@ -314,7 +326,6 @@ int main (int argc, char** argv)
             {
                 ROS_INFO("Finished  Searching best path");
                 ROS_INFO("Starting  Repropagating");
-                ros::spinOnce();
                 p_fun_main->repropagating(vehicle_loc);
                 flag = false;
                 ROS_INFO("Found the path");
@@ -354,10 +365,14 @@ int main (int argc, char** argv)
                         p_fun_main->selected_path.at(i).y);
 
                     autopilot_msgs::RouteNode routenode;
-                    routenode.latitude = p_fun_main->selected_path.at(i).latitude;
-                    routenode.longitude = p_fun_main->selected_path.at(i).longitude;
-                    routenode.x = p_fun_main->selected_path.at(i).x;
-                    routenode.y = p_fun_main->selected_path.at(i).y;
+                    routenode.latitude = \
+                        p_fun_main->selected_path.at(i).latitude;
+                    routenode.longitude = \
+                        p_fun_main->selected_path.at(i).longitude;
+                    routenode.x = \
+                        p_fun_main->selected_path.at(i).x;
+                    routenode.y = \
+                        p_fun_main->selected_path.at(i).y;
                     waypoints_msg.points.push_back(routenode);
                 }
                 else
