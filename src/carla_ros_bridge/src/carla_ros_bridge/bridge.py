@@ -16,6 +16,9 @@ from carla_ros_bridge.markers import PlayerAgentHandler, NonPlayerAgentsHandler
 from carla_ros_bridge.sensors import CameraHandler, LidarHandler
 from carla_ros_bridge.map import MapHandler
 
+from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import MultiArrayDimension
+
 
 class CarlaRosBridge(object):
     """
@@ -54,6 +57,8 @@ class CarlaRosBridge(object):
 
         # creating input controller listener
         self.input_controller = InputController()
+
+
 
     def setup_carla_client(self, client, params):
         self.client = client
@@ -135,6 +140,7 @@ class CarlaRosBridge(object):
 
         # load settings into the server
         scene = self.client.load_settings(self.carla_settings)
+
         # Choose one player start at random.
         number_of_player_starts = len(scene.player_start_spots)
         player_start = random.randint(0, max(0, number_of_player_starts - 1))
@@ -144,6 +150,9 @@ class CarlaRosBridge(object):
         map_handler.send_map()
 
         self.client.start_episode(player_start)
+
+        # publish start spots
+        self.publish_start_spots(scene)
 
         for frame in count():
             if (frame == self.frames_per_episode) or rospy.is_shutdown():
@@ -175,6 +184,28 @@ class CarlaRosBridge(object):
             else:
                 control = self.input_controller.cur_control
                 self.client.send_control(**control)
+
+    #####[Fllowing codes added by Trouble,is not the first-party codes]#####
+    def publish_start_spots(self, scene):  
+        """
+        Publish the player_start_spots to ros
+        """
+        _player_start_spots = Float64MultiArray()
+        _dim_0 = MultiArrayDimension()
+        _dim_0.label = 'height'
+        _dim_0.size = len(scene.player_start_spots)
+        _player_start_spots.layout.dim.append(_dim_0)
+        _dim_1 = MultiArrayDimension()
+        _dim_1.label = 'width'
+        _dim_1.size = 3
+        _player_start_spots.layout.dim.append(_dim_1)
+        rospy.loginfo(_player_start_spots.layout.dim[0].size)
+        for spot in scene.player_start_spots:
+            _player_start_spots.data.append(spot.location.x)
+            _player_start_spots.data.append(spot.location.y)
+            _player_start_spots.data.append(spot.location.z)
+        self.process_msg('player_start_spots', _player_start_spots)
+    ######[Above codes added by Trouble,is not the first-party codes]###########
 
     def __enter__(self):
         return self

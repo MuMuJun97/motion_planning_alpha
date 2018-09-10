@@ -11,46 +11,46 @@ carla:
   Episodes: 2
 
   sensors:
-    camera_front:
-      SensorType: CAMERA
-      carla_settings:
-        PostProcessing: SceneFinal
-        ImageSizeX: 320
-        ImageSizeY: 240
-        FOV: 90
-        PositionX: 1.80
-        PositionY: 0
-        PositionZ: 1.30
-        RotationPitch: 0
-        RotationRoll: 0
-        RotationYaw: 0
+    # camera_front:
+    #   SensorType: CAMERA
+    #   carla_settings:
+    #     PostProcessing: SceneFinal
+    #     ImageSizeX: 320
+    #     ImageSizeY: 240
+    #     FOV: 90
+    #     PositionX: 1.80
+    #     PositionY: 0
+    #     PositionZ: 1.30
+    #     RotationPitch: 0
+    #     RotationRoll: 0
+    #     RotationYaw: 0
 
-    camera_depth:
-      SensorType: CAMERA
-      carla_settings:
-        PostProcessing: Depth
-        ImageSizeX: 320
-        ImageSizeY: 240
-        FOV: 90
-        PositionX: 1.80
-        PositionY: 0
-        PositionZ: 1.30
-        RotationPitch: 0
-        RotationRoll: 0
-        RotationYaw: 0
+    # camera_depth:
+    #   SensorType: CAMERA
+    #   carla_settings:
+    #     PostProcessing: Depth
+    #     ImageSizeX: 320
+    #     ImageSizeY: 240
+    #     FOV: 90
+    #     PositionX: 1.80
+    #     PositionY: 0
+    #     PositionZ: 1.30
+    #     RotationPitch: 0
+    #     RotationRoll: 0
+    #     RotationYaw: 0
 
     lidar_0:
       SensorType: LIDAR_RAY_CAST
       carla_settings:
-        Channels: 4
+        Channels: 32
         Range: 40
-        PointsPerSecond: 200000
-        RotationFrequency: 25
-        UpperFovLimit: 1.6
-        LowerFovLimit: -1.6
+        PointsPerSecond: 150000
+        RotationFrequency: 50
+        UpperFovLimit: 5
+        LowerFovLimit: -16.5
         PositionX: 0.0
         PositionY: 0
-        PositionZ: 1.50
+        PositionZ: 1.80
         RotationPitch: 0
         RotationYaw: 0
         RotationRoll: 0
