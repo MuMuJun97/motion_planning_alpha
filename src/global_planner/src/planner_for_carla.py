@@ -19,26 +19,29 @@ from carla.client import make_carla_client
 from carla.planner.map import CarlaMap
 from carla.settings import CarlaSettings
 from carla.tcp import TCPConnectionError
+from carla.planner.map import CarlaMap
 
 source = ()
 source_ori = ()
 target_number = 11
 route = []
 _player_start_spots = []
+city_name = 'Town01'
 
-_city_track = city_track.CityTrack(city_name = 'Town01')
+_city_track = city_track.CityTrack(city_name)
 
 def find_path(source, source_ori, target, target_ori):
+    rospy.loginfo("Starting find global route")
     global route
     track_source = _city_track.project_node(source)
     track_target = _city_track.project_node(target)
     route = _city_track.compute_route(track_source, source_ori, 
                                       track_target, target_ori)
-    print(route)
+    rospy.loginfo("Finished find global route")
     talker()
 
 def loc_callback(odometry):
-    rospy.loginfo("Location callback")
+    rospy.loginfo("Starting get current location")
     global source_ori, source
     source = (
         odometry.pose.pose.position.x,
@@ -53,19 +56,23 @@ def loc_callback(odometry):
     )
     roll, pitch, yaw = tf.transformations.euler_from_quaternion(quat)
     source_ori = (roll, pitch, yaw)
+    rospy.loginfo("Finished get current location")
 
 
 def path_callback(requested_goal):
-    rospy.loginfo("Path callback")
-    rospy.loginfo(_player_start_spots)
+    rospy.loginfo("Starting get target from player start spots")
     global target_number
-    target_number = 2
+    target_number = 11
     target = (
         _player_start_spots[target_number][0],
         _player_start_spots[target_number][1],
         _player_start_spots[target_number][2],
     )
+    rospy.loginfo(target)
+    rospy.loginfo(source)
+    rospy.loginfo(source_ori)
     target_ori = (0,0,0)
+    rospy.loginfo("Finished get target from player start spots")
     find_path(source, source_ori, target, target_ori)
 
 def get_start_spots(Float64MultiArray):
@@ -77,7 +84,6 @@ def get_start_spots(Float64MultiArray):
     for h in range(height):
         spot = [ Float64MultiArray.data[h * width + _] for _ in range(width) ]
         _player_start_spots.append(spot)
-    rospy.loginfo(_player_start_spots)
     rospy.loginfo("Finished get player start spots")
 
 
@@ -89,15 +95,19 @@ def listener():
 
 
 def talker():
+    rospy.loginfo("Starting publish global route to motion planner")
     pub = rospy.Publisher('/route/path', RoutePath, queue_size=500, latch=True)
     rp = RoutePath()
-    for (x, y) in route:
-        node = RouteNode()
-        node.x = x
-        node.y = y
-        rp.goals.append(node)
+    for node in route:
+        world_point = CarlaMap(city_name).convert_to_world(node)
+        route_node = RouteNode()
+        route_node.x = world_point[0]
+        route_node.y = world_point[1]
+        rp.goals.append(route_node)
     rp.headings = [0.0] * len(rp.goals)
+    rospy.loginfo(rp.goals)
     pub.publish(rp)
+    rospy.loginfo("Finished publish global route to motion planner")
 
 if __name__ == '__main__':
     rospy.init_node('global_planner')

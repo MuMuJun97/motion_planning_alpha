@@ -4,11 +4,14 @@ Rosbridge class:
 Class that handle communication between CARLA and ROS
 """
 import random
+import rospy
 from itertools import count
+import tf
+import numpy as np
 
 from rosgraph_msgs.msg import Clock
 from tf2_msgs.msg import TFMessage
-import rospy
+from nav_msgs.msg import Odometry
 
 from carla.settings import CarlaSettings
 from carla_ros_bridge.control import InputController
@@ -174,6 +177,9 @@ class CarlaRosBridge(object):
             for name, data in sensor_data.items():
                 self.sensors[name].process_sensor_data(data, self.cur_time)
 
+            # publish motion state
+            self.publish_motion_state(measurements)
+
             # publish all messages
             self.send_msgs()
 
@@ -205,6 +211,34 @@ class CarlaRosBridge(object):
             _player_start_spots.data.append(spot.location.y)
             _player_start_spots.data.append(spot.location.z)
         self.process_msg('player_start_spots', _player_start_spots)
+
+    def publish_motion_state(self, measurements):
+        forward_speed = measurements.player_measurements.forward_speed
+        rotation = measurements.player_measurements.transform.rotation
+        location = measurements.player_measurements.transform.location
+
+        quat = tf.transformations.quaternion_from_euler(
+            np.radians(rotation.roll),
+            np.radians(rotation.pitch),
+            np.radians(rotation.yaw)
+        )
+        velocity_x = forward_speed * np.cos( np.radians(rotation.yaw) )
+        velocity_y = forward_speed * np.sin( np.radians(rotation.yaw) )
+
+        odometry = Odometry()
+        odometry.pose.pose.position.x = location.x
+        odometry.pose.pose.position.y = location.y
+        odometry.pose.pose.position.z = location.z
+        odometry.pose.pose.orientation.x = quat[0]
+        odometry.pose.pose.orientation.y = quat[1]
+        odometry.pose.pose.orientation.z = quat[2]
+        odometry.pose.pose.orientation.w = quat[3]
+        
+        odometry.twist.twist.linear.x = velocity_x
+        odometry.twist.twist.linear.y = velocity_y
+        odometry.twist.twist.linear.z = 0
+        self.process_msg("player_motion_state", odometry)
+
     ######[Above codes added by Trouble,is not the first-party codes]###########
 
     def __enter__(self):

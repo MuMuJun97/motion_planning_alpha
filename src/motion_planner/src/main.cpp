@@ -17,6 +17,7 @@
 #include "autopilot_msgs/RouteMap.h"
 #include "autopilot_msgs/RouteEdge.h"
 #include "autopilot_msgs/Map2WGS.h"
+#include <tf/transform_datatypes.h>
 
 using namespace std;
 using namespace func_simplified;
@@ -62,23 +63,26 @@ void reference_path_callback(const autopilot_msgs::RoutePath::ConstPtr& msg)
 }
 
 // TODO get the vehicle current state
-void vehicle_state_callback(const autopilot_msgs::MotionState::ConstPtr& msg)
+void vehicle_state_callback(const nav_msgs::Odometry::ConstPtr& msg)
 {
     //set the location
-    vehicle_loc.latitude = msg->gps.latitude;
-    vehicle_loc.longitude = msg->gps.longitude;
-    vehicle_loc.x = msg->odom.pose.pose.position.x;
-    vehicle_loc.y = msg->odom.pose.pose.position.y;
+    vehicle_loc.x = msg->pose.pose.position.x;
+    vehicle_loc.y = msg->pose.pose.position.y;
 
-    double w = msg->odom.pose.pose.orientation.w;
-    double x = msg->odom.pose.pose.orientation.x;
-    double y = msg->odom.pose.pose.orientation.y;
-    double z = msg->odom.pose.pose.orientation.z;
-    vehicle_loc.angle = atan( 2 * (w * x + y * z) / (1 - 2 * (x * x + y * y)) );
+    tf::Quaternion quat(
+        msg->pose.pose.orientation.x,
+        msg->pose.pose.orientation.y,
+        msg->pose.pose.orientation.z,
+        msg->pose.pose.orientation.w
+    );
+    tf::Matrix3x3 matrix3x3(quat);
+    double roll, pitch, yaw;
+    matrix3x3.getRPY(roll, pitch, yaw);
+    vehicle_loc.angle = yaw;
+    
     //set the velocity
-    vehicle_vel.vx = msg->odom.twist.twist.linear.x;  //vx
-    vehicle_vel.vy = msg->odom.twist.twist.linear.y;  //vy
-    vehicle_vel.vz = msg->odom.twist.twist.angular.z; //vth
+    vehicle_vel.vx = msg->twist.twist.linear.x;  //vx
+    vehicle_vel.vy = msg->twist.twist.linear.y;  //vy
     
     ROS_INFO("Listener:Get the vehicle location");
     got_vehicle_state_flag = true;
@@ -96,18 +100,18 @@ void grid_map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
         grid_map.data.push_back(msg->data[i]);
     }
     //TODO print given width, height, resolution and data for checking.
-    cout<<"grid_MAP: "<<grid_map.width<<"  "<<grid_map.height<<"  "<<endl;
+    // cout<<"grid_MAP: "<<grid_map.width<<"  "<<grid_map.height<<"  "<<endl;
     for(int i=0;i<grid_map.height;i++)
     {
-        cout<<"<"<<i<<"th row>: ";
+        // cout<<"<"<<i<<"th row>: ";
         for(int j=0;j<grid_map.width;j++)
         {
-            if (grid_map.data[i*grid_map.width+j] > 0) 
-            {
-                cout<<grid_map.data[i*grid_map.width+j]<<" ";
-            }
+            // if (grid_map.data[i*grid_map.width+j] > 0) 
+            // {
+            //     cout<<grid_map.data[i*grid_map.width+j]<<" ";
+            // }
         }
-        cout<<"</"<<i<<"th row>"<<endl;
+        // cout<<"</"<<i<<"th row>"<<endl;
     }
     got_grid_map_flag = true;
 }
@@ -196,7 +200,7 @@ int main (int argc, char** argv)
 	ros::Subscriber reference_path_sub = nh.subscribe(
         "/route/path", 1, reference_path_callback);
 	ros::Subscriber vehicle_state_sub = nh.subscribe(
-        "/localization/motion_state", 1, vehicle_state_callback);
+        "player_motion_state", 1, vehicle_state_callback);
     // ros::Subscriber static_obstacle_sub = nh.subscribe(
     //     "/detection/static_obstacle_grid", 1000, static_obstacle_callback);
     // ros::Subscriber dynamic_obstacle_sub = nh.subscribe(

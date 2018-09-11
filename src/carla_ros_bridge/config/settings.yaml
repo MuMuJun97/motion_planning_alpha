@@ -44,7 +44,7 @@ carla:
       carla_settings:
         Channels: 32
         Range: 40
-        PointsPerSecond: 150000
+        PointsPerSecond: 200000
         RotationFrequency: 50
         UpperFovLimit: 5
         LowerFovLimit: -16.5
