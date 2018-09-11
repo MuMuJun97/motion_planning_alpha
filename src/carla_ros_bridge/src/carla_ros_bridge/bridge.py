@@ -12,6 +12,7 @@ import numpy as np
 from rosgraph_msgs.msg import Clock
 from tf2_msgs.msg import TFMessage
 from nav_msgs.msg import Odometry
+from sensor_msgs.msg import Imu
 
 from carla.settings import CarlaSettings
 from carla_ros_bridge.control import InputController
@@ -155,7 +156,13 @@ class CarlaRosBridge(object):
         self.client.start_episode(player_start)
 
         # publish start spots
-        self.publish_start_spots(scene)
+        self.generate_start_spots_msg(scene)
+
+        # record player's rotation of last frame [roll, pitch, yaw, game_timestamp]
+        last_rotation = [0 , 0, 0, 0]
+
+        # record player's velocity of last frame
+        last_velocity = [0, 0, 0, 0]
 
         for frame in count():
             if (frame == self.frames_per_episode) or rospy.is_shutdown():
@@ -177,8 +184,15 @@ class CarlaRosBridge(object):
             for name, data in sensor_data.items():
                 self.sensors[name].process_sensor_data(data, self.cur_time)
 
-            # publish motion state
-            self.publish_motion_state(measurements)
+            # calculate player's velocity of this frame
+            current_velocity = self.calculate_current_velocity(
+                measurements, last_velocity )
+
+            # generate imu msg
+            self.generate_imu_msg(measurements, last_rotation)
+
+            # generate motion state msg
+            self.generate_motion_state_msg(measurements, current_velocity)
 
             # publish all messages
             self.send_msgs()
@@ -191,8 +205,17 @@ class CarlaRosBridge(object):
                 control = self.input_controller.cur_control
                 self.client.send_control(**control)
 
+            # update player's rotation of this frame
+            last_rotation = self.update_last_rotation(measurements)
+
+            # record player's velocity of this frame
+            last_velocity = current_velocity
+            
+
+
+
     #####[Fllowing codes added by Trouble,is not the first-party codes]#####
-    def publish_start_spots(self, scene):  
+    def generate_start_spots_msg(self, scene):  
         """
         Publish the player_start_spots to ros
         """
@@ -205,15 +228,13 @@ class CarlaRosBridge(object):
         _dim_1.label = 'width'
         _dim_1.size = 3
         _player_start_spots.layout.dim.append(_dim_1)
-        rospy.loginfo(_player_start_spots.layout.dim[0].size)
         for spot in scene.player_start_spots:
             _player_start_spots.data.append(spot.location.x)
             _player_start_spots.data.append(spot.location.y)
             _player_start_spots.data.append(spot.location.z)
         self.process_msg('player_start_spots', _player_start_spots)
 
-    def publish_motion_state(self, measurements):
-        forward_speed = measurements.player_measurements.forward_speed
+    def generate_motion_state_msg(self, measurements, current_velocity):
         rotation = measurements.player_measurements.transform.rotation
         location = measurements.player_measurements.transform.location
 
@@ -222,8 +243,6 @@ class CarlaRosBridge(object):
             np.radians(rotation.pitch),
             np.radians(rotation.yaw)
         )
-        velocity_x = forward_speed * np.cos( np.radians(rotation.yaw) )
-        velocity_y = forward_speed * np.sin( np.radians(rotation.yaw) )
 
         odometry = Odometry()
         odometry.pose.pose.position.x = location.x
@@ -234,10 +253,82 @@ class CarlaRosBridge(object):
         odometry.pose.pose.orientation.z = quat[2]
         odometry.pose.pose.orientation.w = quat[3]
         
-        odometry.twist.twist.linear.x = velocity_x
-        odometry.twist.twist.linear.y = velocity_y
-        odometry.twist.twist.linear.z = 0
+        odometry.twist.twist.linear.x = current_velocity[0]
+        odometry.twist.twist.linear.y = current_velocity[1]
+        odometry.twist.twist.linear.z = current_velocity[2]
         self.process_msg("player_motion_state", odometry)
+    
+    def generate_imu_msg(self, measurements, last_rotation):
+        acceleration = measurements.player_measurements.acceleration
+        rotation = measurements.player_measurements.transform.rotation
+        quat = tf.transformations.quaternion_from_euler(
+            np.radians(rotation.roll),
+            np.radians(rotation.pitch),
+            np.radians(rotation.yaw)
+        )
+        imu = Imu()
+        imu.orientation.x = quat[0]
+        imu.orientation.y = quat[1]
+        imu.orientation.z = quat[2]
+        imu.orientation.w = quat[3]
+
+        imu.angular_velocity.x = (
+            ( rotation.roll - last_rotation[0] ) /
+            ( measurements.game_timestamp - last_rotation[3] ) * 1e3
+        )
+        imu.angular_velocity.y = (
+            ( rotation.pitch - last_rotation[1] ) /
+            ( measurements.game_timestamp - last_rotation[3] ) * 1e3
+        )
+        imu.angular_velocity.z = (
+            ( rotation.yaw - last_rotation[2] ) /
+            ( measurements.game_timestamp - last_rotation[3] ) * 1e3
+        )
+
+        rospy.loginfo("angular_velocity x is :" + str(imu.angular_velocity.x) )
+        rospy.loginfo("angular_velocity y is :" + str(imu.angular_velocity.y) )
+        rospy.loginfo("angular_velocity z is :" + str(imu.angular_velocity.z) )
+
+        imu.linear_acceleration.x = acceleration.x
+        imu.linear_acceleration.y = acceleration.y
+        imu.linear_acceleration.z = acceleration.z
+
+        self.process_msg("/imu/data", imu)
+
+    def calculate_current_velocity(self, measurements, last_velocity):
+        current_velocity = [0, 0, 0, 0]
+        current_velocity[0] = (
+                last_velocity[0] + 
+                measurements.player_measurements.acceleration.x * 
+                (measurements.game_timestamp - last_velocity[3]) * 1e-3
+            )
+        current_velocity[1] = (
+                last_velocity[1] + 
+                measurements.player_measurements.acceleration.y * 
+                (measurements.game_timestamp - last_velocity[3]) * 1e-3
+            )
+        current_velocity[2] = (
+                last_velocity[2] + 
+                measurements.player_measurements.acceleration.z * 
+                (measurements.game_timestamp - last_velocity[3]) * 1e-3
+            )
+        current_velocity[3] = measurements.game_timestamp
+        return current_velocity
+
+    def update_last_rotation(self, measurements):
+        updated_rotation = [0, 0, 0, 0]
+        updated_rotation[0] = (
+            measurements.player_measurements.transform.rotation.roll
+        )
+        updated_rotation[1] = (
+                measurements.player_measurements.transform.rotation.pitch
+        )
+        updated_rotation[2] = (
+                measurements.player_measurements.transform.rotation.yaw
+        )
+        updated_rotation[3] = measurements.game_timestamp
+        return updated_rotation
+
 
     ######[Above codes added by Trouble,is not the first-party codes]###########
 
