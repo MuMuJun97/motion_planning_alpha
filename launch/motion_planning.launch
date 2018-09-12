@@ -6,19 +6,21 @@
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find carla_ros_bridge)/config/carla_default_rviz.cfg.rviz"/>
 
   <!-- Ground segmentation -->
-  <node name="ground_segmentation_config" pkg="linefit_ground_segmentation_ros" type="ground_segmentation_node" output="screen">
+  <node name="ground_segmentation_config" pkg="linefit_ground_segmentation_ros" type="ground_segmentation_node">
     <rosparam command="load" file="$(find linefit_ground_segmentation_ros)/launch/segmentation_params.yaml"/>
-    <param name="input_topic" value="/velodyne_points" />
+    <param name="input_topic" value="/lidar_0" />
     <param name="ground_output_topic" value="ground_cloud" />
     <param name="obstacle_output_topic" value="obstacle_cloud" />
   </node>
 
-  <node pkg="linefit_ground_segmentation_ros" name="ground_segmentation_node" type="ground_segmentation_node" output="screen"/>
+  <node pkg="linefit_ground_segmentation_ros" name="ground_segmentation_node" type="ground_segmentation_node"/>
   <node pkg="simple" name="grid_test" type="grid_test" />
 
   <node pkg="global_planner" name="global_planner" type="planner_for_carla.py" output="screen"/>
 
-  <node pkg="motion_planner" name="motion_planner" type="motion_planner" output="screen"/>
+  <!-- <node pkg="motion_planner" name="motion_planner" type="motion_planner" output="screen"/> -->
+
+  <node pkg="autopilot_controller" name="autopilot_controller" type="AX7controller" output="screen"/>
 
 
 

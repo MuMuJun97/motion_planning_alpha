@@ -41,7 +41,6 @@ def find_path(source, source_ori, target, target_ori):
     talker()
 
 def loc_callback(odometry):
-    rospy.loginfo("Starting get current location")
     global source_ori, source
     source = (
         odometry.pose.pose.position.x,
@@ -56,7 +55,6 @@ def loc_callback(odometry):
     )
     roll, pitch, yaw = tf.transformations.euler_from_quaternion(quat)
     source_ori = (roll, pitch, yaw)
-    rospy.loginfo("Finished get current location")
 
 
 def path_callback(requested_goal):

@@ -22,6 +22,7 @@ from carla_ros_bridge.map import MapHandler
 
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import MultiArrayDimension
+from std_msgs.msg import Float64
 
 
 class CarlaRosBridge(object):
@@ -61,6 +62,18 @@ class CarlaRosBridge(object):
 
         # creating input controller listener
         self.input_controller = InputController()
+
+        # record msg from controller
+        float64multiarray = Float64MultiArray()
+        float64multiarray.data.append(0.0)
+        float64multiarray.data.append(0.0)
+        float64 = Float64()
+        float64.data = 0.0
+        self.controller_msg = {
+            'steering' : float64multiarray,
+            'throttle' : float64,
+            'brake' : float64
+        }
 
 
 
@@ -139,6 +152,8 @@ class CarlaRosBridge(object):
         self.process_msg('clock', Clock(self.cur_time))
 
     def run(self):
+        self.subscribe_controller_msg()
+
         self.publishers['clock'] = rospy.Publisher(
             "clock", Clock, queue_size=10)
 
@@ -202,8 +217,9 @@ class CarlaRosBridge(object):
                 control = measurements.player_measurements.autopilot_control
                 self.client.send_control(control)
             else:
-                control = self.input_controller.cur_control
-                self.client.send_control(**control)
+                # control = self.input_controller.cur_control
+                control = self.generate_controller(measurements)
+                self.client.send_control(control)
 
             # update player's rotation of this frame
             last_rotation = self.update_last_rotation(measurements)
@@ -285,10 +301,6 @@ class CarlaRosBridge(object):
             ( measurements.game_timestamp - last_rotation[3] ) * 1e3
         )
 
-        rospy.loginfo("angular_velocity x is :" + str(imu.angular_velocity.x) )
-        rospy.loginfo("angular_velocity y is :" + str(imu.angular_velocity.y) )
-        rospy.loginfo("angular_velocity z is :" + str(imu.angular_velocity.z) )
-
         imu.linear_acceleration.x = acceleration.x
         imu.linear_acceleration.y = acceleration.y
         imu.linear_acceleration.z = acceleration.z
@@ -329,6 +341,30 @@ class CarlaRosBridge(object):
         updated_rotation[3] = measurements.game_timestamp
         return updated_rotation
 
+    def generate_controller(self, measurements):
+        control = measurements.player_measurements.autopilot_control
+        control.steer = self.controller_msg['steering'].data[0] / 70
+        control.throttle = self.controller_msg['throttle'].data
+        control.brake = self.controller_msg['brake'].data
+        control.reverse = False
+        control.hand_brake = False
+        rospy.loginfo(control)
+        return control
+    
+    def subscribe_controller_msg(self):
+        rospy.Subscriber('player_steering', Float64MultiArray, self.get_steering_msg)
+        rospy.Subscriber('player_throttle', Float64, self.get_throttle_msg)
+        rospy.Subscriber('player_brake', Float64, self.get_brake_msg)
+
+    def get_steering_msg(self, Float64MultiArray):
+        rospy.loginfo('Starting get steering msg from controller')
+        self.controller_msg['steering'] = Float64MultiArray
+    def get_throttle_msg(self, Float64):
+        rospy.loginfo('Starting get steering msg from controller')
+        self.controller_msg['throttle'] = Float64
+    def get_brake_msg(self, Float64):
+        rospy.loginfo('Starting get steering msg from controller')
+        self.controller_msg['brake'] = Float64
 
     ######[Above codes added by Trouble,is not the first-party codes]###########
 

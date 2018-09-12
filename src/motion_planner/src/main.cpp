@@ -36,6 +36,7 @@ double PROPAGATION_TIME = 0.07;
 //TODO get the global path and srtore it in a vector.
 void reference_path_callback(const autopilot_msgs::RoutePath::ConstPtr& msg)
 {
+    ROS_INFO("Starting get the global path");
     for(int i = 0; i < msg->goals.size(); i++)
     {
         type_road_point rp;
@@ -58,7 +59,7 @@ void reference_path_callback(const autopilot_msgs::RoutePath::ConstPtr& msg)
         reference_path.push_back(rp);
         cout << rp.x << " " << rp.y << endl;
     }
-    ROS_INFO("Listener:Get the global path");
+    ROS_INFO("Finished get the global path");
     got_refer_path_flag = true;
 }
 
@@ -84,7 +85,6 @@ void vehicle_state_callback(const nav_msgs::Odometry::ConstPtr& msg)
     vehicle_vel.vx = msg->twist.twist.linear.x;  //vx
     vehicle_vel.vy = msg->twist.twist.linear.y;  //vy
     
-    ROS_INFO("Listener:Get the vehicle location");
     got_vehicle_state_flag = true;
 }
 
@@ -245,17 +245,17 @@ int main (int argc, char** argv)
     //      collision-checking, path-selecting and other related works. 
     while (nh.ok()) 
     {
-        if( got_vehicle_state_flag ||
-           ! got_grid_map_flag ||
-           ! got_refer_path_flag)
+        if( !got_vehicle_state_flag ||
+            !got_grid_map_flag ||
+            !got_refer_path_flag)
         {
-            ROS_INFO_STREAM_ONCE("Waiting for information for motion planning");
             continue;
         }else{
             got_vehicle_state_flag = false;
             got_grid_map_flag = false;
             got_refer_path_flag = false;
         }
+        ROS_INFO("GOT ALL INFORMATION FOR MOTION PLANNING");
         // TODO Initialize related parameters
         vehicle_loc.x = 11290.4667969;
         vehicle_loc.y = 8706.98730469;
