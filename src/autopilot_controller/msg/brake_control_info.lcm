@@ -1,0 +1,9 @@
+//刹车控制
+package obu_lcm;
+
+struct brake_control_info {
+    // boolean brake_auto;  //true自动控制，false手动控制
+    // double cur_speed;  //实时速度
+    // double target_speed;//目标速度
+    double brake_percentage;
+}

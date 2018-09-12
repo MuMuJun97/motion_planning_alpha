@@ -1,0 +1,25 @@
+package obu_lcm;
+
+//惯导信息，obu_ins.exe进程发布，obu和vui可读，发布频率=100Hz
+struct ins_info
+{
+    int64_t tv_sec;                 //生成info时间Seconds
+    int64_t tv_usec;                //生成info时间Microseconds
+    double lat;                     //经度
+    double lon;                     //纬度
+    double height;                  //高程
+    double lateral_speed;           //横向速度，单位：m/s
+    double longitudinal_speed;      //纵向速度，单位：m/s
+    double down_speed;              //地向速度，单位：m/s
+    double roll;                    //横滚角度，单位：度
+    double pitch;                   //俯仰角度，单位：度
+    double heading;                 //航向角度，单位：度
+    double lateral_accelerate;      //横向加速度，单位：m/s2
+    double longitudinal_accelerate; //纵向加速度，单位：m/s2
+    double down_accelerate;         //地向加速度，单位：m/s2
+    double roll_speed;              //横滚角速度，单位：度/s
+    double pitch_speed;             //俯仰角速度，单位：度/s
+    double heading_speed;           //航向角速度，单位：度/s
+    int32_t flag;                   //定位定姿状态，源自POS状态量的高2位，参考枚举值：GPS_FLAG_XXX
+    int32_t n;                      //info计数
+}

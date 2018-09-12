@@ -1,0 +1,312 @@
+package obu_lcm;
+
+
+//-------------------------------------------------------------------
+// 本文件中的速度的单位为：m/s
+// 此外，nad_msg.lcm中的单位为：km/h
+// 1(km/h) = 1/3.6(m/s)
+// 1(m/s)  =   3.6(km/h)
+//-------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------
+// CAN总线信息，obu_controller进程发布此消息，obu和vui可读此信息
+//-------------------------------------------------------------------
+
+//CAN总线的高速信息，发布速度约100Hz
+struct CAN_value {
+    double wheel_speed_FL;       //前左轮轮速，单位：圈/s(rpm)
+    double wheel_speed_FR;       //前右轮轮速，单位：圈/s(rpm)
+    double wheel_speed_BL;       //后左轮轮速，单位：圈/s(rpm)
+    double wheel_speed_BR;       //后右轮轮速，单位：圈/s(rpm)
+    double car_speed;            //车速，单位：m/s(CAN发出的是km/h，需要转化为m/s)
+    double steering_angle;       //方向盘转角，单位：度
+    double steering_angle_speed; //方向盘角速度，单位：度/s
+    double engine_RPM;           //发动机转速，单位：圈/s(rpm)
+}
+
+
+//CAN总线的低速信息，发布速度约10Hz
+struct CAN_status {
+    int32_t engine_status;     //发动机状态，参考枚举值：ENGINE_STATUS_XXX
+    int32_t at_status;         //档位状态，参考枚举值：AT_STATUS_XXX
+    int32_t brake_status;      //刹车状态，参考枚举值：BRAKE_STATUS_XXX
+    int32_t hand_brake_status; //手刹状态，参考枚举值：BRAKE_STATUS_XXX
+    int32_t flashing_status;   //转向灯状态，参考枚举值：FLASHING_STATUS_XXX
+    int32_t low_beam_status;   //近光灯状态，参考枚举值：BEAM_STATUS_XXX
+    int32_t high_beam_status;  //远光灯状态，参考枚举值：BEAM_STATUS_XXX
+}
+
+
+//-------------------------------------------------------------------
+// 运动控制信息，obu_controller用来控制车辆执行器，obu和vui不读此信息
+//-------------------------------------------------------------------
+
+//转向控制
+struct steering_control_info {
+    double steering_angle;       //方向盘转角，单位：度
+    double steering_angle_speed; //方向盘角速度，单位：度/s
+    int32_t signature;
+}
+
+//转向回馈
+
+struct steering_feedback_info {
+    double steering_angle;       //方向盘转角，单位：度
+    double steering_angle_speed; //方向盘角速度，单位：度/s
+}
+
+//油门控制
+struct accelerate_control_info {
+    // double high_sensor_v; //油门踏板传感器1比例电压，单位：v
+    // double low_sensor_v;  //油门踏板传感器2比例电压，单位：v
+    double accelerate_percentage;
+    int32_t signature;
+}
+
+//油门回馈
+struct accelerate_feedback_info {
+    // double high_sensor_v; //油门踏板传感器1比例电压，单位：v
+    // double low_sensor_v;  //油门踏板传感器2比例电压，单位：v
+    double accelerate_percentage;
+}
+
+//刹车控制
+struct brake_control_info {
+    // double line_speed;    //拉线速度，单位：
+    // double line_time;     //拉线时间，单位：
+    // double position_time; //保持时间，单位：
+    // double free_speed;    //释放速度，单位：
+    // double free_time;     //释放时间，单位：
+    double brake_percentage;
+    int32_t signature;
+}
+
+//刹车回馈
+struct brake_feedback_info {
+    double line_position;  //拉线位置，单位：
+}
+
+//档位控制
+struct gears_control_info {
+    double tap_speed; //步进电机速度
+    double tap_time;  //步进电机旋转时间
+}
+
+//档位回馈
+struct gears_feedback_info {
+    double  tap_position; //步进电机位置
+    int32_t tap;          //??
+}
+
+
+//-------------------------------------------------------------------
+// GPS和惯导的信息
+//-------------------------------------------------------------------
+
+//gps信息，obu_gps.exe进程发布，obu和vui可读，发布频率=10Hz
+struct gps_info {
+    double gps_time;                //gps时间
+    int32_t week;                   //星期，周日=0，周一=1，……，周六=6
+    double lat;                     //经度
+    double lon;                     //纬度
+    double height;                  //高程
+    double lateral_speed;           //横向速度，单位：m/s
+    double longitudinal_speed;      //纵向速度，单位：m/s
+    double down_speed;              //地向速度，单位：m/s
+    double roll;                    //横滚角度，单位：度
+    double pitch;                   //俯仰角度，单位：度
+    double heading;                 //航向角度，单位：度
+    double lateral_accelerate;      //横向加速度，单位：m/s2
+    double longitudinal_accelerate; //纵向加速度，单位：m/s2
+    double down_accelerate;         //地向加速度，单位：m/s2
+    double roll_speed;              //横滚角速度，单位：度/s
+    double pitch_speed;             //俯仰角速度，单位：度/s
+    double heading_speed;           //航向角速度，单位：度/s
+    int32_t flag;                   //定位定姿状态，源自POS状态量的高2位，参考枚举值：GPS_FLAG_XXX
+    int32_t n;                      //RTK状态，源自POS状态量的低6位，参考枚举值：GPS_N_XXX
+}
+
+
+//惯导信息，obu_ins.exe进程发布，obu和vui可读，发布频率=100Hz
+struct ins_info {
+    double gps_time;                //gps时间
+    int32_t week;                   //星期，周日=0，周一=1，……，周六=6
+    double lat;                     //经度
+    double lon;                     //纬度
+    double height;                  //高程
+    double lateral_speed;           //横向速度，单位：m/s
+    double longitudinal_speed;      //纵向速度，单位：m/s
+    double down_speed;              //地向速度，单位：m/s
+    double roll;                    //横滚角度，单位：度
+    double pitch;                   //俯仰角度，单位：度
+    double heading;                 //航向角度，单位：度
+    double lateral_accelerate;      //横向加速度，单位：m/s2
+    double longitudinal_accelerate; //纵向加速度，单位：m/s2
+    double down_accelerate;         //地向加速度，单位：m/s2
+    double roll_speed;              //横滚角速度，单位：度/s
+    double pitch_speed;             //俯仰角速度，单位：度/s
+    double heading_speed;           //航向角速度，单位：度/s
+    int32_t flag;                   //定位定姿状态，源自POS状态量的高2位，参考枚举值：GPS_FLAG_XXX
+    int32_t n;                      //RTK状态，源自POS状态量的低6位，参考枚举值：GPS_N_XXX
+}
+
+
+//-------------------------------------------------------------------
+// 车辆控制消息
+//-------------------------------------------------------------------
+//导航精确控制点，obu_trajectory_planner进程发给obu_controller进程，用来控制车辆，频率：10Hz
+struct nav_points {
+    double p_x;                      //局部坐标系坐标
+    double p_y;                      //局部坐标系坐标
+    double speed_desired_Uxs;        //期望纵向速度，单位：m/s
+}
+
+//导航精确控制点的序列
+struct nav_control_points {
+    int64_t tv_sec;                   //规划时间Seconds
+    int64_t tv_usec;                  //规划时间Microseconds
+    int32_t num_of_points;            //导航控制点数量，自身→前方
+    nav_points points[num_of_points]; //导航控制点序列
+}
+
+// struct nav_points {
+//     double gps_time;                 //gps时间
+//     int32_t week;                    //星期，周日=0，周一=1，……，周六=6
+//     double p_x;                      //局部坐标系坐标
+//     double p_y;                      //局部坐标系坐标
+//     double p_z;                      //局部坐标系坐标
+//     double lat;                      //经度
+//     double lon;                      //纬度
+//     double height;                   //高程
+//     double lateral_speed;            //横向速度，单位：m/s
+//     double longitudinal_speed;       //纵向速度，单位：m/s
+//     double down_speed;               //地向速度，单位：m/s
+//     double roll;                     //横滚角度，单位：度
+//     double pitch;                    //俯仰角度，单位：度
+//     double heading;                  //航向角度，单位：度
+//     double lateral_accelerate;       //横向加速度，单位：m/s2
+//     double longitudinal_accelerate;  //纵向加速度，单位：m/s2
+//     double down_accelerate;          //地向加速度，单位：m/s2
+//     double roll_speed;               //横滚角速度，单位：度/s
+//     double pitch_speed;              //俯仰角速度，单位：度/s
+//     double heading_speed;            //航向角速度，单位：度/s
+//     double steering_angle;           //方向盘角度，单位：度
+//     double steering_angle_speed;     //方向盘角速度，单位：度/s
+//     double speed_desired_Uxs;        //期望纵向速度，单位：m/s
+//     double acceleration_desired_Axs; //期望纵向加速度，单位：m/s2
+//     double lateral_offset;           //横向偏移，单位：m
+//     double k_s;                      //曲率，单位：m^-1
+//     double s;                        //相对起点的里程值
+//     int32_t point_no;                //参考轨迹的对应点
+// }
+
+// //导航精确控制点的序列
+// struct nav_control_points {
+//     int64_t utime;                    //规划时间
+//     int32_t num_of_points;            //导航控制点数量，自身→前方
+//     nav_points points[num_of_points]; //导航控制点序列
+// }
+
+
+//-------------------------------------------------------------------
+// 激光雷达和毫米波雷达，obu_lidar/obu_radar.exe进程发布，obu和vui可读，发布频率=10Hz
+//-------------------------------------------------------------------
+
+//点
+struct point_t {
+    float x; //单位：m
+    float y; //单位：m
+    float z; //单位：m
+}
+
+//矩形
+struct rect_t {
+    point_t p1; //左前点
+    point_t p2; //右前点
+    point_t p3; //左后点
+    point_t p4; //右后点
+}
+
+//障碍物
+struct obstacle_t {
+    int32_t value; //代价，取值范围0-1000，估算值，目前的估值：
+    //轨迹中心线=0、坑洼=100、小型障碍物=300、大型障碍物=500、车辆=600、动物=800、行人=1000
+    rect_t rt;     //障碍物范围
+    float v;       //速度，单位：m/s
+    float yaw;     //头指向，单位：与大地坐标正北的夹角（注意不是车辆或道路的相对正北），单位：度
+}
+
+//路面分片(即：静态障碍物)
+struct patch_t {
+    int32_t value; //代价，取值范围0-1000，估算值，目前的估值：
+    //轨迹中心线=0、坑洼=100、小型障碍物=300、大型障碍物=500、车辆=600、动物=800、行人=1000
+    rect_t rt;     //障碍物范围
+    float s1;      //纵向距离起点，单位：m
+    float s2;      //纵向距离终点，单位：m
+    float l1;      //横向偏移起点，单位：m
+    float l2;      //横向偏移终点，单位：m
+}
+
+//障碍物列表
+struct obstacle_list {
+    int64_t utime;                          //当前时间
+    int32_t num_of_obstacles;               //障碍物数量
+    obstacle_t obstacles[num_of_obstacles]; //障碍物列表
+}
+
+//路面分片的矩阵
+struct patch_grid {
+    int64_t utime;                               //当前时间
+    int32_t patchs_width;                        //宽度分片数，左→右
+    int32_t patchs_length;                       //远近分片数，近→远
+    patch_t patchs[20][20];                      //路面分片的矩阵
+}
+
+
+//-------------------------------------------------------------------
+// 车道线接口，obu_camera.exe进程发布，obu和vui可读，发布频率=10Hz
+//-------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------
+// 路径规划进程obu_planning不断地为轨迹规划进程obu_trajectory_planner下指令
+// 实现车辆路线控制，下发频率：1Hz或有需要时，每次下发前方100米，
+// 内容为：左边界线，左车道，右车道，右边界线
+//-------------------------------------------------------------------
+
+//地图上的点
+struct map_points {
+    double lat;    //经度
+    double lon;    //纬度
+    double height; //高程
+}
+
+//地图上的线
+struct map_line {
+    int32_t num_of_points;          //粗略行车中心线的点数，自身→前方
+    map_points line[num_of_points]; //粗略行车中心线的集合
+}
+
+//obu_planning每秒下发的路径规划指令
+struct obu_map_info {
+    nav_control_points center_line;         //导航中心线
+    map_line left_line;                     //左边界线
+    map_line right_line;                    //右边界线
+    int32_t num_of_lane_lines;              //车道线数量，共有num_of_lane-1个车道，左车道→右车道
+    map_line lane_lines[num_of_lane_lines]; //所有车道线
+}
+
+
+//-------------------------------------------------------------------
+// 运动规划进程motion_planner为路径规划进程obu_planning发消息
+// 道路全堵死时请求重规划
+//-------------------------------------------------------------------
+struct mo_planning_request {
+    string obu_name;     //发起请求的obu名称
+    double starting_lon; //起点经度
+    double starting_lat; //起点纬度
+    double ending_lon;   //终点经度
+    double ending_lat;   //终点纬度
+    string destination;  //目的地名称
+}

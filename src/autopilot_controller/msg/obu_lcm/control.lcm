@@ -1,0 +1,63 @@
+//-------------------------------------------------------------------
+// 运动控制信息，obu_controller用来控制车辆执行器，obu和vui不读此信息
+//-------------------------------------------------------------------
+
+//转向控制
+struct steering_control_info
+{
+    double steering_angle;       //方向盘转角，单位：度
+    double steering_angle_speed; //方向盘角速度，单位：度/s
+}
+
+//转向回馈
+
+struct steering_feedback_info
+{
+    double steering_angle;       //方向盘转角，单位：度
+    double steering_angle_speed; //方向盘角速度，单位：度/s
+}
+
+//油门控制
+struct accelerate_control_info
+{
+   double high_sensor_v; //油门踏板传感器1比例电压，单位：v
+   double low_sensor_v;  //油门踏板传感器2比例电压，单位：v
+}
+
+//油门回馈
+struct accelerate_feedback_info
+{
+   double high_sensor_v; //油门踏板传感器1比例电压，单位：v
+   double low_sensor_v;  //油门踏板传感器2比例电压，单位：v
+}
+
+//刹车控制
+struct brake_control_info
+{
+   double line_speed;    //拉线速度，单位：
+   double line_time;     //拉线时间，单位：
+   double position_time; //保持时间，单位：
+   double free_speed;    //释放速度，单位：
+   double free_time;     //释放时间，单位：
+}
+
+//刹车回馈
+struct brake_feedback_info
+{
+   double line_position;  //拉线位置，单位：
+}
+
+//档位控制
+struct gears_control_info
+{
+   double tap_speed; //步进电机速度
+   double tap_time;  //步进电机旋转时间
+}
+
+//档位回馈
+struct gears_feedback_info
+{
+   double  tap_position; //步进电机位置
+   int32_t tap;          //??
+}
+

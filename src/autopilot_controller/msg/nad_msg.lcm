@@ -1,0 +1,835 @@
+package nad_lcm;
+
+
+//-------------------------------------------------------------------
+// 本文件中的速度的单位为：km/h
+// 此外，obu_msg.lcm中的单位为：m/s
+// 1(km/h) = 1/3.6(m/s)
+// 1(m/s)  =   3.6(km/h)
+//-------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------
+// 交通信息上报下发的公共结构
+//-------------------------------------------------------------------
+
+//车道上的一个点
+struct lane_point
+{
+    int64_t lane_id; //当前lane的id，0表示当前车辆位置
+    double offset;   //此点相对lane起点的偏移，单位：m
+}
+
+//obu每秒上报自身信息的结构
+struct obu_info
+{
+    string obu_name;                      //obu的名称
+    double cur_lon;                       //当前经度
+    double cur_lat;                       //当前纬度
+    double cur_yaw;                       //头指向和北方向的夹角，单位：度
+    lane_point cur_point;                 //当前的车道和位置
+    double cur_speed;                     //当前车速，单位：km/h，更新代码
+    double cur_speed_lateral;             //横向速度，单位：km/h，更新代码
+    double cur_speed_longitudinal;        //纵向速度，单位：km/h，更新代码
+    double cur_acceleration_pattern;      //加速度模式，参考枚举值：ACC_P_XXX
+    double cur_acceleration;              //加速度，单位：m/s2
+    double cur_acceleration_lateral;      //横向加速度，单位：m/s2
+    double cur_acceleration_longitudinal; //纵向加速度，单位：m/s2
+    double steering_angle;                //方向盘转角，源于obu_controller的CAN，单位：度
+                                          //下面传感器状态使用枚举值：SENSOR_NONE/SENSOR_OK/SENSOR_ERR
+    int32_t camera_stat[16];              //相机状态，下标参考枚举值：IDX_CAMERA_XXX
+    int32_t radar_stat[16];               //毫米波雷达状态，下标参考枚举值：IDX_RADAR_XXX
+    int32_t lidar_stat[16];               //激光雷达状态，下标参考枚举值：IDX_LIDAR_XXX
+    int32_t gps_stat[16];                 //gps状态，下标参考枚举值：IDX_GPS_XXX
+    int32_t cur_gears;                    //档位，参考枚举值：AT_STATUS_XXX
+    int32_t drive_button_stat;            //是否允许自动驾驶的按键状态，参考枚举值：AUTO_DRIVE_XXX
+}
+
+//rsu每秒上报自身信息的结构
+struct rsu_info
+{
+    string rsu_name;          //rsu的名称
+    int16_t num_of_obu;       //在线的obu数量
+    obu_info obu[num_of_obu]; //在线的obu
+}
+
+//红绿灯描述结构
+struct light_info
+{
+    string light_id;      //红绿灯在OSM地图中的ID
+    string light_type;    //红绿灯类型，参考db_query_light_type
+    string light_setting; //红绿灯的默认运行规律，"g25,y5,r30"表示：绿25秒，黄5秒，红30秒，循环
+    int32_t light_status; //红绿灯的状态，参考枚举值：LS_XXX
+    int32_t light_value;  //红绿灯的当前取值(运行了多少秒)
+}
+
+//限速牌描述结构
+struct limspeed_info
+{
+    string limspeed_id;     //限速牌在OSM地图中的ID
+    string limspeed_type;   //限速牌类型，参考db_query_limspeed_type
+    int32_t limspeed_value; //限速牌的当前取值，单位：km/h
+}
+
+//施工标志描述结构
+struct block_info
+{
+    string block_id;     //施工标志在OSM地图中的ID
+    string block_type;   //施工标志类型，参考db_query_block_type
+    int32_t block_value; //施工标志的当前取值，转化为二进制，如10110表示五车道，1/3/4车道封闭
+}
+
+
+//-------------------------------------------------------------------
+// 路径规划的公共结构
+//-------------------------------------------------------------------
+
+//地图上的一个点
+struct map_point
+{
+    double lat;  //点的纬度
+    double lon;  //点的经度
+    int64_t id;  //点的id
+}
+
+struct lane_of_route
+{
+    int64_t lane_id;           //当前lane的id
+    int16_t num_of_lane;       //同等车道数量
+    int64_t lane[num_of_lane]; //所有同等车道，从左向右排列，车辆换道后修改lane_id
+    double length;             //车道长度，单位：m
+    double start;              //车道起点，单位：m
+    double end;                //车道终点，单位：m
+    int32_t direction;         //道路方向，接近路口的方向才有意义，枚举值为LD_XXX
+    double max_speed;          //最大限速，单位：km/h
+    double sug_speed;          //推荐限速，单位：km/h
+}
+
+//红绿灯
+struct light_of_route
+{
+    map_point light_point;           //地图上唯一标记一个红绿灯
+    int32_t light_status;            //状态，枚举值为LS_XXX，交通模块会修改此数值
+    int32_t light_value;             //启动规则到当前的秒数,后期用于计算当前灯色还会持续多长时间,这个值会影响车在路口的决策
+    int16_t num_of_lane;             //该红绿灯影响的lane数量
+    int64_t influ_lane[num_of_lane]; //该红绿灯影响的lane的id的集合
+}
+
+//施工标志
+struct block_of_route
+{
+    map_point block_point;           //地图上唯一标记一个施工牌
+    int32_t block_value;             //限制的车道，0表示不限制，从左向右每一个二进制位为1表示限制通行，交通模块会修改此数值
+    int16_t num_of_lane;             //该施工牌影响的lane数量
+    int64_t influ_lane[num_of_lane]; //该施工牌影响的lane的id的集合
+}
+
+//限速牌
+struct limspeed_of_route
+{
+    map_point limspeed_point;        //地图上唯一标记一个限速牌
+    int32_t limspeed_value;          //限速值，单位为：km/h，交通模块会修改此数值
+    int16_t num_of_lane;             //该限速牌影响的lane数量
+    int64_t influ_lane[num_of_lane]; //该限速牌影响的lane的id的集合
+}
+
+//路口
+//张毅注释：这个结构只表达了路口的一个方向，完整路口如何表达？
+struct crossing_of_route
+{
+    int64_t crossing_id;              //与数据库中的light_id、地图的id对应
+    lane_of_route v_lane;             //为通过路口创建的虚拟车道线
+                                      //本期人为规定：路口的前一个对象必须是lane_of_route(该lane的终点是停止线)，
+                                      //              路口的后一个对象可能是light_of_route(无红绿灯路口则不是nad_light)
+    int16_t num_of_point;             //停止线的点数
+    map_point stopline[num_of_point]; //停止线
+    int64_t light_id;                 //影响obu的红绿灯的id
+    map_point active_point;           //路口激活状态点
+    map_point end_point;              //路口结束状态点
+}
+
+//路径规划的一个节点(定义成union更合适，但LCM通讯不支持union，此结构长度约为80字节)
+struct route_element
+{
+    int32_t type;               //节点类型，参考枚举值：TET_XXX
+    lane_of_route lane;         //一段车道
+    light_of_route light;       //红绿灯
+    limspeed_of_route limspeed; //限速牌
+    block_of_route block;       //施工标志
+    crossing_of_route crossing; //路口
+}
+
+//路径规划
+struct route_planning
+{
+    int16_t num_of_element;             //路径节点数
+    route_element list[num_of_element]; //路径节点
+    int64_t time_stamp;                 //产生此路径规划的时间，gettimeofday获得的毫秒数
+    double speed;                       //rsu或csu指定的实时车速，小于0表示没有指定，单位：km/h
+    double starting_lon;                //起点经度
+    double starting_lat;                //起点纬度，落在list的第一个lane_of_route里
+    double ending_lon;                  //终点经度
+    double ending_lat;                  //终点纬度，落在list的最后一个lane_of_route里
+    string destination;                 //目的地名称
+    int32_t route_reason;               //路径规划原因，参考枚举值：ROUTE_REASON_XXX
+}
+
+
+//-------------------------------------------------------------------
+// rsu注册过程，rsu注销过程
+//-------------------------------------------------------------------
+
+//rsu注册请求
+struct rc_rsu_login_request
+{
+    string rsu_name; //发起请求的rsu的名称
+}
+
+//rsu注册应答
+struct cr_rsu_login_respond
+{
+    string rsu_name; //发起请求的rsu的名称
+    int32_t retcode; //操作的返回码，成功返回RET_OK，失败返回RET_XXX
+}
+
+//csu发现rsu心跳丢失，删除rsu-session后尝试通知rsu
+struct cr_rsu_logout_notify
+{
+    string rsu_name; //被删除的rsu的名称
+}
+
+
+//-------------------------------------------------------------------
+// obu注册过程，obu注销过程
+//-------------------------------------------------------------------
+
+//obu向csu询问rsu_name
+struct oc_rsu_name_request
+{
+    string obu_name; //发起请求的obu的名称
+    double obu_lon;  //obu位置的经度
+    double obu_lat;  //obu位置的纬度
+}
+
+//csu向obu应答rsu_name
+struct co_rsu_name_respond
+{
+    string rsu_name; //obu所在区域的rsu名称
+}
+
+//obu向rsu发起注册请求
+struct or_obu_login_request
+{
+    string rsu_name; //接受obu注册的rsu的名称
+    string obu_name; //发起注册请求的obu的名称
+}
+
+//rsu转发obu注册请求到csu
+struct rc_obu_login_request
+{
+    string rsu_name; //接受obu注册的rsu的名称
+    string obu_name; //发起注册请求的obu的名称
+}
+
+//csu给rsu应答obu注册结果
+struct cr_obu_login_respond
+{
+    string rsu_name; //接受obu注册的rsu的名称
+    string obu_name; //发起注册请求的obu的名称
+    int32_t retcode; //操作的返回码，成功返回RET_OK，失败返回RET_XXX
+}
+
+//rsu应答obu注册结果
+struct ro_obu_login_respond
+{
+    string rsu_name; //接受obu注册的rsu的名称
+    string obu_name; //发起注册请求的obu的名称
+    int32_t retcode; //操作的返回码，成功返回RET_OK，失败返回RET_XXX
+}
+
+//csu发现obu心跳丢失，通知rsu删除obu-sessin
+struct cr_obu_logout_notify
+{
+    string obu_name; //心跳超时的obu的名称
+}
+
+//rsu发现obu心跳丢失，通知csu删除obu-sessin
+struct rc_obu_logout_notify
+{
+    string obu_name; //心跳超时的obu的名称
+}
+
+//rsu发现obu心跳丢失，删除obu-session后尝试通知obu
+struct ro_obu_logout_notify
+{
+    string obu_name; //心跳超时的obu的名称
+}
+
+
+//-------------------------------------------------------------------
+// obu发起路径规划过程，obu、rsu、csu发起路径重规划
+//-------------------------------------------------------------------
+
+//vui->obu：发起路径规划请求
+struct uo_route_request
+{
+    string obu_name;     //发起请求的obu名称
+    double starting_lon; //起点经度
+    double starting_lat; //起点纬度
+    double ending_lon;   //终点经度
+    double ending_lat;   //终点纬度
+    string destination;  //目的地名称
+}
+
+//obu->rsu：发起路径规划请求
+struct or_route_request
+{
+    string obu_name;      //发起请求的obu名称
+    double starting_lon;  //起点经度
+    double starting_lat;  //起点纬度
+    double ending_lon;    //终点经度
+    double ending_lat;    //终点纬度
+    string destination;   //目的地名称
+    int32_t route_reason; //路径规划原因，参考枚举值：ROUTE_REASON_XXX
+}
+
+//rsu->csu：发起路径规划请求
+struct rc_route_request
+{
+    string obu_name;      //发起请求的obu名称
+    double starting_lon;  //起点经度
+    double starting_lat;  //起点纬度
+    double ending_lon;    //终点经度
+    double ending_lat;    //终点纬度
+    string destination;   //目的地名称
+    int32_t route_reason; //路径规划原因，参考枚举值：ROUTE_REASON_XXX
+}
+
+//csu->rsu：返回路径规划结果
+struct cr_route_respond
+{
+    string obu_name;      //发起请求的obu名称
+    int32_t retcode;      //规划成功返回RET_OK，否则返回RET_XXX
+    route_planning route; //路径规划结果
+}
+
+//rsu->obu：返回路径规划结果
+struct ro_route_respond
+{
+    string obu_name;      //发起请求的obu名称
+    int32_t retcode;      //规划成功返回RET_OK，否则返回RET_XXX
+    route_planning route; //路径规划结果
+}
+
+//obu->vui：返回路径规划结果
+struct ou_route_respond
+{
+    string obu_name;      //发起请求的obu名称
+    int32_t retcode;      //规划成功返回RET_OK，否则返回RET_XXX
+    route_planning route; //路径规划结果
+}
+
+
+//-------------------------------------------------------------------
+// obu请求启动自动驾驶
+//-------------------------------------------------------------------
+
+//vui->obu：发起开始自动驾驶请求
+struct uo_start_auto_request
+{
+    string obu_name;    //发起请求的obu名称
+    int64_t time_stamp; //产生此路径规划的时间，对应route_planning.time_stamp
+}
+
+//obu->rsu：发起开始自动驾驶请求
+struct or_start_auto_request
+{
+    string obu_name;      //发起请求的obu名称
+    int64_t time_stamp;   //产生此路径规划的时间，对应route_planning.time_stamp
+    int32_t start_reason; //VUI、网络驱动启动，参考枚举值：START_REASON_XXX
+}
+
+//rsu->csu：发起开始自动驾驶请求
+struct rc_start_auto_request
+{
+    string obu_name;      //发起请求的obu名称
+    int64_t time_stamp;   //产生此路径规划的时间，对应route_planning.time_stamp
+    int32_t start_reason; //VUI、网络驱动启动，参考枚举值：START_REASON_XXX
+}
+
+//csu->rsu：返回开始自动驾驶结果
+struct cr_start_auto_respond
+{
+    string obu_name;      //发起请求的obu名称
+    int32_t retcode;      //允许启动返回RET_OK，否则返回RET_XXX
+    int32_t start_reason; //VUI、网络驱动启动，参考枚举值：START_REASON_XXX
+}
+
+//rsu->obu：返回开始自动驾驶结果
+struct ro_start_auto_respond
+{
+    string obu_name;      //发起请求的obu名称
+    int32_t retcode;      //允许启动返回RET_OK，否则返回RET_XXX
+    int32_t start_reason; //VUI、网络驱动启动，参考枚举值：START_REASON_XXX
+}
+
+//obu->vui：返回开始自动驾驶结果
+struct ou_start_auto_respond
+{
+    string obu_name;      //发起请求的obu名称
+    int32_t retcode;      //允许启动返回RET_OK，否则返回RET_XXX
+    int32_t start_reason; //VUI、网络驱动启动，参考枚举值：START_REASON_XXX
+}
+
+
+//-------------------------------------------------------------------
+// obu退出自动驾驶流程
+//-------------------------------------------------------------------
+
+//vui->obu：请求退出自动驾驶
+struct uo_stop_auto_request
+{
+    string obu_name; //发起请求的obu名称
+}
+
+//obu->rsu：请求退出自动驾驶
+struct or_stop_auto_notify
+{
+    string obu_name;     //发起请求的obu名称
+    int32_t stop_reason; //VUI、button、到达目的地，参考枚举值：STOP_REASON_XXX
+}
+
+//rsu->csu：通知某obu退出自动驾驶
+struct rc_stop_auto_notify
+{
+    string obu_name;     //发起请求的obu名称
+    int32_t stop_reason; //VUI、button、到达目的地，参考枚举值：STOP_REASON_XXX
+}
+
+//csu->oct：通知某obu退出自动驾驶
+struct cu_stop_auto_notify
+{
+    string obu_name;     //发起请求的obu名称
+    int32_t stop_reason; //VUI、button、到达目的地，参考枚举值：STOP_REASON_XXX
+}
+
+//obu->vui：应答或通知退出自动驾驶的结果
+struct ou_stop_auto_respond
+{
+    string obu_name;     //发起请求的obu名称
+    int32_t stop_reason; //VUI、button、到达目的地，参考枚举值：STOP_REASON_XXX
+}
+
+
+//-------------------------------------------------------------------
+// 每1秒交通信息上报下发流程-ets部分
+//-------------------------------------------------------------------
+
+//ets每秒上报自身状态，也起到注册和心跳的作用
+struct er_ets_report
+{
+    string ets_id;     //ets在OSM地图中的ID
+    int32_t ets_type;  //ets类型，仅用来核对与地图是否一致，允许为0，参考枚举值：TET_XXX
+    double ets_lon;    //ets经度，仅用来核对与地图是否一致，允许为0
+    double ets_lat;    //ets纬度，仅用来核对与地图是否一致，允许为0
+}
+
+//rsu每秒钟给ets下发状态，也起到心跳的作用
+struct re_ets_report
+{
+    string ets_id;      //ets在OSM地图中的ID
+    int32_t ets_type;    //ets类型，参考枚举值：TET_XXX
+    string ets_setting; //ets的默认运行规律
+    int32_t ets_value;  //ets的当前取值
+}
+
+
+//-------------------------------------------------------------------
+// 每1秒交通信息上报下发流程-obu部分
+//-------------------------------------------------------------------
+
+//obu_planning搜集obu各部件的指标
+//obu_sensor_report，由多个obu部件内部消息组合而成，暂未定义
+
+//obu->rsu：每秒上报obu状态，也起到心跳的作用
+struct or_info_report
+{
+    obu_info obu; //obu信息
+}
+
+//rsu->csu：每秒上报obu状态，也起到心跳的作用
+struct rc_info_report
+{
+    rsu_info rsu;                            //rsu信息，核心参数是在线obu列表
+    int16_t num_of_light;                    //激活的红绿灯数量
+    light_info light[num_of_light];          //激活的红绿灯
+    int16_t num_of_limspeed;                 //激活的限速牌数量
+    limspeed_info limspeed[num_of_limspeed]; //激活的限速牌
+    int16_t num_of_block;                    //激活的施工标志数量
+    block_info block[num_of_block];          //激活的施工标志
+}
+
+//csu->oct：每秒上报obu状态，也起到心跳的作用
+struct cu_info_report
+{
+    rsu_info rsu;                            //rsu信息，核心参数是在线obu列表
+    int16_t num_of_light;                    //激活的红绿灯数量
+    light_info light[num_of_light];          //激活的红绿灯
+    int16_t num_of_limspeed;                 //激活的限速牌数量
+    limspeed_info limspeed[num_of_limspeed]; //激活的限速牌
+    int16_t num_of_block;                    //激活的施工标志数量
+    block_info block[num_of_block];          //激活的施工标志
+}
+
+//csu->rsu：每秒下发交通信息（本期无内容），也起到心跳的作用
+struct cr_info_report
+{
+    int32_t retcode; //恒为RET_OK
+}
+
+//rsu->obu：每秒下发交通信息，也起到心跳的作用
+struct ro_info_report
+{
+    int16_t num_of_light;                    //激活的红绿灯数量
+    light_info light[num_of_light];          //激活的红绿灯
+    int16_t num_of_limspeed;                 //激活的限速牌数量
+    limspeed_info limspeed[num_of_limspeed]; //激活的限速牌
+    int16_t num_of_block;                    //激活的施工标志数量
+    block_info block[num_of_block];          //激活的施工标志
+}
+
+//obu->vui：每秒下发交通信息，也起到心跳的作用
+struct ou_info_report
+{
+    obu_info obu;                            //obu自身信息
+    int16_t num_of_light;                    //激活的红绿灯数量
+    light_info light[num_of_light];          //激活的红绿灯
+    int16_t num_of_limspeed;                 //激活的限速牌数量
+    limspeed_info limspeed[num_of_limspeed]; //激活的限速牌
+    int16_t num_of_block;                    //激活的施工标志数量
+    block_info block[num_of_block];          //激活的施工标志
+}
+
+
+//-------------------------------------------------------------------
+// obu上报急处理事件-本期只做刹车，处理只是通告
+//-------------------------------------------------------------------
+
+//控制模块上报应急处理事件(目前只有刹车)
+struct obu_control_event
+{
+    int32_t event_type;  //上报事件类型，按位设定，枚举值参考：EVENT_TYPE_XXX
+    int32_t break_event; //刹车事件，枚举值参考：BREAK_EVENT_XXX
+}
+
+//obu->rsu：上报应急处理事件(目前只有刹车)
+struct or_event_notify
+{
+    string obu_name;     //发起事件的obu名称
+    int32_t event_type;  //上报事件类型，按位设定，枚举值参考：EVENT_TYPE_XXX
+    int32_t break_event; //刹车事件，枚举值参考：BREAK_EVENT_XXX
+}
+
+//obu->vui：上报应急处理事件(目前只有刹车)
+struct ou_event_notify
+{
+    string obu_name;     //发起事件的obu名称
+    int32_t event_type;  //上报事件类型，按位设定，枚举值参考：EVENT_TYPE_XXX
+    int32_t break_event; //刹车事件，枚举值参考：BREAK_EVENT_XXX
+}
+
+//本期obu事件暂不上报csu
+
+
+//-------------------------------------------------------------------
+// obu请求换道，rsu请求obu换道
+//-------------------------------------------------------------------
+
+//obu->rsu：请求换道
+struct or_change_lane_request
+{
+    string obu_name;         //发起请求的obu名称
+    lane_point active_point; //开始换道位置，active_point.lane_id=0表示尽快换道
+    lane_point end_point;    //超过此位置放弃换道，end_point.lane_id=0首次尝试换道失败就放弃换道
+    int32_t direction;       //换道方向，参考枚举值：CL_DIRECTION_XXX
+    int32_t level;           //换道紧急程度，参考枚举值：CL_LEVEL_XXX
+    int32_t reason;          //换道原因，参考枚举值：CL_REASON_XXX
+}
+
+//rsu->obu：应答换道或主动请求换道
+struct ro_change_lane_notify
+{
+    string obu_name;         //发起请求的obu名称
+    int32_t retcode;         //允许换道RET_OK，不允许返回RET_XXX
+    lane_point active_point; //开始换道位置，active_point.lane_id=0表示尽快换道
+    lane_point end_point;    //超过此位置放弃换道，end_point.lane_id=0表示首次尝试换道失败就放弃换道
+    int32_t direction;       //换道方向，参考枚举值：CL_DIRECTION_XXX
+    int32_t level;           //换道紧急程度，参考枚举值：CL_LEVEL_XXX
+    int32_t reason;          //换道原因，参考枚举值：CL_REASON_XXX
+    route_planning route;    //允许换道则需提供换道后的路径规划
+}
+
+//obu->vui：上报VUI显示换道事件
+struct ou_change_lane_notify
+{
+    string obu_name;         //发起请求的obu名称
+    int32_t retcode;         //允许换道RET_OK，不允许返回RET_XXX
+    lane_point active_point; //开始换道位置，active_point.lane_id=0表示尽快换道
+    lane_point end_point;    //超过此位置放弃换道，end_point.lane_id=0表示首次尝试换道失败就放弃换道
+    int32_t direction;       //换道方向，参考枚举值：CL_DIRECTION_XXX
+    int32_t level;           //换道紧急程度，参考枚举值：CL_LEVEL_XXX
+    int32_t reason;          //换道原因，参考枚举值：CL_REASON_XXX
+}
+
+
+//-------------------------------------------------------------------
+// rsu请求obu修改车速或刹车
+// 注1：obu自行调整车速或刹车用or_event_notify，不用rsu同意
+// 注2：使用限速牌、红绿灯、施工标志造成修改车速或刹车不用ro_change_speed_notify
+//-------------------------------------------------------------------
+
+//rsu->obu：通知obu修改车速或刹车
+struct ro_change_speed_notify
+{
+    string obu_name;         //发起请求的obu名称
+    lane_point active_point; //开始修改车速或刹车位置，active_point.lane_id=0表示尽快修改车速或刹车
+    lane_point end_point;    //超过此位置恢复为lane_of_route.sug_speed，end_point.lane_id=0表示永不恢复为sug_speed
+    double speed;            //指定车速，0表示刹车，允许超过lane_of_route.max_speed，单位：km/h
+    int32_t length;          //在多少米内完成修改车速或刹车，距离短意味着急刹车
+    int32_t reason;          //修改车速或刹车的原因，参考枚举值：CS_REASON_XXX
+}
+
+//obu->vui：上报UI显示修改车速或刹车事件
+struct ou_change_speed_notify
+{
+    string obu_name;         //发起请求的obu名称
+    lane_point active_point; //开始修改车速或刹车位置，active_point.lane_id=0表示尽快修改车速或刹车
+    lane_point end_point;    //超过此位置恢复为lane_of_route.sug_speed，end_point.lane_id=0表示永不恢复为sug_speed
+    double speed;            //指定车速，小于0表示刹车，允许超过lane_of_route.max_speed，单位：km/h
+    int32_t length;          //在多少米内完成修改车速或刹车，距离短意味着急刹车
+    int32_t reason;          //修改车速或刹车的原因，参考枚举值：CS_REASON_XXX
+}
+
+
+//-------------------------------------------------------------------
+// oct登录到csu
+//-------------------------------------------------------------------
+
+//oct->csu：请求登录
+struct uc_oct_login_request
+{
+    string csu_user;     //csu登录用户名
+    string csu_password; //csu登录密码，本期用明文
+}
+
+//csu->oct：应答登录
+struct cu_oct_login_respond
+{
+    string csu_name; //对应csu的名称
+    int32_t retcode; //登录成功返回RET_OK，失败返回RET_XXX
+}
+
+
+//-------------------------------------------------------------------
+// oct获得基本配置的接口
+//-------------------------------------------------------------------
+
+//obu配置
+struct obu_config
+{
+    string obu_name; //obu名称
+    string obu_type; //obu类型
+}
+
+//rsu配置
+struct rsu_config
+{
+    string rsu_name;       //rsu名称
+    string rsu_type;       //rsu类型
+    double rsu_lon;        //rsu位置(经度)
+    double rsu_lat;        //rsu位置(纬度)
+    double rsu_radius_lon; //rsu覆盖半径(经度,米)
+    double rsu_radius_lat; //rsu覆盖半径(纬度,米)
+}
+
+//脚本配置
+struct task_config
+{
+    string filename;    //脚本文件名
+    string caption;     //脚本标题
+    string description; //脚本描述
+}
+
+//oct->csu：查询基本配置
+struct uc_config_request
+{
+    string csu_name; //对应csu的名称
+}
+
+//csu->oct：返回基本配置
+struct cu_config_respond
+{
+    string csu_name;               //对应csu的名称
+    string csu_type;               //对应csu的类型
+    int16_t num_of_obu;            //obu数量
+    obu_config obu[num_of_obu];    //obu信息
+    int16_t num_of_rsu;            //rsu数量
+    rsu_config rsu[num_of_rsu];    //rsu信息
+    int16_t num_of_task;           //脚本数量
+    task_config task[num_of_task]; //脚本信息
+}
+
+
+//-------------------------------------------------------------------
+// oct执行脚本的接口
+// 脚本实际在csu_scene执行，脚本函数大部分在csu_planning执行
+// 一期的脚本都是一次性执行完，没有“正在执行脚本”的状态
+//-------------------------------------------------------------------
+
+//oct->csu：请求执行脚本
+struct uc_exec_task_request
+{
+    string csu_name;  //对应csu的名称
+    string task_name; //脚本文件名
+}
+
+//csu->oct：应答执行脚本结果，一期无需等待脚本函数返回就可以发cu_exec_task_respond
+struct cu_exec_task_respond
+{
+    string csu_name; //对应csu的名称
+    int32_t retcode; //执行成功返回RET_OK，失败返回RET_XXX
+    string err_desc; //成功则为空，失败返回执行失败的描述
+}
+
+//csu_scene->csu其他进程：请求执行脚本函数
+struct csu_task_func_request
+{
+    string func_name;         //函数名
+    int16_t num_of_para;      //参数数量
+    string para[num_of_para]; //参数表，没有设定的参数保持为空，字符串参数已经去掉""
+                              //例如: set_light("4076117449", light_setting="r7,y3,g5", past_time=9, tag=1)
+                              //则：func_name=set_light, para[0]=4076117449, para[1]=r7,y3,g5, para[2]=9, para[6]=1
+                              //注意，每个脚本函数都有自己的参数顺序，不能填错，例如set_light的参数表为：
+                              //[0]  [1]           [2]       [3]      [4]       [5]      [6]
+                              //name light_setting past_time latitude longitude altitude tag
+}
+
+//csu其他进程->csu_scene：返回脚本函数结果，一期csu_scene无需收到csu_task_func_respond就可继续执行
+struct csu_task_func_respond
+{
+    int32_t retcode;              //执行成功返回RET_OK，失败返回RET_XXX
+    string err_desc;              //成功则为空，失败返回执行失败的描述
+    int16_t num_of_result;        //结果数量
+    string result[num_of_result]; //没结果或失败的函数返回num_of_result=0，
+                                  //有结果的依不同函数而定，一期无有结果函数
+}
+
+
+//-------------------------------------------------------------------
+// 控制电子交通牌的接口
+//-------------------------------------------------------------------
+
+//oct->csu：通过对话框请求修改ets
+struct uc_set_ets_request
+{
+    string ets_id;      //ets在OSM地图中的ID
+    int32_t ets_type;    //ets类型，参考枚举值：TET_XXX
+    string ets_setting; //ets的默认运行规律，目前仅对红绿灯有效
+    int32_t ets_value;  //ets的当前取值
+    int32_t reason;     //引起修改的原因,参考枚举值ETS_REASON_XXX
+}
+
+//csu->rsu：请求修改ets（修改原因可能是：oct对话框、脚本或路口等算法）
+struct cr_set_ets_request
+{
+    string ets_id;      //ets在OSM地图中的ID
+    int32_t ets_type;    //ets类型，参考枚举值：TET_XXX
+    string ets_setting; //ets的默认运行规律
+    int32_t ets_value;  //ets的当前取值,-1表示无效值
+    int32_t reason;     //引起修改的原因,参考枚举值ETS_REASON_XXX
+}
+
+//csu->oct：通过对话框修改ets的应答
+struct cu_set_ets_respond
+{
+    string ets_id;   //ets在OSM地图中的ID
+    int32_t retcode; //执行成功返回RET_OK，失败返回RET_XXX
+    string err_desc; //成功则为空，失败返回执行失败的描述
+    int32_t reason;     //引起修改的原因,参考枚举值ETS_REASON_XXX
+}
+
+//rsu->csu：通过对话框修改ets的应答
+struct rc_set_ets_respond
+{
+    string ets_id;   //ets在OSM地图中的ID
+    int32_t retcode; //执行成功返回RET_OK，失败返回RET_XXX
+    string err_desc; //成功则为空，失败返回执行失败的描述
+    int32_t reason;     //引起修改的原因,参考枚举值ETS_REASON_XXX
+}
+
+//-------------------------------------------------------------------
+// oct的日志告警接口
+//-------------------------------------------------------------------
+
+//csu->oct：上报日志
+struct cu_log_report
+{
+    string log_proc;   //产生日志的进程名
+    string log_time;   //产生日志的时间
+    int32_t log_level; //日志等级，参考枚举值：LOG_XXX
+    string log;        //日志正文
+}
+
+//csu->oct：上报告警
+struct cu_alarm_report
+{
+    string alarm_proc;   //产生告警的进程名
+    string alarm_time;   //产生告警的时间
+    int32_t alarm_level; //告警等级，参考枚举值：ALARM_XXX
+    int32_t alarm_type;  //告警类型：上报告警或恢复告警，参考枚举值：ALARM_TYPE_XXX
+    int32_t alarm_no;    //告警序列号，用来恢复告警
+    string alarm;        //告警正文
+}
+
+
+//-------------------------------------------------------------------
+// vui的日志告警接口
+//-------------------------------------------------------------------
+
+//obu->vui：上报日志
+struct ou_log_report
+{
+    string log_proc;   //产生日志的进程名
+    string log_time;   //产生日志的时间
+    int32_t log_level; //日志等级，参考枚举值：LOG_XXX
+    string log;        //日志正文
+}
+
+//obu->vui：上报告警
+struct ou_alarm_report
+{
+    string alarm_proc;   //产生告警的进程名
+    string alarm_time;   //产生告警的时间
+    int32_t alarm_level; //告警等级，参考枚举值：ALARM_XXX
+    int32_t alarm_type;  //告警类型：上报告警或恢复告警，参考枚举值：ALARM_TYPE_XXX
+    int32_t alarm_no;    //告警序列号，用来恢复告警
+    string alarm;        //告警正文
+}
+
+
+//-------------------------------------------------------------------
+// 调试命令接口
+//-------------------------------------------------------------------
+
+//cmd->其他进程：请求执行调试命令
+struct cmd_request
+{
+    string cmd; //完整的调试命令
+}
+
+//其他进程->cmd：返回调试命令的结果
+struct cmd_respond
+{
+    string result; //返回结果，多行文本用'\n'间隔
+}
+

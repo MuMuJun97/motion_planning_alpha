@@ -1,0 +1,33 @@
+package obu_lcm;
+
+//-------------------------------------------------------------------
+// 路径规划进程obu_planning不断地为轨迹规划进程obu_trajectory_planner下指令
+// 实现车辆路线控制，下发频率：1Hz或有需要时，每次下发前方100米，
+// 内容为：左边界线，左车道，右车道，右边界线
+//-------------------------------------------------------------------
+
+//地图上的点
+struct map_points
+{
+    double lat;    //经度
+    double lon;    //纬度
+    double height; //高程
+}
+
+//地图上的线
+struct map_line
+{
+    int32_t num_of_points;          //粗略行车中心线的点数，自身→前方
+    map_points line[num_of_points]; //粗略行车中心线的集合
+}
+
+//obu_planning每秒下发的路径规划指令
+struct obu_map_info
+{
+    nav_control_points center_line;         //导航中心线
+    map_line left_line;                     //左边界线
+    map_line right_line;                    //右边界线
+    int32_t num_of_lane_lines;              //车道线数量，共有num_of_lane-1个车道，左车道→右车道
+    map_line lane_lines[num_of_lane_lines]; //所有车道线
+}
+
