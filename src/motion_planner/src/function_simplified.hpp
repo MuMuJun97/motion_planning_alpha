@@ -28,7 +28,9 @@ public:
     void update_info(
         type_road_point global_coordinate, 
         std::vector<type_road_point> reference_path,
-        double current_speed,GridMap grid_map);
+        double current_speed,
+        GridMap grid_map,
+        type_road_point motion_goal);
     /*
      * add new node into the tree
      */

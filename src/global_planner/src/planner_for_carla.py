@@ -14,6 +14,7 @@ from nav_msgs.msg import Odometry
 from visualization_msgs.msg import MarkerArray
 from visualization_msgs.msg import Marker
 from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import Int64
 
 from carla.client import make_carla_client
 from carla.planner.map import CarlaMap
@@ -23,7 +24,8 @@ from carla.planner.map import CarlaMap
 
 source = ()
 source_ori = ()
-target_number = 11
+target_number = 1
+motion_goal = RouteNode()
 route = []
 _player_start_spots = []
 city_name = 'Town01'
@@ -59,8 +61,9 @@ def loc_callback(odometry):
 
 def path_callback(requested_goal):
     rospy.loginfo("Starting get target from player start spots")
-    global target_number
-    target_number = 11
+    global target_number, motion_goal
+    target_number = requested_goal.data
+    rospy.loginfo('Target Number is: ' + str(requested_goal.data) )
     target = (
         _player_start_spots[target_number][0],
         _player_start_spots[target_number][1],
@@ -71,6 +74,8 @@ def path_callback(requested_goal):
     rospy.loginfo(source_ori)
     target_ori = (0,0,0)
     rospy.loginfo("Finished get target from player start spots")
+    motion_goal.x = target[0]
+    motion_goal.y = target[1]
     find_path(source, source_ori, target, target_ori)
 
 def get_start_spots(Float64MultiArray):
@@ -82,15 +87,13 @@ def get_start_spots(Float64MultiArray):
     for h in range(height):
         spot = [ Float64MultiArray.data[h * width + _] for _ in range(width) ]
         _player_start_spots.append(spot)
-    rospy.loginfo("Finished get player start spots")
-
+    rospy.loginfo("Finished get player start spots")    
 
 def listener():
     rospy.Subscriber('player_odometry', Odometry, loc_callback)
-    rospy.Subscriber('/route/goal', RoutePath, path_callback)
+    rospy.Subscriber('/route/goal', Int64, path_callback)
     rospy.Subscriber('player_start_spots',Float64MultiArray,
                      get_start_spots)
-
 
 def talker():
     rospy.loginfo("Starting publish global route to motion planner")
@@ -106,6 +109,15 @@ def talker():
     rospy.loginfo(rp.goals)
     pub.publish(rp)
     rospy.loginfo("Finished publish global route to motion planner")
+
+    rospy.loginfo("Starting publish motion goal to motion planner")
+    pub_1 = rospy.Publisher('motion/goal', RouteNode, queue_size=500, latch=True)
+    pub_1.publish(motion_goal)
+    rospy.loginfo(
+        "Motion Goal: (" + str(motion_goal.x) + ", " + str(motion_goal.y) + ")"
+    )
+    rospy.loginfo("Finished publish motion goal to motion planner")
+
 
 if __name__ == '__main__':
     rospy.init_node('global_planner')

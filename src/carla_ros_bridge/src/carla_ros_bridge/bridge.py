@@ -8,11 +8,12 @@ import rospy
 from itertools import count
 import tf
 import numpy as np
+import libGaussLocalGeographicCS as Map2Wgs
 
 from rosgraph_msgs.msg import Clock
 from tf2_msgs.msg import TFMessage
 from nav_msgs.msg import Odometry
-from sensor_msgs.msg import Imu
+from sensor_msgs.msg import Imu, NavSatFix
 
 from carla.settings import CarlaSettings
 from carla_ros_bridge.control import InputController
@@ -23,6 +24,7 @@ from carla_ros_bridge.map import MapHandler
 from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import MultiArrayDimension
 from std_msgs.msg import Float64
+from autopilot_msgs.msg import *
 
 
 class CarlaRosBridge(object):
@@ -74,6 +76,7 @@ class CarlaRosBridge(object):
             'throttle' : float64,
             'brake' : float64
         }
+        self.player_odometry = Odometry()
 
 
 
@@ -203,11 +206,11 @@ class CarlaRosBridge(object):
             current_velocity = self.calculate_current_velocity(
                 measurements, last_velocity )
 
-            # generate imu msg
-            self.generate_imu_msg(measurements, last_rotation)
+            # generate generate_player_odometry_msg
+            self.generate_player_odometry_msg(measurements, current_velocity)
 
-            # generate motion state msg
-            self.generate_motion_state_msg(measurements, current_velocity)
+            # generate generate_motion_state_msg
+            self.generate_motion_state_msg(measurements, last_rotation)
 
             # publish all messages
             self.send_msgs()
@@ -250,7 +253,7 @@ class CarlaRosBridge(object):
             _player_start_spots.data.append(spot.location.z)
         self.process_msg('player_start_spots', _player_start_spots)
 
-    def generate_motion_state_msg(self, measurements, current_velocity):
+    def generate_player_odometry_msg(self, measurements, current_velocity):
         rotation = measurements.player_measurements.transform.rotation
         location = measurements.player_measurements.transform.location
 
@@ -272,9 +275,13 @@ class CarlaRosBridge(object):
         odometry.twist.twist.linear.x = current_velocity[0]
         odometry.twist.twist.linear.y = current_velocity[1]
         odometry.twist.twist.linear.z = current_velocity[2]
-        self.process_msg("player_motion_state", odometry)
+
+        self.player_odometry = odometry
+        self.process_msg("player_odometry", odometry)
     
-    def generate_imu_msg(self, measurements, last_rotation):
+    def generate_motion_state_msg(self, measurements, last_rotation):
+        motion_state = MotionState()
+        # generate IMU msg
         acceleration = measurements.player_measurements.acceleration
         rotation = measurements.player_measurements.transform.rotation
         quat = tf.transformations.quaternion_from_euler(
@@ -305,7 +312,27 @@ class CarlaRosBridge(object):
         imu.linear_acceleration.y = acceleration.y
         imu.linear_acceleration.z = acceleration.z
 
-        self.process_msg("/imu/data", imu)
+        # generate odometry msg
+        odometry = Odometry()
+        odometry = self.player_odometry
+
+        # generate GPS msg
+        gps = NavSatFix()
+        map2wsg = Map2Wgs.GaussLocalGeographicCS(0, 0)
+        llh = map2wsg.xyz2llh(
+            odometry.pose.pose.position.x,
+            odometry.pose.pose.position.y,
+            odometry.pose.pose.position.z,
+        )
+        gps.latitude = llh[0]
+        gps.longitude = llh[1]
+        gps.altitude = llh[2]
+        
+        motion_state.imu = imu
+        motion_state.odom = odometry
+        motion_state.gps = gps
+
+        self.process_msg("/localization/motion_state", motion_state)
 
     def calculate_current_velocity(self, measurements, last_velocity):
         current_velocity = [0, 0, 0, 0]

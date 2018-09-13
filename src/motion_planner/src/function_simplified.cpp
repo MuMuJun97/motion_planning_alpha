@@ -40,12 +40,15 @@ bool fun_simple::collision_check(type_road_point point)
 void fun_simple:: update_info(
     type_road_point global_coordinate, 
     std::vector<type_road_point> reference_path,
-    double current_speed, GridMap grid_map)
+    double current_speed, 
+    GridMap grid_map,
+    type_road_point motion_goal)
 {
     global_coord=global_coordinate;
     local_reference_path=reference_path;
     local_grid_map = grid_map;
     speed=current_speed;
+    goal_point = motion_goal;
 }
 
 
@@ -53,8 +56,6 @@ bool fun_simple::is_goal(type_node_point node)
 {
     type_road_point ps;
     ps = transform_from_node_to_point(node);
-    goal_point.x = 11296.2177734;
-    goal_point.y = 8786.04199219;
     if(norm_sqrt(ps, goal_point) < goal_size)
     {
         //std::cout << "goal point : " << goal_point.x << " " << goal_point.y << std::endl;
