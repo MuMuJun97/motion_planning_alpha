@@ -22,8 +22,8 @@ void Controller::lateral_none() {
     g_lcm_steering.publish("steering_control_info", &steering_msg);
     // ROS
     std_msgs::Float64MultiArray temp_steering;
-    temp_steering.data[0] = steering_msg.steering_angle;
-    temp_steering.data[1] = steering_msg.steering_angle_speed;
+    temp_steering.data.push_back(steering_msg.steering_angle);
+    temp_steering.data.push_back(steering_msg.steering_angle_speed);
     steering_pub.publish(temp_steering);
 #endif
 }
@@ -226,8 +226,8 @@ void Controller::lateral_control_output(const Path &p) {
     g_lcm_steering.publish("steering_control_info", &steering_msg);
     // ROS
     std_msgs::Float64MultiArray temp_steering;
-    temp_steering.data[0] = steering_msg.steering_angle;
-    temp_steering.data[1] = steering_msg.steering_angle_speed;
+    temp_steering.data.push_back(steering_msg.steering_angle);
+    temp_steering.data.push_back(steering_msg.steering_angle_speed);
     steering_pub.publish(temp_steering);
 #endif
 }

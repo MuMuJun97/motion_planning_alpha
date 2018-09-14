@@ -22,17 +22,17 @@ void Controller::handle_ins_msg(const autopilot_msgs::MotionState::Ptr &motionSt
     set_current_ins_info(motionState);
     // 本应从CAN总线获取总体车速，这里使用IMU数据代替
     car_speed = Current_Speed * 3.6;
-
+    
     if (enableInsHandlerLogger)
         mytimer::getHHMMSSUS(ins_t1);
 
     Controller_preprocessing(curr_path);
 
+
     if (enableInsHandlerLogger)
         mytimer::getHHMMSSUS(ins_t2);
 
     Controller_apply();
-
     interface_apply();
 }
 
@@ -66,19 +66,14 @@ void Controller::handle_planner_nav_control_points_msg(const autopilot_msgs::Way
         extract_path_from_msg(wayPoints, next_path);
         if (enablePathExtractLog)
             mytimer::getHHMMSSUS(path_t1);
-
         int no_points = cau_all_output_from_single_spline_realtime(*next_path, next_path->size());
         if (no_points < 10)
-            return;
-
+            // return;
         if (enablePathExtractLog)
             mytimer::getHHMMSSUS(path_t2);
-
         switch_path_buffer();
-
         if (enablePathExtractLog)
             mytimer::getHHMMSSUS(path_t3);
-
         if (enablePathExtractLog) {
             timeval path_gen_tv;
             path_gen_tv.tv_sec = static_cast<__time_t >(wayPoints->header.stamp.sec);
@@ -144,7 +139,7 @@ int Controller::init_lcm() {
     /////////////////////////ins接收////////////////////////////////////
     ROS_INFO("Subscribe ROS INS MESSAGE");
     //subscriber = rosNodeHandle.subscribe("/localization/motion_state", 1, &Controller::handle_ins_msg, this);
-    insSubscriber = rosNodeHandle.subscribe(runtimeParameters.ins_topic_name, 1, &Controller::handle_ins_msg, this);
+    insSubscriber = rosNodeHandle.subscribe(runtimeParameters.ins_topic_name, 100, &Controller::handle_ins_msg, this);
 
     /////////////////////////车量接收////////////////////////////////////
     if (!g_lcm_can.good())
@@ -160,7 +155,7 @@ int Controller::init_lcm() {
         return -1;
 
     ///////////////////规划数据接收/////////////////////////////////
-    wayPointsSubscriber = rosNodeHandle.subscribe(runtimeParameters.way_points_topic_name, 1,
+    wayPointsSubscriber = rosNodeHandle.subscribe(runtimeParameters.way_points_topic_name, 10,
                                                   &Controller::handle_planner_nav_control_points_msg, this);
 
     ///////////////////控制数据发送/////////////////////////////////

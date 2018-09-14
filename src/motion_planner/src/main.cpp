@@ -225,7 +225,7 @@ int main (int argc, char** argv)
     // ros::Subscriber dynamic_obstacle_sub = nh.subscribe(
     //     "/detection/dynamic_obstacle", 1000, dynamic_obstacle_callback);
     ros::Publisher way_points_pub = nh.advertise<autopilot_msgs::WayPoints>(
-        "/planner/way_points",1);
+        "/planner/way_points",10);
 
     ros::ServiceClient map_to_wgs_client = \
         nh.serviceClient<autopilot_msgs::Map2WGS>("/map/map_to_wgs");
@@ -304,6 +304,10 @@ int main (int argc, char** argv)
         //      node-adding, collision-checking and other related works.
         while(true)
         {
+            if (n > 0)
+            {
+                continue;
+            }
             ROS_INFO("Starting  Propagating tree");
             ros::Duration timeout(PROPAGATION_TIME); // Timeout of 0.07 seconds
             ros::Time start_time = ros::Time::now();
@@ -410,6 +414,8 @@ int main (int argc, char** argv)
             way_points_pub.publish(waypoints_msg);
 
             ROS_INFO("Finished  Publishing the path to Controller");
+
+            n++;
         }
 
     }

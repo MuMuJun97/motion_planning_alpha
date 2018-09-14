@@ -77,6 +77,16 @@ class CarlaRosBridge(object):
             'brake' : float64
         }
         self.player_odometry = Odometry()
+        self.sub_steer = (
+            rospy.Subscriber(
+                'player_steering', Float64MultiArray, self.get_steering_msg)
+        )
+        self.sub_throttle = (
+            rospy.Subscriber('player_throttle', Float64, self.get_throttle_msg)
+        )
+        self.sub_brake = (
+            rospy.Subscriber('player_brake', Float64, self.get_brake_msg)
+        )
 
 
 
@@ -155,8 +165,6 @@ class CarlaRosBridge(object):
         self.process_msg('clock', Clock(self.cur_time))
 
     def run(self):
-        self.subscribe_controller_msg()
-
         self.publishers['clock'] = rospy.Publisher(
             "clock", Clock, queue_size=10)
 
@@ -377,11 +385,6 @@ class CarlaRosBridge(object):
         control.hand_brake = False
         rospy.loginfo(control)
         return control
-    
-    def subscribe_controller_msg(self):
-        rospy.Subscriber('player_steering', Float64MultiArray, self.get_steering_msg)
-        rospy.Subscriber('player_throttle', Float64, self.get_throttle_msg)
-        rospy.Subscriber('player_brake', Float64, self.get_brake_msg)
 
     def get_steering_msg(self, Float64MultiArray):
         rospy.loginfo('Starting get steering msg from controller')

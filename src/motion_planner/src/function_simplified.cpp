@@ -263,7 +263,8 @@ bool fun_simple::repropagating(type_road_point vehicle_loc)
 {
     //TODO store the updated vehicle location.
     type_road_point vehicle_loc_updated = vehicle_loc;
-
+    std::cout<<"Updated vehicle_loc (x: "<<vehicle_loc_updated.x<<", y: "
+        <<vehicle_loc_updated.y<<")"<<endl;
     double k ,dk ,L;
     double cost = 0;
     int index = -1, selected_index = -1;

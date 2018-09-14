@@ -28,10 +28,10 @@ void Controller::longitudinal_none() {
     // ROS
     std_msgs::Float64 temp_throttle;
     temp_throttle.data = accelerate_msg.accelerate_percentage;
-    steering_pub.publish(temp_throttle);
+    throttle_pub.publish(temp_throttle);
     std_msgs::Float64 temp_brake;
     temp_brake.data = brake_msg.brake_percentage;
-    steering_pub.publish(temp_brake);
+    brake_pub.publish(temp_brake);
 #endif
 }
 
@@ -205,10 +205,10 @@ void Controller::longitudinal_speed_controller(double tar_speed, const double sp
     // ROS
     std_msgs::Float64 temp_throttle;
     temp_throttle.data = accelerate_msg.accelerate_percentage;
-    steering_pub.publish(temp_throttle);
+    throttle_pub.publish(temp_throttle);
     std_msgs::Float64 temp_brake;
     temp_brake.data = brake_msg.brake_percentage;
-    steering_pub.publish(temp_brake);
+    brake_pub.publish(temp_brake);
 #endif
 }
 
