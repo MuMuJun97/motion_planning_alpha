@@ -46,9 +46,10 @@ def loc_callback(odometry):
     global source_ori, source
     source = (
         odometry.pose.pose.position.x,
-        odometry.pose.pose.position.y,
+        - odometry.pose.pose.position.y,
         odometry.pose.pose.position.z
     )
+    rospy.loginfo("source is: " + str(source[0]) + str(source[1]) )
     quat = (
         odometry.pose.pose.orientation.x,
         odometry.pose.pose.orientation.y,
@@ -56,7 +57,7 @@ def loc_callback(odometry):
         odometry.pose.pose.orientation.w
     )
     roll, pitch, yaw = tf.transformations.euler_from_quaternion(quat)
-    source_ori = (roll, pitch, yaw)
+    source_ori = (- roll, pitch, - yaw)
 
 
 def path_callback(requested_goal):
@@ -75,7 +76,7 @@ def path_callback(requested_goal):
     target_ori = (0,0,0)
     rospy.loginfo("Finished get target from player start spots")
     motion_goal.x = target[0]
-    motion_goal.y = target[1]
+    motion_goal.y = - target[1]
     find_path(source, source_ori, target, target_ori)
 
 def get_start_spots(Float64MultiArray):
@@ -103,7 +104,7 @@ def talker():
         world_point = CarlaMap(city_name).convert_to_world(node)
         route_node = RouteNode()
         route_node.x = world_point[0]
-        route_node.y = world_point[1]
+        route_node.y = - world_point[1]
         rp.goals.append(route_node)
     rp.headings = [0.0] * len(rp.goals)
     rospy.loginfo(rp.goals)

@@ -174,6 +174,8 @@ class CarlaRosBridge(object):
         # Choose one player start at random.
         number_of_player_starts = len(scene.player_start_spots)
         player_start = random.randint(0, max(0, number_of_player_starts - 1))
+        
+        player_start = 10
 
         # Send occupancy grid to rivz
         map_handler = MapHandler(scene.map_name)
@@ -242,7 +244,7 @@ class CarlaRosBridge(object):
 
 
     #####[Fllowing codes added by Trouble,is not the first-party codes]#####
-    def generate_start_spots_msg(self, scene):  
+    def generate_start_spots_msg(self, scene):
         """
         Publish the player_start_spots to ros
         """
@@ -266,14 +268,14 @@ class CarlaRosBridge(object):
         location = measurements.player_measurements.transform.location
 
         quat = tf.transformations.quaternion_from_euler(
-            np.radians(rotation.roll),
+            - np.radians(rotation.roll),
             np.radians(rotation.pitch),
-            np.radians(rotation.yaw)
+            - np.radians(rotation.yaw)
         )
 
         odometry = Odometry()
         odometry.pose.pose.position.x = location.x
-        odometry.pose.pose.position.y = location.y
+        odometry.pose.pose.position.y = - location.y
         odometry.pose.pose.position.z = location.z
         odometry.pose.pose.orientation.x = quat[0]
         odometry.pose.pose.orientation.y = quat[1]
@@ -281,7 +283,7 @@ class CarlaRosBridge(object):
         odometry.pose.pose.orientation.w = quat[3]
         
         odometry.twist.twist.linear.x = current_velocity[0]
-        odometry.twist.twist.linear.y = current_velocity[1]
+        odometry.twist.twist.linear.y = - current_velocity[1]
         odometry.twist.twist.linear.z = current_velocity[2]
 
         self.player_odometry = odometry
@@ -293,9 +295,9 @@ class CarlaRosBridge(object):
         acceleration = measurements.player_measurements.acceleration
         rotation = measurements.player_measurements.transform.rotation
         quat = tf.transformations.quaternion_from_euler(
-            np.radians(rotation.roll),
+            - np.radians(rotation.roll),
             np.radians(rotation.pitch),
-            np.radians(rotation.yaw)
+            - np.radians(rotation.yaw)
         )
         imu = Imu()
         imu.orientation.x = quat[0]
@@ -303,7 +305,7 @@ class CarlaRosBridge(object):
         imu.orientation.z = quat[2]
         imu.orientation.w = quat[3]
 
-        imu.angular_velocity.x = (
+        imu.angular_velocity.x = - (
             ( rotation.roll - last_rotation[0] ) /
             ( measurements.game_timestamp - last_rotation[3] ) * 1e3
         )
@@ -311,13 +313,13 @@ class CarlaRosBridge(object):
             ( rotation.pitch - last_rotation[1] ) /
             ( measurements.game_timestamp - last_rotation[3] ) * 1e3
         )
-        imu.angular_velocity.z = (
+        imu.angular_velocity.z = - (
             ( rotation.yaw - last_rotation[2] ) /
             ( measurements.game_timestamp - last_rotation[3] ) * 1e3
         )
 
         imu.linear_acceleration.x = acceleration.x
-        imu.linear_acceleration.y = acceleration.y
+        imu.linear_acceleration.y = - acceleration.y
         imu.linear_acceleration.z = acceleration.z
 
         # generate odometry msg
@@ -326,16 +328,19 @@ class CarlaRosBridge(object):
 
         # generate GPS msg
         gps = NavSatFix()
-        map2wsg = Map2Wgs.GaussLocalGeographicCS(0, 0)
+        map2wsg = Map2Wgs.GaussLocalGeographicCS(22.9886565512, 113.2691559583)
+
         llh = map2wsg.xyz2llh(
             odometry.pose.pose.position.x,
             odometry.pose.pose.position.y,
-            odometry.pose.pose.position.z,
+            0
         )
         gps.latitude = llh[0]
         gps.longitude = llh[1]
         gps.altitude = llh[2]
         
+        rospy.loginfo("py: " + str(llh[0]) + str(llh[1]))
+
         motion_state.imu = imu
         motion_state.odom = odometry
         motion_state.gps = gps

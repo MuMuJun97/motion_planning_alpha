@@ -382,8 +382,8 @@ int main (int argc, char** argv)
             {
                 //TODO transform map coordination to WGS coordination.
                 GaussLocalGeographicCS gausslocalgeographiccs = 
-                    GaussLocalGeographicCS(0.0, 0.0);
-                double _ = 0.0;
+                    GaussLocalGeographicCS(22.9886565512, 113.2691559583);
+                double _ ;
                 gausslocalgeographiccs.xyz2llh(
                     p_fun_main->selected_path.at(i).x,
                     p_fun_main->selected_path.at(i).y,
@@ -392,21 +392,22 @@ int main (int argc, char** argv)
                     p_fun_main->selected_path.at(i).longitude,
                     _
                 );
-                // ROS_INFO(
-                //         "Got WG2: (%f, %f) from Map: (%f, %f)", 
-                //         p_fun_main->selected_path.at(i).latitude, 
-                //         p_fun_main->selected_path.at(i).longitude, 
-                //         p_fun_main->selected_path.at(i).x, 
-                //         p_fun_main->selected_path.at(i).y);
+
+                ROS_INFO(
+                        "Got WG2: (%.10f, %.10f) from Map: (%f, %f)", 
+                        p_fun_main->selected_path.at(i).latitude, 
+                        p_fun_main->selected_path.at(i).longitude,
+                        p_fun_main->selected_path.at(i).x, 
+                        p_fun_main->selected_path.at(i).y);
 
                 autopilot_msgs::RouteNode routenode;
-                routenode.latitude = \
+                routenode.latitude =
                         p_fun_main->selected_path.at(i).latitude;
-                routenode.longitude = \
+                routenode.longitude =
                         p_fun_main->selected_path.at(i).longitude;
-                routenode.x = \
+                routenode.x =
                         p_fun_main->selected_path.at(i).x;
-                routenode.y = \
+                routenode.y =
                         p_fun_main->selected_path.at(i).y;
                 waypoints_msg.points.push_back(routenode);
                 waypoints_msg.speeds.push_back(speed);
