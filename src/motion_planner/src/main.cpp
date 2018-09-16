@@ -28,9 +28,9 @@ vector<type_road_point> sample_nodes;
 type_road_point vehicle_loc; // coordinate 
 vehicle_velocity vehicle_vel; //speed
 GridMap grid_map;
-bool got_refer_path_flag = false, \
-     got_grid_map_flag = false, \
-     got_vehicle_state_flag = false, \
+bool got_refer_path_flag = false,
+     got_grid_map_flag = false,
+     got_vehicle_state_flag = false,
      got_motion_goal = false;
 
 double PROPAGATION_TIME = 0.07;
@@ -41,7 +41,6 @@ void motion_goal_callback(const autopilot_msgs::RouteNode::ConstPtr& msg)
 {
     motion_goal.x = msg->x;
     motion_goal.y = msg->y;
-
     got_motion_goal = true;
 }
 
@@ -352,66 +351,102 @@ int main (int argc, char** argv)
             ROS_INFO("Starting  Searching best path");
 
             // TODO Path-selecting and other related works
-            if(flag && p_fun_main->search_best_path())
-            {
-                ROS_INFO("Finished  Searching best path");
-                ROS_INFO("Starting  Repropagating");
-                p_fun_main->repropagating(vehicle_loc);
-                flag = false;
-                ROS_INFO("Found the path");
-                show_path(p_fun_main->selected_path);
-                show_tree(p_fun_main->m_tree);
-                ROS_INFO("The best path is :");
-                vector<type_road_point>::iterator iter;
-                for(
-                    iter = p_fun_main->selected_path.begin(); 
-                    iter != p_fun_main->selected_path.end(); 
-                    iter++)
-                {
-                    ROS_INFO("(x: %f, y: %f)", (*iter).x, (*iter).y);
-                }
-            }
-            ROS_INFO("Finished  Repropagating");
-            ROS_INFO("Starting  Publishing the path to Controller");
+            // if(flag && p_fun_main->search_best_path())
+            // {
+            //     ROS_INFO("Finished  Searching best path");
+            //     ROS_INFO("Starting  Repropagating");
+            //     p_fun_main->repropagating(vehicle_loc);
+            //     flag = false;
+            //     ROS_INFO("Found the path");
+            //     show_path(p_fun_main->selected_path);
+            //     show_tree(p_fun_main->m_tree);
+            //     ROS_INFO("The best path is :");
+            //     vector<type_road_point>::iterator iter;
+            //     for(
+            //         iter = p_fun_main->selected_path.begin(); 
+            //         iter != p_fun_main->selected_path.end(); 
+            //         iter++)
+            //     {
+            //         ROS_INFO("(x: %f, y: %f)", (*iter).x, (*iter).y);
+            //     }
+            // }
+            // ROS_INFO("Finished  Repropagating");
+            // ROS_INFO("Starting  Publishing the path to Controller");
             
             // Useless currently. Maybe used in the future.
             autopilot_msgs::WayPoints waypoints_msg;
             autopilot_msgs::Map2WGS map2wgs;
 
-            for (int i = 0; i < p_fun_main->selected_path.size(); i++)
+            // for (int i = 0; i < p_fun_main->selected_path.size(); i++)
+            // {
+            //     //TODO transform map coordination to WGS coordination.
+            //     GaussLocalGeographicCS gausslocalgeographiccs = 
+            //         GaussLocalGeographicCS(22.9886565512, 113.2691559583);
+            //     double _ ;
+            //     gausslocalgeographiccs.xyz2llh(
+            //         p_fun_main->selected_path.at(i).x,
+            //         p_fun_main->selected_path.at(i).y,
+            //         0,
+            //         p_fun_main->selected_path.at(i).latitude,
+            //         p_fun_main->selected_path.at(i).longitude,
+            //         _
+            //     );
+
+            //     // ROS_INFO(
+            //     //         "Got WG2: (%.10f, %.10f) from Map: (%f, %f)", 
+            //     //         p_fun_main->selected_path.at(i).latitude, 
+            //     //         p_fun_main->selected_path.at(i).longitude,
+            //     //         p_fun_main->selected_path.at(i).x, 
+            //     //         p_fun_main->selected_path.at(i).y);
+
+            //     autopilot_msgs::RouteNode routenode;
+            //     routenode.latitude =
+            //             p_fun_main->selected_path.at(i).latitude;
+            //     routenode.longitude =
+            //             p_fun_main->selected_path.at(i).longitude;
+            //     routenode.x =
+            //             p_fun_main->selected_path.at(i).x;
+            //     routenode.y =
+            //             p_fun_main->selected_path.at(i).y;
+            //     waypoints_msg.points.push_back(routenode);
+            //     waypoints_msg.speeds.push_back(speed);
+            // }
+            std::reverse(reference_path.begin(), reference_path.end());
+            for (int i = 0; i < reference_path.size(); i++)
             {
                 //TODO transform map coordination to WGS coordination.
                 GaussLocalGeographicCS gausslocalgeographiccs = 
                     GaussLocalGeographicCS(22.9886565512, 113.2691559583);
                 double _ ;
                 gausslocalgeographiccs.xyz2llh(
-                    p_fun_main->selected_path.at(i).x,
-                    p_fun_main->selected_path.at(i).y,
+                    reference_path.at(i).x,
+                    reference_path.at(i).y,
                     0,
-                    p_fun_main->selected_path.at(i).latitude,
-                    p_fun_main->selected_path.at(i).longitude,
+                    reference_path.at(i).latitude,
+                    reference_path.at(i).longitude,
                     _
                 );
 
                 ROS_INFO(
                         "Got WG2: (%.10f, %.10f) from Map: (%f, %f)", 
-                        p_fun_main->selected_path.at(i).latitude, 
-                        p_fun_main->selected_path.at(i).longitude,
-                        p_fun_main->selected_path.at(i).x, 
-                        p_fun_main->selected_path.at(i).y);
+                        reference_path.at(i).latitude, 
+                        reference_path.at(i).longitude,
+                        reference_path.at(i).x, 
+                        reference_path.at(i).y);
 
                 autopilot_msgs::RouteNode routenode;
                 routenode.latitude =
-                        p_fun_main->selected_path.at(i).latitude;
+                        reference_path.at(i).latitude;
                 routenode.longitude =
-                        p_fun_main->selected_path.at(i).longitude;
+                        reference_path.at(i).longitude;
                 routenode.x =
-                        p_fun_main->selected_path.at(i).x;
+                        reference_path.at(i).x;
                 routenode.y =
-                        p_fun_main->selected_path.at(i).y;
+                        reference_path.at(i).y;
                 waypoints_msg.points.push_back(routenode);
                 waypoints_msg.speeds.push_back(speed);
             }
+
             way_points_pub.publish(waypoints_msg);
 
             ROS_INFO("Finished  Publishing the path to Controller");

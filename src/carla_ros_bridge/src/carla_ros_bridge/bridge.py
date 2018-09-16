@@ -268,14 +268,14 @@ class CarlaRosBridge(object):
         location = measurements.player_measurements.transform.location
 
         quat = tf.transformations.quaternion_from_euler(
-            - np.radians(rotation.roll),
+            np.radians(rotation.roll),
             np.radians(rotation.pitch),
-            - np.radians(rotation.yaw)
+            np.radians(rotation.yaw)
         )
 
         odometry = Odometry()
         odometry.pose.pose.position.x = location.x
-        odometry.pose.pose.position.y = - location.y
+        odometry.pose.pose.position.y = location.y
         odometry.pose.pose.position.z = location.z
         odometry.pose.pose.orientation.x = quat[0]
         odometry.pose.pose.orientation.y = quat[1]
@@ -283,7 +283,7 @@ class CarlaRosBridge(object):
         odometry.pose.pose.orientation.w = quat[3]
         
         odometry.twist.twist.linear.x = current_velocity[0]
-        odometry.twist.twist.linear.y = - current_velocity[1]
+        odometry.twist.twist.linear.y = current_velocity[1]
         odometry.twist.twist.linear.z = current_velocity[2]
 
         self.player_odometry = odometry
@@ -295,9 +295,9 @@ class CarlaRosBridge(object):
         acceleration = measurements.player_measurements.acceleration
         rotation = measurements.player_measurements.transform.rotation
         quat = tf.transformations.quaternion_from_euler(
-            - np.radians(rotation.roll),
+            np.radians(rotation.roll),
             np.radians(rotation.pitch),
-            - np.radians(rotation.yaw)
+            np.radians(rotation.yaw - 90)
         )
         imu = Imu()
         imu.orientation.x = quat[0]
@@ -305,21 +305,21 @@ class CarlaRosBridge(object):
         imu.orientation.z = quat[2]
         imu.orientation.w = quat[3]
 
-        imu.angular_velocity.x = - (
-            ( rotation.roll - last_rotation[0] ) /
+        imu.angular_velocity.x = (
+            np.radians( rotation.roll - last_rotation[0] ) /
             ( measurements.game_timestamp - last_rotation[3] ) * 1e3
         )
         imu.angular_velocity.y = (
-            ( rotation.pitch - last_rotation[1] ) /
+            np.radians( rotation.pitch - last_rotation[1] ) /
             ( measurements.game_timestamp - last_rotation[3] ) * 1e3
         )
-        imu.angular_velocity.z = - (
-            ( rotation.yaw - last_rotation[2] ) /
+        imu.angular_velocity.z = (
+            np.radians( rotation.yaw - last_rotation[2] ) /
             ( measurements.game_timestamp - last_rotation[3] ) * 1e3
         )
 
         imu.linear_acceleration.x = acceleration.x
-        imu.linear_acceleration.y = - acceleration.y
+        imu.linear_acceleration.y = acceleration.y
         imu.linear_acceleration.z = acceleration.z
 
         # generate odometry msg
@@ -338,8 +338,6 @@ class CarlaRosBridge(object):
         gps.latitude = llh[0]
         gps.longitude = llh[1]
         gps.altitude = llh[2]
-        
-        rospy.loginfo("py: " + str(llh[0]) + str(llh[1]))
 
         motion_state.imu = imu
         motion_state.odom = odometry
@@ -383,7 +381,7 @@ class CarlaRosBridge(object):
 
     def generate_controller(self, measurements):
         control = measurements.player_measurements.autopilot_control
-        control.steer = self.controller_msg['steering'].data[0] / 70
+        control.steer = - self.controller_msg['steering'].data[0] / 70
         control.throttle = self.controller_msg['throttle'].data
         control.brake = self.controller_msg['brake'].data
         control.reverse = False
