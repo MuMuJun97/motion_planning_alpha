@@ -67,6 +67,14 @@ public:
        */
       type_road_point global_coord;
       /*
+       * vehicle location
+       */
+      type_road_point vehicle_loc;
+      /*
+       * vehicle velocity
+       */
+      vehicle_velocity vehicle_vel;
+      /*
        * reference path
        */
       std::vector<type_road_point> local_reference_path;
