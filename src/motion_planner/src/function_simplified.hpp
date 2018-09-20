@@ -25,12 +25,7 @@ public:
      * update the infomation include:
      * reference path,global coordinate, current speed.
      */
-    void update_info(
-        type_road_point global_coordinate, 
-        std::vector<type_road_point> reference_path,
-        double current_speed,
-        GridMap grid_map,
-        type_road_point motion_goal);
+    void update_info(type_road_point global_coordinate);
     /*
      * add new node into the tree
      */
@@ -85,7 +80,7 @@ public:
       /*
        * current speed.
        */
-      double speed;
+      Speed speed;
       /*
        * goal nodes
        */

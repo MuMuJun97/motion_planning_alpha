@@ -15,6 +15,7 @@ typedef struct type_road_point
     double latitude;
     double longitude;
     double angle;
+    bool size = false;
 }type_road_point;
 typedef struct type_node_point
 {
@@ -27,6 +28,7 @@ typedef struct type_node_point
     bool flag_effective;
     double cost;
     double k,dk,L;
+    bool size = false;
 }type_node_point;
 typedef struct type_path_cost
 {
@@ -44,6 +46,7 @@ typedef struct vehicle_velocity
     double vx;
     double vy;
     double vz;
+    bool size = false; //for checking if it has initialized
 }vehicle_velocity;
 
 typedef struct GridMap
@@ -52,6 +55,13 @@ typedef struct GridMap
     unsigned long width;
     unsigned long height;
     double resolution;
+    bool size = false;
 }GridMap;
+
+typedef struct Speed
+{
+    double speed = 5;
+    bool size = false; //for checking if it has been manual initialized
+}Speed;
 
 #endif // TYPE_VARIABLES_HPP

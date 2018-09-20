@@ -37,18 +37,9 @@ bool fun_simple::collision_check(type_road_point point)
 }
 
 
-void fun_simple:: update_info(
-    type_road_point global_coordinate, 
-    std::vector<type_road_point> reference_path,
-    double current_speed, 
-    GridMap grid_map,
-    type_road_point motion_goal)
+void fun_simple:: update_info(type_road_point global_coordinate)
 {
     global_coord=global_coordinate;
-    local_reference_path=reference_path;
-    local_grid_map = grid_map;
-    speed=current_speed;
-    goal_point = motion_goal;
 }
 
 
