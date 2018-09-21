@@ -26,7 +26,6 @@ from std_msgs.msg import MultiArrayDimension
 from std_msgs.msg import Float64
 from autopilot_msgs.msg import *
 
-
 class CarlaRosBridge(object):
     """
     Carla Ros bridge

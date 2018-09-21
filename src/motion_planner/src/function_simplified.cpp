@@ -16,12 +16,11 @@ fun_simple::~fun_simple()
 
 bool fun_simple::collision_check(type_road_point point)
 {
-    // TODO 
-    unsigned long point_height = \
-        (local_grid_map.height / 2 - point.x - global_coord.x) / \
+    unsigned long point_height = 
+        (local_grid_map.height / 2 - point.x - global_coord.x) /
         local_grid_map.resolution;
-    unsigned long point_width = \
-        (point.y + local_grid_map.width / 2 - global_coord.y) / \
+    unsigned long point_width =
+        (point.y + local_grid_map.width / 2 - global_coord.y) /
         local_grid_map.resolution;
 
     if (local_grid_map.width > point_width && 
@@ -135,6 +134,19 @@ void fun_simple::initialize_tree()
 
 bool fun_simple::search_best_path()
 {
+    std::cout<< "[IN(FUN) search_best_path]" << "[>>>>INFO<<<<] " <<
+        "tree size: " << m_tree.size() 
+    << std::endl;
+
+    if ( m_tree.size() <= 1 )
+    {
+        std::cout<< "[IN(FUN) search_best_path]" << "[>>>WARNING<<] " <<
+            "Tree is empty, no need to search, SKIP"
+        <<std::endl;
+
+        return false;
+    }
+
     tree<type_node_point>::iterator it;
     std::vector<tree<type_node_point>::iterator> save_goal_nodes;
     std::cout << "tree size: " << m_tree.size() << std::endl;
@@ -180,7 +192,7 @@ bool fun_simple::search_best_path()
             //std::cout << "save_goal_nodes[i]: " << save_goal_nodes[i]->x << "  parent: " << it->x << std::endl;
             path.push_back(*it);
         }
-        std::cout << "path.size: " << path.size() << std::endl; 
+        std::cout << "path.size: " << path.size() << std::endl;
         double cost_dk = 0;
         double cost_diff_curvature = 0;
         double cost_L = (*save_goal_nodes[i]).L;
@@ -250,12 +262,28 @@ bool fun_simple::search_best_path()
     return true;
 }
 
-bool fun_simple::repropagating(type_road_point vehicle_loc)
+bool fun_simple::repropagating()
 {
+    if ( vehicle_loc.size = false )
+    {
+        std::cout<< "[IN(FUN) repropagating]" << "[>>>WARNING<<] " <<
+            "vehicle location is not updated, using the old one"
+        <<endl;
+
+        return true;
+
+    }else{
+        vehicle_loc.size = false;
+    }
+
     //TODO store the updated vehicle location.
     type_road_point vehicle_loc_updated = vehicle_loc;
-    std::cout<<"Updated vehicle_loc (x: "<<vehicle_loc_updated.x<<", y: "
-        <<vehicle_loc_updated.y<<")"<<endl;
+
+    std::cout<< "[IN(FUN) repropagating]" << "[>>>>INFO<<<<] " <<
+        "Updated vehicle_loc (x: "<<vehicle_loc_updated.x<<", y: " << 
+        vehicle_loc_updated.y<<")"
+    <<std::endl;
+
     double k ,dk ,L;
     double cost = 0;
     int index = -1, selected_index = -1;

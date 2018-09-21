@@ -50,7 +50,7 @@ public:
     /*
      * re-propagating the updated vehicle state with the selected best path
      */
-    bool repropagating(type_road_point vehicle_loc);
+    bool repropagating();
 
 public:
     /*
