@@ -107,6 +107,7 @@ def talker():
         route_node.x = world_point[0] + 2
         route_node.y = world_point[1] + 8
         rp.goals.append(route_node)
+    rp.goals.reverse()
     rp.headings = [0.0] * len(rp.goals)
     rospy.loginfo(rp.goals)
     pub.publish(rp)
