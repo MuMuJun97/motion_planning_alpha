@@ -50,10 +50,31 @@ public:
         initialization();
     }
 
+private:
+
+    void initialization()
+    {
+        p_fun_main = new fun_simple;
+
+        p_sample_main = new sampling_methods;
+        p_sample_main->p_func_from_sampling = &p_fun_main;
+
+        p_search_main = new searching_parent_methods;
+        p_search_main->p_func_methods_searching_parent = &p_fun_main;
+        p_search_main->p_sampling_methods_searching_parent = &p_sample_main;
+
+        p_propegate_main = new propegating_methods();
+        p_propegate_main->p_func_method_propegating = &p_fun_main;
+    }
+
+public:
+
     void run_once()
     {
         if ( !is_ok() ){    return;    }
         
+        ROS_INFO("Starting run once");
+
         update_state();
 
         propegate_tree();
@@ -225,48 +246,35 @@ public:
 
     bool is_ok()
     {
-        if ( ! p_fun_main -> goal_point.size )
+        if ( ! p_fun_main -> local_grid_map.size )
         {
+            ROS_INFO("Missing grid map");
             return false;
         }
-        if ( p_fun_main -> local_grid_map.size )
+        if ( ! p_fun_main -> vehicle_loc.size )
         {
+            ROS_INFO("Missing vehicle location");
             return false;
         }
-        if ( p_fun_main -> vehicle_loc.size )
+        if ( ! p_fun_main -> vehicle_vel.size )
         {
-            return false;
-        }
-        if ( p_fun_main -> vehicle_vel.size )
-        {
+            ROS_INFO("Missing vehicle velocity");
             return false;
         }
         if ( p_fun_main -> local_reference_path.size() <= 0 )
         {
+            ROS_INFO("Missing reference path");
+            return false;
+        }
+        if ( ! p_fun_main -> goal_point.size )
+        {
+            ROS_INFO("Missing goal point");
             return false;
         }
         if ( p_fun_main -> speed.size = false )
-        {
-
-        }
+        {}
 
         return true;
-    }
-
-private:
-
-    void initialization()
-    {
-        p_fun_main = new fun_simple;
-
-        p_sample_main = new sampling_methods;
-        p_sample_main->p_func_from_sampling = &p_fun_main;
-
-        p_search_main->p_func_methods_searching_parent = &p_fun_main;
-        p_search_main->p_sampling_methods_searching_parent = &p_sample_main;
-
-        p_propegate_main = new propegating_methods();
-        p_propegate_main->p_func_method_propegating = &p_fun_main;
     }
 
 };
@@ -396,10 +404,12 @@ private:
     void motion_goal_callback(
         const autopilot_msgs::RouteNode::ConstPtr& msg
     ){
+        ROS_INFO("Starting get the motion goal");
         _fun_simple.goal_point.x = msg -> x;
         _fun_simple.goal_point.y = msg -> y;
 
         _fun_simple.goal_point.size = true;
+        ROS_INFO("Finished get the motion goal");
 
     }
 
@@ -432,9 +442,12 @@ private:
     void motion_speed_callback(
         const std_msgs::Float64::ConstPtr& msg
     ){
+        ROS_INFO("Starting get the motion speed");
         _fun_simple.speed.speed = msg -> data;
 
         _fun_simple.speed.size = true;
+
+        ROS_INFO("Finished get the global path");
     }
 };
 
@@ -448,8 +461,6 @@ int main(int argc, char** argv)
     //TODO initialize the motion planner
     MotionPlanner planner;
 
-    ROS_INFO("Hello planner");
-
     //TODO subscribe demanded topic
     Listener listener(&nh, planner.p_fun_main);
 
@@ -461,7 +472,7 @@ int main(int argc, char** argv)
     ros::AsyncSpinner spinner(0);
     spinner.start();
 
-    while ( !planner.is_finished() )
+    while ( ros::ok() )
     {
         planner.run_once();
 
