@@ -69,9 +69,11 @@ private:
 
 public:
 
-    void run_once()
+    bool run_once()
     {
-        if ( !is_ok() ){    return;    }
+        if ( !is_ok() ){    return false;    }
+
+        if ( is_finished() ) {  return true;    }
         
         ROS_INFO("Starting run once");
 
@@ -81,13 +83,20 @@ public:
 
         search_path();
 
+        return false;
+
+    }
+
+    void clear_selected_path()
+    {
+        p_fun_main -> selected_path.clear();
     }
 
     bool is_finished()
     {
         if(
             norm_sqrt( p_fun_main -> vehicle_loc, p_fun_main -> goal_point ) 
-            < p_fun_main -> goal_size
+            <= p_fun_main -> goal_size
         ){
             return true;
         }
@@ -163,9 +172,10 @@ public:
         p_fun_main->initialize_tree();
 
         ROS_INFO(
-            "Motion Planning From source: (x: %f, y: %f) to Goal: (x: %f, y: %f)",
+            "Motion Planning From source: (x: %f, y: %f) to Goal: (x: %f, y: %f), goal size is: %f",
             predicted_vehicle_loc.x, predicted_vehicle_loc.y,
-            p_fun_main -> goal_point.x, p_fun_main -> goal_point.y
+            p_fun_main -> goal_point.x, p_fun_main -> goal_point.y,
+            p_fun_main -> goal_size
         );
     }
 
@@ -217,7 +227,7 @@ public:
         ROS_INFO("Finished  Propagating tree");
     }
 
-    std::vector<type_road_point> search_path()
+    void search_path()
     {
         ROS_INFO("Starting  Searching best path");
         ROS_INFO("Starting  Searching path");
@@ -241,7 +251,6 @@ public:
             }
         }
         ROS_INFO("Finished Searching best path");
-
     }
 
     bool is_ok()
@@ -319,13 +328,13 @@ class Listener
 {
 public:
     Listener(ros::NodeHandle* nodehandle,fun_simple* p_fun_main)
-    :_nh(*nodehandle), _fun_simple(*p_fun_main)
+    :_nh(*nodehandle), _fun_simple(p_fun_main)
     {
         initializeSubscribers();
     }
 private:
     ros::NodeHandle _nh;
-    fun_simple _fun_simple;
+    fun_simple* _fun_simple;
     std::vector<std::pair<string,ros::Subscriber>> _subs;
 
     void initializeSubscribers()
@@ -360,15 +369,15 @@ private:
     void grid_map_callback(
         const nav_msgs::OccupancyGrid::ConstPtr& msg
     ){
-        _fun_simple.local_grid_map.width = msg->info.width;
-        _fun_simple.local_grid_map.height = msg->info.height;
-        _fun_simple.local_grid_map.resolution = msg->info.resolution;
+        _fun_simple -> local_grid_map.width = msg->info.width;
+        _fun_simple -> local_grid_map.height = msg->info.height;
+        _fun_simple -> local_grid_map.resolution = msg->info.resolution;
         for(int i=0; i< msg->info.width * msg->info.height; i++)
         {
-            _fun_simple.local_grid_map.data.push_back(msg->data[i]);
+            _fun_simple -> local_grid_map.data.push_back(msg->data[i]);
         }
 
-        _fun_simple.local_grid_map.size = true;
+        _fun_simple -> local_grid_map.size = true;
     }
 
     void reference_path_callback(
@@ -394,7 +403,7 @@ private:
                     (msg->goals[i].y - msg->goals[i-1].y)/
                     (msg->goals[i].x - msg->goals[i-1].x));
             }
-            _fun_simple.local_reference_path.push_back(rp);
+            _fun_simple -> local_reference_path.push_back(rp);
             ROS_INFO("(x : %f, y : %f, angle : %f)", rp.x, rp.y, rp.angle);
         }
 
@@ -405,10 +414,10 @@ private:
         const autopilot_msgs::RouteNode::ConstPtr& msg
     ){
         ROS_INFO("Starting get the motion goal");
-        _fun_simple.goal_point.x = msg -> x;
-        _fun_simple.goal_point.y = msg -> y;
+        _fun_simple -> goal_point.x = msg -> x;
+        _fun_simple -> goal_point.y = msg -> y;
 
-        _fun_simple.goal_point.size = true;
+        _fun_simple -> goal_point.size = true;
         ROS_INFO("Finished get the motion goal");
 
     }
@@ -416,8 +425,8 @@ private:
     void vehicle_odometry_callback(
         const nav_msgs::Odometry::ConstPtr& msg
     ){
-        _fun_simple.vehicle_loc.x = msg -> pose.pose.position.x;
-        _fun_simple.vehicle_loc.y = msg -> pose.pose.position.y;
+        _fun_simple -> vehicle_loc.x = msg -> pose.pose.position.x;
+        _fun_simple -> vehicle_loc.y = msg -> pose.pose.position.y;
 
         tf::Quaternion quat(
         msg->pose.pose.orientation.x,
@@ -429,23 +438,23 @@ private:
         double roll, pitch, yaw;
         matrix3x3.getRPY(roll, pitch, yaw);
 
-        _fun_simple.vehicle_loc.angle = yaw;
+        _fun_simple -> vehicle_loc.angle = yaw;
 
-        _fun_simple.vehicle_vel.vx = msg -> twist.twist.linear.x;
-        _fun_simple.vehicle_vel.vy = msg -> twist.twist.linear.y;
-        _fun_simple.vehicle_vel.vz = msg -> twist.twist.linear.z;
+        _fun_simple -> vehicle_vel.vx = msg -> twist.twist.linear.x;
+        _fun_simple -> vehicle_vel.vy = msg -> twist.twist.linear.y;
+        _fun_simple -> vehicle_vel.vz = msg -> twist.twist.linear.z;
 
-        _fun_simple.vehicle_loc.size = true;
-        _fun_simple.vehicle_vel.size = true;
+        _fun_simple -> vehicle_loc.size = true;
+        _fun_simple -> vehicle_vel.size = true;
     }
 
     void motion_speed_callback(
         const std_msgs::Float64::ConstPtr& msg
     ){
         ROS_INFO("Starting get the motion speed");
-        _fun_simple.speed.speed = msg -> data;
+        _fun_simple -> speed.speed = msg -> data;
 
-        _fun_simple.speed.size = true;
+        _fun_simple -> speed.size = true;
 
         ROS_INFO("Finished get the global path");
     }
@@ -474,17 +483,22 @@ int main(int argc, char** argv)
 
     while ( ros::ok() )
     {
-        planner.run_once();
+        if ( planner.run_once() )
+        {
+            continue;
+        }
 
         if ( planner.p_fun_main -> selected_path.size() <= 0 )
         {
-
             continue;
-
         }
 
         talker.get_publisher( "/planner/way_points" ).
             publish( planner.generate_msg_to_controller() );
+        
+        ROS_INFO("Finished publish way points");
+
+        planner.clear_selected_path();
     }
 
     return 0;
