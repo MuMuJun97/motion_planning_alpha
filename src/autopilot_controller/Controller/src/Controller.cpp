@@ -15,7 +15,7 @@ Controller::Controller(const std::string &inifilename, const std::string &contro
         "udpm://239.255.76.63:7660?ttl=3"), g_lcm_feedback(
         "udpm://239.255.76.63:7662?ttl=3"), g_lcm_vehicle(
         "udpm://239.255.76.63:7663?ttl=3"), g_lcm_steering(
-        "udpm://239.255.76.63:7664?ttl=3"){
+        "udpm://239.255.76.63:7664?ttl=3") {
 
     Calculate_controller_signature();
     l_a = 0.0;

@@ -33,6 +33,7 @@ void Controller::handle_ins_msg(const autopilot_msgs::MotionState::Ptr &motionSt
         mytimer::getHHMMSSUS(ins_t2);
 
     Controller_apply();
+
     interface_apply();
 }
 
@@ -68,7 +69,8 @@ void Controller::handle_planner_nav_control_points_msg(const autopilot_msgs::Way
             mytimer::getHHMMSSUS(path_t1);
         int no_points = cau_all_output_from_single_spline_realtime(*next_path, next_path->size());
         if (no_points < 10)
-            // return;
+            return;
+
         if (enablePathExtractLog)
             mytimer::getHHMMSSUS(path_t2);
         switch_path_buffer();
@@ -139,7 +141,7 @@ int Controller::init_lcm() {
     /////////////////////////ins接收////////////////////////////////////
     ROS_INFO("Subscribe ROS INS MESSAGE");
     //subscriber = rosNodeHandle.subscribe("/localization/motion_state", 1, &Controller::handle_ins_msg, this);
-    insSubscriber = rosNodeHandle.subscribe(runtimeParameters.ins_topic_name, 100, &Controller::handle_ins_msg, this);
+    insSubscriber = rosNodeHandle.subscribe(runtimeParameters.ins_topic_name, 1, &Controller::handle_ins_msg, this);
 
     /////////////////////////车量接收////////////////////////////////////
     if (!g_lcm_can.good())
@@ -155,7 +157,7 @@ int Controller::init_lcm() {
         return -1;
 
     ///////////////////规划数据接收/////////////////////////////////
-    wayPointsSubscriber = rosNodeHandle.subscribe(runtimeParameters.way_points_topic_name, 10,
+    wayPointsSubscriber = rosNodeHandle.subscribe(runtimeParameters.way_points_topic_name, 1,
                                                   &Controller::handle_planner_nav_control_points_msg, this);
 
     ///////////////////控制数据发送/////////////////////////////////
