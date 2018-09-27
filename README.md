@@ -2,6 +2,15 @@
 ## Bulid and set environment
 0. Install OS. Recommanded OS: Ubuntu 16.04 LTS. it is tested.
 1. Install ROS. Recommanded ROS version : [ROS Kinetic Kame](http://wiki.ros.org/kinetic/Installation/Ubuntu).
+2. Install [lcm-vala](https://github.com/baceituno/lcm-vala)
+<br>2.1. ```$ cd```
+<br>2.1. ```$ git clone https://github.com/baceituno/lcm-vala.git```
+<br>2.2. ```$ cd lcm-vala```
+<br>2.3. ```$ ./bootstrap.sh```
+<br>2.4. ```$ ./configure```
+<br>2.5. ```$ make```
+<br>2.6. ```$sudo make install```
+2. Download [CARLA 8.0.4 Compiled version](https://drive.google.com/open?id=18OaDbQ2K9Dcs25d-nIxpw3GPRHhG1r_2) 
 2. Install [gird map](https://github.com/anybotics/grid_map).
 3. Install [google glog](https://github.com/google/glog).
  <br>3.1. ```$ cd```
