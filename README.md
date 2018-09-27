@@ -2,20 +2,28 @@
 ## Bulid and set environment
 0. Install OS. Recommanded OS: Ubuntu 16.04 LTS. it is tested.
 1. Install ROS. Recommanded ROS version : [ROS Kinetic Kame](http://wiki.ros.org/kinetic/Installation/Ubuntu).
-2. Install [gird map](https://github.com/anybotics/grid_map).
-3. Install [google glog](https://github.com/google/glog).
- <br>3.1. ```$ cd```
- <br>3.2. ```$ git clone https://github.com/google/glog.git```
- <br>3.3. ```$ cd glog```
- <br>3.4. ```$ ./autogen.sh && ./configure && make && sudo make install```
-4. Install catkin tools
- <br> 4.1. ```$ sudo apt-get install python-catkin-tools```
-1. Copy the whole file folder named *motion_planning_alpha* to the *<path>* you want it stays.
-2. In your terminal, run command ```(~)$ cd <path>/motion_planning_alpha/```
-3. In your terminal, run command ```(motion_planning_alpha)$ catkin_make```
- <br>3.1. if it fails, do more three times tries.
- <br>3.2. if the above method also fail, google why.
-4. In your terminal, run command ```(motion_planning_alpha)$ echo "source <path>/motion_planning_alpha/devel/setup.bash" >> ~/.bashrc```
+2. Install [lcm-vala](https://github.com/baceituno/lcm-vala)
+<br>2.1. ```$ cd```
+<br>2.1. ```$ git clone https://github.com/baceituno/lcm-vala.git```
+<br>2.2. ```$ cd lcm-vala```
+<br>2.3. ```$ ./bootstrap.sh```
+<br>2.4. ```$ ./configure```
+<br>2.5. ```$ make```
+<br>2.6. ```$sudo make install```
+2. Download [CARLA 8.0.4 Compiled version](https://drive.google.com/open?id=18OaDbQ2K9Dcs25d-nIxpw3GPRHhG1r_2)
+3. Install [gird map](https://github.com/anybotics/grid_map).
+4. Install ackermann msgs 
+<br>4.1 ```$ sudo apt-get install ros-kinetic-ackermann-msgs```
+5. Install [google glog](https://github.com/google/glog).
+<br>5.1. ```$ cd```
+<br>5.2. ```$ git clone https://github.com/google/glog.git```
+<br>5.3. ```$ cd glog```
+<br>5.4. ```$ ./autogen.sh && ./configure && make && sudo make install```
+6. Copy the whole file folder named *motion_planning_alpha* to the *<path>* you want it stays.
+7. In your terminal, run command ```(~)$ cd <path>/motion_planning_alpha/```
+8. In your terminal, run command ```(motion_planning_alpha)$ catkin_make```
+ <br>8.1. if it fails, do more three times tries.
+ <br>8.2. if the above method also fail, google why.
 
 ## Run
 1. To start ROS services ```(motion_planning_alpha)$ roscore```
