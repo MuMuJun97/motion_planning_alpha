@@ -13,7 +13,6 @@
 3. In your terminal, run command ```(motion_planning_alpha)$ catkin_make```
  <br>3.1. if it fails, do more 5 times tries.
  <br>3.2. if the above method also fail, google why.
-4. In your terminal, run command ```(motion_planning_alpha)$ echo "source <path>/motion_planning_alpha/devel/setup.bash" >> ~/.bashrc```
 
 ## Run
 1. To start ROS services ```(motion_planning_alpha)$ roscore```
