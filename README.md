@@ -1,5 +1,5 @@
 # Codes Related
-## Bulid and set environment
+## Set environment
 0. Install OS. Recommanded OS: Ubuntu 16.04 LTS. it is tested.
 1. Install ROS. Recommanded ROS version : [ROS Kinetic Kame](http://wiki.ros.org/kinetic/Installation/Ubuntu).
 2. Install [lcm-vala](https://github.com/baceituno/lcm-vala)
@@ -9,8 +9,8 @@
 <br>2.3. ```$ ./bootstrap.sh```
 <br>2.4. ```$ ./configure```
 <br>2.5. ```$ make```
-<br>2.6. ```$sudo make install```
-2. Download [CARLA 8.0.4 Compiled version](https://drive.google.com/open?id=18OaDbQ2K9Dcs25d-nIxpw3GPRHhG1r_2)
+<br>2.6. ```$ sudo make install```
+2. Download [CARLA 0.8.4 Compiled version](https://drive.google.com/open?id=18OaDbQ2K9Dcs25d-nIxpw3GPRHhG1r_2)
 3. Install [gird map](https://github.com/anybotics/grid_map).
 4. Install ackermann msgs 
 <br>4.1 ```$ sudo apt-get install ros-kinetic-ackermann-msgs```
@@ -19,26 +19,26 @@
 <br>5.2. ```$ git clone https://github.com/google/glog.git```
 <br>5.3. ```$ cd glog```
 <br>5.4. ```$ ./autogen.sh && ./configure && make && sudo make install```
-6. Copy the whole file folder named *motion_planning_alpha* to the *<path>* you want it stays.
-7. In your terminal, run command ```(~)$ cd <path>/motion_planning_alpha/```
-8. In your terminal, run command ```(motion_planning_alpha)$ catkin_make```
- <br>8.1. if it fails, do more three times tries.
- <br>8.2. if the above method also fail, google why.
+
+## Bulid 
+<br>```$ git clone https://github.com/TroubleLi/motion_planning_alpha.git```
+<br>```$ cd motion_planning_alpha```
+<br>```$ catkin_make```
+> NOTES: if catkin_make fails, do more ten times tries.
+> if the above method also fail, google why.
 
 ## Run
-1. To start ROS services ```(motion_planning_alpha)$ roscore```
-2. 每次更改代码之后都要: ```(motion_planning_alpha)$ catkin_make``` and ```(motion_planning_alpha)$ source devel/setup.bash```
-<br>2.1 every time you create new msg or srv, run ```(motion_planning_alpha)$ catkin_make install```
-<br>2.2 if you create a new code file, run ```(<path>)$ chmod +x <your_new_code_file>``` then  run ```(motion_planning_alpha)$ catkin_make``` 
-3. 开启motion planner: ```(motion_planning_alpha)$ rosrun motion_planner motion_planner```
-4. 开启global planner ```(motion_planning_alpha)$ rosrun global_planner planner.py```
-5. 发送一次route map信息: ```(motion_planning_alpha)$ rosbag play routemap.bag```
-6. 发送位置信息: ```(motion_planning_alpha)$ rostopic pub /localization/location autopilot_msgs/Location  '{stamp: now, frame_id: map}' '11290.4667969' '8706.98730469' '[0.0, 0.0, 0.0, 0.0]' '23.067371' '113.3795204' '[0.0, 0.0, 0.0, 0.0]'```
-7. 发送目标信息: ```(motion_planning_alpha)$ rostopic pub /route/goal autopilot_msgs/RoutePath  '{stamp: now, frame_id: map}' '[{latitude: 23.0677242, longitude: 113.3795769, x: 11296.2177734, y: 8746.04199219}]' '[0.0]'```
-8. Publish the grid map
- <br>```$ roslaunch segmentation.launch```
- <br>```$ rosbag paly <your_3d_map>```
- <br>```$ rviz #to visualization for debug```
+1. Run CARLA
+<br>```$ cd CARLA_0.8.4```
+<br>```$ ./launch```
+2. Run motion planning aplha (Open a new terminal and do followings)
+<br>```$ cd motion_planning_alpha```
+<br>when you see the words: 'waiting for client' on that terminal on which the carla running. then do the following
+<br>```$ ./run.sh```
+3. publish motion goal topic (Open a new terminal and do followings)
+<br> after you see the carla and motion planning alpha are connecting to each other stably, do the following
+<br>```$ ./publish_topic.sh```
+
 
 # Theory Related
 ## Overview
