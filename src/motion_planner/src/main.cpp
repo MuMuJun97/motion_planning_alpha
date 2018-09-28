@@ -257,27 +257,27 @@ public:
     {
         if ( ! p_fun_main -> local_grid_map.size )
         {
-            // ROS_INFO("Missing grid map");
+            ROS_INFO("Missing grid map");
             return false;
         }
         if ( ! p_fun_main -> vehicle_loc.size )
         {
-            // ROS_INFO("Missing vehicle location");
+            ROS_INFO("Missing vehicle location");
             return false;
         }
         if ( ! p_fun_main -> vehicle_vel.size )
         {
-            // ROS_INFO("Missing vehicle velocity");
+            ROS_INFO("Missing vehicle velocity");
             return false;
         }
         if ( p_fun_main -> local_reference_path.size() <= 0 )
         {
-            // ROS_INFO("Missing reference path");
+            ROS_INFO("Missing reference path");
             return false;
         }
         if ( ! p_fun_main -> goal_point.size )
         {
-            // ROS_INFO("Missing goal point");
+            ROS_INFO("Missing goal point");
             return false;
         }
         if ( p_fun_main -> speed.size = false )

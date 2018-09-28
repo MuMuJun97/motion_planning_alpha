@@ -47,10 +47,10 @@ carla:
         PointsPerSecond: 500000
         RotationFrequency: 50
         UpperFovLimit: 5
-        LowerFovLimit: -16.5
-        PositionX: 0.0
+        LowerFovLimit: -30
+        PositionX: 0.2
         PositionY: 0
-        PositionZ: 1.80
+        PositionZ: 2.00
         RotationPitch: 0
         RotationYaw: 0
         RotationRoll: 0

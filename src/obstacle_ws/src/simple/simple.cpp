@@ -40,7 +40,7 @@ public:
         float x_x = cloud[i].x;
         float y_y = cloud[i].y;
         float z_z = cloud[i].z;
-        if(fabs(x_x) <= 20 && fabs(y_y) <= 20 && z_z < 2.5){
+        if(fabs(x_x) <= 20 && fabs(x_x) >= 2 && fabs(y_y) <= 20 && fabs(y_y) >= 1 && z_z < 3){
             Position position(x_x, y_y);
             map.atPosition("obstacle", position) = 1;
         }  

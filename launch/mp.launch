@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+
+  <node pkg="motion_planner" name="motion_planner" type="motion_planner" output="screen"/>
+
+</launch>

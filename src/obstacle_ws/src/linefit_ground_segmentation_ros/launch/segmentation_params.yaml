@@ -12,7 +12,7 @@ max_fit_error: 0.15 # maximum error of a point during line fit. ori:0.05
 long_threshold: 3.0 # distance between points after which they are considered far from each other. ori:1.0
 max_long_height: 0.05  # maximum height change to previous point in long line. ori:0.1
 max_start_height: 0.50 # maximum difference to estimated ground height to start a new line. ori:2.0;
-sensor_height: 1.8 # sensor height above ground. 
+sensor_height: 2.0 # sensor height above ground. 
 line_search_angle: 0.2 # how far to search in angular direction to find a line [rad].
 
 latch: true # latch output topics or not
