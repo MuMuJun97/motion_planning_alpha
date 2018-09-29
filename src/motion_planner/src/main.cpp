@@ -281,7 +281,7 @@ int main(int argc, char** argv)
         
         ROS_INFO("Finished publish way points");
 
-        planner.record_process( "../ros_ws/motion_planning_alpha/" );
+        planner.record_process( "../ros_ws/motion_planning_alpha/logs/" );
 
         planner.clear_storages();
     }

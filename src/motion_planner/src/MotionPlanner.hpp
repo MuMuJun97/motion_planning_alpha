@@ -104,7 +104,7 @@ public:
 
             waypoints_out.open( waypoints_file, ios::app );
 
-            reference_path_out.open( reference_path_file, ios::out );
+            reference_path_out.open( reference_path_file, ios::app );
         }
 
         //TODO record tree of once motion planning.
