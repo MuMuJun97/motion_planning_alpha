@@ -1,10 +1,5 @@
-#include <iostream>
-#include <cmath>
-#include "sampling_methods.h"
-#include "searching_parent_methods.h"
-#include "propegating_methods.h"
-#include "function_simplified.hpp"
-#include "plot_utility.h"
+
+#include "MotionPlanner.hpp"
 
 #include "ros/ros.h"
 #include "autopilot_msgs/Location.h"
@@ -23,271 +18,10 @@
 #include <vector>
 #include <utility>
 #include <string>
-#include <typeinfo>
 #include <std_msgs/Float64.h>
-
-using namespace func_simplified;
-
-
-class MotionPlanner
-{
-public:
-
-    double PROPAGATION_TIME = 0.08;
-
-    std::vector<type_road_point> sample_nodes;
-    
-    fun_simple* p_fun_main;
-    //TODO Creat tree-expanding-related utility object.
-    sampling_methods* p_sample_main;
-    //TODO Creat parent-searching-related utility object.
-    searching_parent_methods* p_search_main;
-    //TODO Creat curve-propegating-related utility object
-    propegating_methods* p_propegate_main;
-
-    MotionPlanner()
-    {
-        initialization();
-    }
-
-private:
-
-    void initialization()
-    {
-        p_fun_main = new fun_simple;
-
-        p_sample_main = new sampling_methods;
-        p_sample_main->p_func_from_sampling = &p_fun_main;
-
-        p_search_main = new searching_parent_methods;
-        p_search_main->p_func_methods_searching_parent = &p_fun_main;
-        p_search_main->p_sampling_methods_searching_parent = &p_sample_main;
-
-        p_propegate_main = new propegating_methods();
-        p_propegate_main->p_func_method_propegating = &p_fun_main;
-    }
-
-public:
-
-    bool run_once()
-    {
-        if ( !is_ok() ){    return false;    }
-
-        if ( is_finished() ) {  return true;    }
-        
-        ROS_INFO("Starting run once");
-
-        update_state();
-
-        propegate_tree();
-
-        search_path();
-
-        return false;
-
-    }
-
-    void clear_selected_path()
-    {
-        p_fun_main -> selected_path.clear();
-    }
-
-    bool is_finished()
-    {
-        if(
-            norm_sqrt( p_fun_main -> vehicle_loc, p_fun_main -> goal_point ) 
-            <= p_fun_main -> goal_size
-        ){
-            return true;
-        }
-        
-        return false;
-    }
-
-    autopilot_msgs::WayPoints generate_msg_to_controller()
-    {
-        autopilot_msgs::WayPoints waypoints_msg;
-
-        for ( int i = 0; i < p_fun_main->selected_path.size(); i++ )
-        {
-            //TODO transform map coordination to WGS coordination.
-            GaussLocalGeographicCS gausslocalgeographiccs = 
-                GaussLocalGeographicCS(22.9886565512, 113.2691559583);
-            
-            double _ ;
-            gausslocalgeographiccs.xyz2llh(
-                p_fun_main->selected_path.at(i).x,
-                p_fun_main->selected_path.at(i).y,
-                0,
-                p_fun_main->selected_path.at(i).latitude,
-                p_fun_main->selected_path.at(i).longitude,
-                _
-            );
-
-            // ROS_INFO(
-            //         "Got WG2: (%.10f, %.10f) from Map: (%f, %f)", 
-            //         p_fun_main->selected_path.at(i).latitude, 
-            //         p_fun_main->selected_path.at(i).longitude,
-            //         p_fun_main->selected_path.at(i).x, 
-            //         p_fun_main->selected_path.at(i).y);
-
-            autopilot_msgs::RouteNode routenode;
-
-            routenode.latitude =
-                p_fun_main->selected_path.at(i).latitude;
-            routenode.longitude =
-                p_fun_main->selected_path.at(i).longitude;
-            routenode.x =
-                p_fun_main->selected_path.at(i).x;
-            routenode.y =
-                p_fun_main->selected_path.at(i).y;
-            
-            waypoints_msg.points.push_back( routenode );
-            waypoints_msg.speeds.push_back( p_fun_main -> speed.speed );
-        }
-
-        return waypoints_msg;
-    }
-
-
-    void update_state()
-    {
-        type_road_point predicted_vehicle_loc;
-        predicted_vehicle_loc.x =
-            p_fun_main -> vehicle_loc.x + 
-            p_fun_main -> vehicle_vel.vx * PROPAGATION_TIME;
-        
-        predicted_vehicle_loc.y =
-            p_fun_main -> vehicle_loc.y + 
-            p_fun_main -> vehicle_vel.vy * PROPAGATION_TIME;
-        
-        predicted_vehicle_loc.angle = p_fun_main -> vehicle_loc.angle;
-
-        p_fun_main -> vehicle_loc.size = false;
-        p_fun_main -> vehicle_vel.size = false;
-
-        // TODO Initialize tree-expanding-related utility object
-        p_fun_main->update_info( predicted_vehicle_loc );
-        p_fun_main->setup();
-        p_fun_main->initialize_tree();
-
-        ROS_INFO(
-            "Motion Planning From source: (x: %f, y: %f) to Goal: (x: %f, y: %f), goal size is: %f",
-            predicted_vehicle_loc.x, predicted_vehicle_loc.y,
-            p_fun_main -> goal_point.x, p_fun_main -> goal_point.y,
-            p_fun_main -> goal_size
-        );
-    }
-
-    void propegate_tree()
-    {
-        ROS_INFO("Starting Propagating tree");
-        ros::Duration timeout(PROPAGATION_TIME);
-        ros::Time start_time = ros::Time::now();
-        while ( ros::Time::now() - start_time < timeout )
-        {
-            // TODO Node-sampling and collision-checking.
-            bool flag_sample = p_sample_main -> sampling_nearby_reference_path(
-                p_fun_main->local_reference_path
-            );
-
-            if ( flag_sample )
-            {
-                // TODO Parent-searching.
-                bool flag_search_parent =
-                    p_search_main->searching_parent_node();
-
-                if ( flag_search_parent )
-                {
-                    type_node_point new_node;
-
-                    // TODO Curve-propegation and collision-checking.
-                    bool flag_prop = p_propegate_main -> curve_propegation(
-                        p_search_main -> parent_node, 
-                        p_sample_main -> sample_node, new_node
-                    );
-
-                    sample_nodes.push_back( p_sample_main -> sample_node );
-
-                    if( flag_prop )
-                    {
-                        // TODO Node-adding.
-                        if( p_fun_main->add_node_into_tree( new_node ) )
-                        {
-                            p_fun_main -> m_tree.append_child(
-                                p_search_main -> parent_node, new_node
-                            );
-                        }
-                    }
-                }
-
-            }
-            
-        }
-        ROS_INFO("Finished  Propagating tree");
-    }
-
-    void search_path()
-    {
-        ROS_INFO("Starting  Searching best path");
-        ROS_INFO("Starting  Searching path");
-        if( p_fun_main->search_best_path() )
-        {
-            ROS_INFO("Finished  Searching path");
-            ROS_INFO("Starting  Repropagating");
-
-            p_fun_main->repropagating();
-            
-            ROS_INFO("Finished  Repropagating");
-            ROS_INFO("Found the path");
-            ROS_INFO("The best path is :");
-            vector<type_road_point>::iterator iter;
-            for(
-                iter = p_fun_main->selected_path.begin(); 
-                iter != p_fun_main->selected_path.end(); 
-                iter++)
-            {
-                ROS_INFO("(x: %f, y: %f)", (*iter).x, (*iter).y);
-            }
-        }
-        ROS_INFO("Finished Searching best path");
-    }
-
-    bool is_ok()
-    {
-        if ( ! p_fun_main -> local_grid_map.size )
-        {
-            ROS_INFO("Missing grid map");
-            return false;
-        }
-        if ( ! p_fun_main -> vehicle_loc.size )
-        {
-            ROS_INFO("Missing vehicle location");
-            return false;
-        }
-        if ( ! p_fun_main -> vehicle_vel.size )
-        {
-            ROS_INFO("Missing vehicle velocity");
-            return false;
-        }
-        if ( p_fun_main -> local_reference_path.size() <= 0 )
-        {
-            ROS_INFO("Missing reference path");
-            return false;
-        }
-        if ( ! p_fun_main -> goal_point.size )
-        {
-            ROS_INFO("Missing goal point");
-            return false;
-        }
-        if ( p_fun_main -> speed.size = false )
-        {}
-
-        return true;
-    }
-
-};
-
+#include <fstream>
+#include <iostream>
+#include <cmath>
 
 class Talker
 {
@@ -308,6 +42,52 @@ public:
             }
         }
         return returned_pub;
+    }
+
+    autopilot_msgs::WayPoints generate_msg_to_controller(
+        std::vector<type_road_point> selected_path, double speed
+    ){
+        autopilot_msgs::WayPoints waypoints_msg;
+
+        for ( int i = 0; i < selected_path.size(); i++ )
+        {
+            //TODO transform map coordination to WGS coordination.
+            GaussLocalGeographicCS gausslocalgeographiccs = 
+                GaussLocalGeographicCS(22.9886565512, 113.2691559583);
+            
+            double _ ;
+            gausslocalgeographiccs.xyz2llh(
+                selected_path.at(i).x,
+                selected_path.at(i).y,
+                0,
+                selected_path.at(i).latitude,
+                selected_path.at(i).longitude,
+                _
+            );
+
+            // ROS_INFO(
+            //         "Got WG2: (%.10f, %.10f) from Map: (%f, %f)", 
+            //         p_fun_main->selected_path.at(i).latitude, 
+            //         p_fun_main->selected_path.at(i).longitude,
+            //         p_fun_main->selected_path.at(i).x, 
+            //         p_fun_main->selected_path.at(i).y);
+
+            autopilot_msgs::RouteNode routenode;
+
+            routenode.latitude =
+                selected_path.at(i).latitude;
+            routenode.longitude =
+                selected_path.at(i).longitude;
+            routenode.x =
+                selected_path.at(i).x;
+            routenode.y =
+                selected_path.at(i).y;
+            
+            waypoints_msg.points.push_back( routenode );
+            waypoints_msg.speeds.push_back( speed );
+        }
+
+        return waypoints_msg;
     }
 
 private:
@@ -493,12 +273,17 @@ int main(int argc, char** argv)
             continue;
         }
 
-        talker.get_publisher( "/planner/way_points" ).
-            publish( planner.generate_msg_to_controller() );
+        talker.get_publisher( "/planner/way_points" ).publish( 
+            talker.generate_msg_to_controller( 
+                planner.p_fun_main->selected_path, 
+                planner.p_fun_main->speed.speed ) 
+        );
         
         ROS_INFO("Finished publish way points");
 
-        planner.clear_selected_path();
+        planner.record_process( "../ros_ws/motion_planning_alpha/" );
+
+        planner.clear_storages();
     }
 
     return 0;
