@@ -1,5 +1,5 @@
-#ifndef MOTION_PLANNER_MOTIONPLANNER_HPP_
-#define MOTION_PLANNER_MOTIONPLANNER_HPP_
+#ifndef MOTION_PLANNER_MOTIONPLANNER_HPP
+#define MOTION_PLANNER_MOTIONPLANNER_HPP
 
 #include "sampling_methods.h"
 #include "searching_parent_methods.h"
@@ -15,6 +15,8 @@
 #include <sys/time.h>
 #include <stdio.h>
 
+#include "ros/ros.h"
+
 using namespace func_simplified;
 
 
@@ -22,7 +24,7 @@ class MotionPlanner
 {
 public:
 
-    double PROPAGATION_TIME = 8; // unit is ms
+    double PROPAGATION_TIME = 0.08; // unit is ms
 
     std::vector<type_road_point> sample_nodes;
     
@@ -56,13 +58,6 @@ private:
 
         p_propegate_main = new propegating_methods();
         p_propegate_main->p_func_method_propegating = &p_fun_main;
-    }
-
-    double get_current_time()
-    {
-        struct timeval tv;    
-        gettimeofday(&tv,NULL);
-        return tv.tv_sec * 1000 + tv.tv_usec / 1000; // unit is ms
     }
 
 public:
@@ -114,7 +109,7 @@ public:
 
         //TODO record tree of once motion planning.
         tree<type_node_point>::iterator it;
-
+        tree_out << p_fun_main -> m_tree.size() << std::endl;
         for (it = p_fun_main -> m_tree.begin(); 
              it != p_fun_main -> m_tree.end(); it++)
         {
@@ -132,6 +127,7 @@ public:
         }
 
         //TODO record selected path of once motion planning.
+        waypoints_out << p_fun_main -> selected_path.size() << std::endl;
         for ( int i = 0; i < p_fun_main->selected_path.size(); i++ )
         {
             waypoints_out << 
@@ -147,6 +143,7 @@ public:
         }
 
         //TODO record reference path of once motion planning.
+        reference_path_out << p_fun_main -> local_reference_path.size() << std::endl;
         for ( int j = 0; j < p_fun_main->local_reference_path.size(); j++ )
         {
             reference_path_out <<
@@ -210,8 +207,9 @@ public:
     void propegate_tree()
     {
         printf("Starting Propagating tree\n");
-        double start_time = get_current_time();
-        while ( get_current_time() - start_time <= PROPAGATION_TIME )
+        ros::Duration timeout(PROPAGATION_TIME);
+        ros::Time start_time = ros::Time::now();
+        while ( ros::Time::now() - start_time < timeout )
         {
             // TODO Node-sampling and collision-checking.
             bool flag_sample = p_sample_main -> sampling_nearby_reference_path(
