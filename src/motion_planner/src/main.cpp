@@ -206,7 +206,7 @@ private:
         const nav_msgs::Odometry::ConstPtr& msg
     ){
         _fun_simple -> vehicle_loc.x = msg -> pose.pose.position.x;
-        _fun_simple -> vehicle_loc.y = msg -> pose.pose.position.y;
+        _fun_simple -> vehicle_loc.y = fabs( msg -> pose.pose.position.y );
 
         tf::Quaternion quat(
         msg->pose.pose.orientation.x,

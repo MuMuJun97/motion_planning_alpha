@@ -278,8 +278,13 @@ bool fun_simple::repropagating()
 
     //TODO store the updated vehicle location.
     type_road_point vehicle_loc_updated;
-    vehicle_loc_updated.x = fabs(vehicle_loc.x);
-    vehicle_loc_updated.y = fabs(vehicle_loc.y);
+    vehicle_loc_updated.x = vehicle_loc.x;
+    vehicle_loc_updated.y = vehicle_loc.y;
+
+    if( norm_sqrt( vehicle_loc_updated, global_coord ) <= 1 )
+    {
+        return true;
+    }
 
     std::cout<< "[IN(FUN) repropagating]" << "[>>>>INFO<<<<] " <<
         "Updated vehicle_loc (x: "<<vehicle_loc_updated.x<<", y: " << 
@@ -311,13 +316,10 @@ bool fun_simple::repropagating()
         save_cost.push_back(std::make_pair(cost, index));
     }
 
-    printf("Is here?");
-
     //TODO search and pick up the point that is nearest to vehicle.
     std::sort(save_cost.begin(), save_cost.end(),smalltogreat);
     selected_index = save_cost.begin()->second;
 
-    printf("Is here?");
     //TODO generate additional points on the trajectory from updated vehicle location 
     //     to the nearest point.
     pointsOnClothoid(
@@ -327,7 +329,7 @@ bool fun_simple::repropagating()
         selected_path.at(selected_index).x, 
         selected_path.at(selected_index).y, 
         selected_path.at(selected_index).angle,
-        30,X,Y,Theta);
+        2,X,Y,Theta);
 
     //TODO delete the useless points in the selected path.
     selected_path.erase(
@@ -335,7 +337,6 @@ bool fun_simple::repropagating()
         selected_path.begin()+selected_index);
 
     //TODO add the additional points to the selected path
-    printf("Is here?");
     for(int k = X.size()-1; k >= 0; k--)
     {
         type_road_point tps;
@@ -345,8 +346,6 @@ bool fun_simple::repropagating()
         selected_path.insert(selected_path.begin(),tps);
     }
     return true;
-
-    printf("Is here?");
 }
 
 }

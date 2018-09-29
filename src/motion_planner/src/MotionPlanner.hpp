@@ -87,10 +87,12 @@ public:
         ofstream tree_out;
         ofstream waypoints_out;
         ofstream reference_path_out;
+        ofstream positions_out;
 
         string tree_file = filepath + "tree.txt";
         string waypoints_file = filepath + "waypoints.txt";
         string reference_path_file = filepath + "reference_path.txt";
+        string positions_file = filepath + "positions.txt";
 
         if ( times_recorder == 1 )
         {
@@ -99,12 +101,16 @@ public:
             waypoints_out.open( waypoints_file, ios::out );
 
             reference_path_out.open( reference_path_file, ios::out );
+
+            positions_out.open( positions_file, ios::out );
         }else{
             tree_out.open( tree_file, ios::app );
 
             waypoints_out.open( waypoints_file, ios::app );
 
             reference_path_out.open( reference_path_file, ios::app );
+
+            positions_out.open( positions_file, ios::app );
         }
 
         //TODO record tree of once motion planning.
@@ -136,6 +142,13 @@ public:
                 p_fun_main->selected_path.at(i).y
             << std::endl;
         }
+
+        //TODO record positions of vehicle.
+        positions_out << 
+            p_fun_main -> vehicle_loc.x
+            << "," <<
+            p_fun_main -> vehicle_loc.y
+        << std::endl;
 
         if ( times_recorder > 1 )
         {
@@ -197,8 +210,9 @@ public:
         p_fun_main->initialize_tree();
 
         printf(
-            "Motion Planning From source: (x: %f, y: %f) to Goal: (x: %f, y: %f), goal size is: %f\n",
-            predicted_vehicle_loc.x, predicted_vehicle_loc.y,
+            "Motion Planning From source: (x: %f @%f, y: %f @%f) to Goal: (x: %f, y: %f), goal size is: %f\n",
+            predicted_vehicle_loc.x, p_fun_main -> vehicle_vel.vx,
+            predicted_vehicle_loc.y, p_fun_main -> vehicle_vel.vy,
             p_fun_main -> goal_point.x, p_fun_main -> goal_point.y,
             p_fun_main -> goal_size
         );
@@ -282,17 +296,17 @@ public:
     {
         if ( ! p_fun_main -> local_grid_map.size )
         {
-            printf("Missing grid map\n");
+            // printf("Missing grid map\n");
             return false;
         }
         if ( ! p_fun_main -> vehicle_loc.size )
         {
-            printf("Missing vehicle location\n");
+            // printf("Missing vehicle location\n");
             return false;
         }
         if ( ! p_fun_main -> vehicle_vel.size )
         {
-            printf("Missing vehicle velocity\n");
+            // printf("Missing vehicle velocity\n");
             return false;
         }
         if ( p_fun_main -> local_reference_path.size() <= 0 )
@@ -302,7 +316,7 @@ public:
         }
         if ( ! p_fun_main -> goal_point.size )
         {
-            printf("Missing goal point\n");
+            // printf("Missing goal point\n");
             return false;
         }
         if ( p_fun_main -> speed.size = false )
