@@ -174,7 +174,7 @@ class CarlaRosBridge(object):
         number_of_player_starts = len(scene.player_start_spots)
         player_start = random.randint(0, max(0, number_of_player_starts - 1))
         
-        player_start = 10
+        player_start = 146
 
         # Send occupancy grid to rivz
         map_handler = MapHandler(scene.map_name)
