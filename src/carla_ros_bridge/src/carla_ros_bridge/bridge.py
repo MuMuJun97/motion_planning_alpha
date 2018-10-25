@@ -8,7 +8,7 @@ import rospy
 from itertools import count
 import tf
 import numpy as np
-import libGaussLocalGeographicCS as Map2Wgs
+import libGaussLocalGeographicCS as MapServer
 
 from rosgraph_msgs.msg import Clock
 from tf2_msgs.msg import TFMessage
@@ -260,7 +260,7 @@ class CarlaRosBridge(object):
             _player_start_spots.data.append(spot.location.x)
             _player_start_spots.data.append(spot.location.y)
             _player_start_spots.data.append(spot.location.z)
-        self.process_msg('player_start_spots', _player_start_spots)
+        self.process_msg('carla/player_start_spots', _player_start_spots)
 
     def generate_player_odometry_msg(self, measurements, current_velocity):
         rotation = measurements.player_measurements.transform.rotation
@@ -286,7 +286,6 @@ class CarlaRosBridge(object):
         odometry.twist.twist.linear.z = current_velocity[2]
 
         self.player_odometry = odometry
-        self.process_msg("player_odometry", odometry)
     
     def generate_motion_state_msg(self, measurements, last_rotation):
         motion_state = MotionState()
@@ -327,9 +326,10 @@ class CarlaRosBridge(object):
 
         # generate GPS msg
         gps = NavSatFix()
-        map2wsg = Map2Wgs.GaussLocalGeographicCS(22.9886565512, 113.2691559583)
+        # GZ: 22.9886565512, 113.2691559583
+        map_server = MapServer.GaussLocalGeographicCS(0.0014744, -0.0017707)
 
-        llh = map2wsg.xyz2llh(
+        llh = map_server.xyz2llh(
             odometry.pose.pose.position.x,
             odometry.pose.pose.position.y,
             0
@@ -342,7 +342,14 @@ class CarlaRosBridge(object):
         motion_state.odom = odometry
         motion_state.gps = gps
 
-        self.process_msg("/localization/motion_state", motion_state)
+        vehicle_location = Location()
+        vehicle_location.x = odometry.pose.pose.position.x
+        vehicle_location.y = odometry.pose.pose.position.y
+        vehicle_location.latitude = gps.latitude
+        vehicle_location.longitude = gps.longitude
+
+        self.process_msg( "/localization/location", vehicle_location )
+        self.process_msg( "/localization/motion_state", motion_state )
 
     def calculate_current_velocity(self, measurements, last_velocity):
         current_velocity = [0, 0, 0, 0]

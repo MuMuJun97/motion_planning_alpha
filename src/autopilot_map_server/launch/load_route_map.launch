@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="map_name" default="test"/>
+
+    <node pkg="autopilot_map_server" type="map_server" name="route_map" output="screen">
+        <param name="map_path" type="string" value="$(find autopilot_map_server)/map/$(arg map_name)"/>
+    </node>
+
+</launch>

@@ -173,7 +173,7 @@ namespace Geography {
             while (fgets(line, sizeof(line), localfile) != NULL) {
                 if (line[0] != '#') {
                     sscanf(line, "%lf %lf", &referenceLat0, &referenceLon0);
-                    if (referenceLon0 > 60.0 && referenceLon0 < 150.0) {
+                    if (true) { //referenceLon0 > 60.0 && referenceLon0 < 150.0
                         cs = new LocalGeographicCS(referenceLat0, referenceLon0);
                         return;
                     } else

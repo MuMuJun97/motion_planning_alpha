@@ -92,9 +92,9 @@ def get_start_spots(Float64MultiArray):
     rospy.loginfo("Finished get player start spots")    
 
 def listener():
-    rospy.Subscriber('player_odometry', Odometry, loc_callback)
+    rospy.Subscriber('/localization/odometry', Odometry, loc_callback)
     rospy.Subscriber('/route/goal', Int64, path_callback)
-    rospy.Subscriber('player_start_spots',Float64MultiArray,
+    rospy.Subscriber('/carla/player_start_spots',Float64MultiArray,
                      get_start_spots)
 
 def talker():
@@ -114,7 +114,7 @@ def talker():
     rospy.loginfo("Finished publish global route to motion planner")
 
     rospy.loginfo("Starting publish motion goal to motion planner")
-    pub_1 = rospy.Publisher('motion/goal', RouteNode, queue_size=500, latch=True)
+    pub_1 = rospy.Publisher('/route/goal', RouteNode, queue_size=500, latch=True)
     pub_1.publish(motion_goal)
     rospy.loginfo(
         "Motion Goal: (" + str(motion_goal.x) + ", " + str(motion_goal.y) + ")"

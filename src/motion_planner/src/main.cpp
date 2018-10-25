@@ -53,7 +53,7 @@ public:
         {
             //TODO transform map coordination to WGS coordination.
             GaussLocalGeographicCS gausslocalgeographiccs = 
-                GaussLocalGeographicCS(22.9886565512, 113.2691559583);
+                GaussLocalGeographicCS(0.0014744, -0.0017707);// GZ: 22.9886565512, 113.2691559583
             
             double _ ;
             gausslocalgeographiccs.xyz2llh(
@@ -130,19 +130,19 @@ private:
         _subs.push_back( make_pair( "/route/path", sub_1 ) );
 
         ros::Subscriber sub_2 = _nh.subscribe(
-            "player_odometry", 10, &Listener::vehicle_odometry_callback, this
+            "/localization/motion_state", 10, &Listener::vehicle_odometry_callback, this
         );
-        _subs.push_back( make_pair( "player_odometry", sub_2 ) );
+        _subs.push_back( make_pair( "/localization/motion_state", sub_2 ) );
 
         ros::Subscriber sub_3 = _nh.subscribe(
-            "motion/goal", 10, &Listener::motion_goal_callback, this
+            "/motion/goal", 10, &Listener::motion_goal_callback, this
         );
-        _subs.push_back( make_pair( "motion/goal", sub_3 ) );
+        _subs.push_back( make_pair( "/motion/goal", sub_3 ) );
 
         ros::Subscriber sub_4 = _nh.subscribe(
             "motion/speed", 10, &Listener::motion_speed_callback, this
         );
-        _subs.push_back( make_pair( "motion/speed", sub_4 ) );
+        _subs.push_back( make_pair( "/motion/speed", sub_4 ) );
 
     }
 
@@ -203,16 +203,16 @@ private:
     }
 
     void vehicle_odometry_callback(
-        const nav_msgs::Odometry::ConstPtr& msg
+        const autopilot_msgs::MotionState::ConstPtr& msg
     ){
-        _fun_simple -> vehicle_loc.x = msg -> pose.pose.position.x;
-        _fun_simple -> vehicle_loc.y = fabs( msg -> pose.pose.position.y );
+        _fun_simple -> vehicle_loc.x = msg -> odom.pose.pose.position.x;
+        _fun_simple -> vehicle_loc.y = fabs( msg -> odom.pose.pose.position.y );
 
         tf::Quaternion quat(
-        msg->pose.pose.orientation.x,
-        msg->pose.pose.orientation.y,
-        msg->pose.pose.orientation.z,
-        msg->pose.pose.orientation.w
+        msg->odom.pose.pose.orientation.x,
+        msg->odom.pose.pose.orientation.y,
+        msg->odom.pose.pose.orientation.z,
+        msg->odom.pose.pose.orientation.w
         );
         tf::Matrix3x3 matrix3x3(quat);
         double roll, pitch, yaw;
@@ -220,9 +220,9 @@ private:
 
         _fun_simple -> vehicle_loc.angle = yaw;
 
-        _fun_simple -> vehicle_vel.vx = msg -> twist.twist.linear.x;
-        _fun_simple -> vehicle_vel.vy = msg -> twist.twist.linear.y;
-        _fun_simple -> vehicle_vel.vz = msg -> twist.twist.linear.z;
+        _fun_simple -> vehicle_vel.vx = msg -> odom.twist.twist.linear.x;
+        _fun_simple -> vehicle_vel.vy = msg -> odom.twist.twist.linear.y;
+        _fun_simple -> vehicle_vel.vz = msg -> odom.twist.twist.linear.z;
 
         _fun_simple -> vehicle_loc.size = true;
         _fun_simple -> vehicle_vel.size = true;

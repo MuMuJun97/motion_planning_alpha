@@ -9,11 +9,15 @@ from visualization_msgs.msg import MarkerArray
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Point
 
+import libGaussLocalGeographicCS as MapServer
+
 list_edges = []
 list_points = []
 list_goals = []
 ini_location = -1
 Path = []  # Globle Path
+alpha = 0.0085
+beta = 0.0017
 
 
 def draw_map(p, e):
@@ -60,6 +64,8 @@ def Map_callback(RouteMap):
 def Loc_callback(Location):
     print("Location callback")
     flag = True
+    Location.x = Location.x / (1 + beta)
+    Location.y = - Location.y / (1 + alpha)
     for i in range(len(list_points)):
         if Location.x == list_points[i][0] and Location.y == list_points[i][1]:
             flag = False
@@ -107,6 +113,7 @@ def listener():
 
 def talker():
     pub = rospy.Publisher('/route/path', RoutePath, queue_size=5000, latch=True)
+    motion_goal_pub = rospy.Publisher( '/motion/goal', RouteNode, queue_size=5000, latch=True )
     visualization_pub = rospy.Publisher('/route/path_visualization', MarkerArray, queue_size=5000, latch=True)
     path_arrows = MarkerArray()
     rp = RoutePath()
@@ -114,8 +121,9 @@ def talker():
     last_i = -1
     for i in Path:
         node = RouteNode()
-        node.x = list_points[i][0]
-        node.y = list_points[i][1]
+
+        node.x = list_points[i][0] * (1 + beta)
+        node.y = - list_points[i][1] * (1 + alpha)
         node.latitude = list_points[i][2]
         node.longitude = list_points[i][3]
         final_path.append(node)
@@ -151,8 +159,11 @@ def talker():
     for pn in final_path:
         rospy.loginfo('Global path is:{}, {}'.format(pn.x, pn.y))
 
+    motion_goal = RouteNode()
+    motion_goal = final_path[-1]
     pub.publish(rp)
     visualization_pub.publish(path_arrows)
+    motion_goal_pub.publish(motion_goal)
 
 
 class Edge:
@@ -308,7 +319,7 @@ def find_Path(list_Graph, location, list_Goals):
     now_point = location
     for item in list_Goals:
         path = ShortestPath(test, now_point)
-        distPath = path.path_to(item);
+        distPath = path.path_to(item)
         for i in range(len(distPath) - 1):
             Path.append(distPath[i])
         now_point = item
