@@ -1,4 +1,5 @@
 #include "function_simplified.hpp"
+
 bool smalltogreat(std::pair<double,int>a,std::pair<double,int>b)
 {
     return a.first<b.first;
@@ -322,13 +323,20 @@ bool fun_simple::repropagating()
 
     //TODO generate additional points on the trajectory from updated vehicle location 
     //     to the nearest point.
-    pointsOnClothoid(
+    buildClothoid(
         vehicle_loc_updated.x, 
         vehicle_loc_updated.y,
         vehicle_loc_updated.angle,
         selected_path.at(selected_index).x, 
         selected_path.at(selected_index).y, 
         selected_path.at(selected_index).angle,
+        k, dk, L
+    );
+    pointsOnClothoid(
+        vehicle_loc_updated.x, 
+        vehicle_loc_updated.y,
+        vehicle_loc_updated.angle,
+        k, dk, L,
         2,X,Y,Theta);
 
     //TODO delete the useless points in the selected path.
@@ -346,6 +354,114 @@ bool fun_simple::repropagating()
         selected_path.insert(selected_path.begin(),tps);
     }
     return true;
+}
+
+void fun_simple::set_local_reference_path()
+{
+    local_reference_path.clear();
+    //TODO delete nodes in global path that vehicle has passed.
+    int index = -1;
+    for (int i = 0; i < global_path.size(); i++)
+    {
+        double temp = norm_sqrt(vehicle_loc, global_path[i]);
+        if ( temp <= PERCISION*2 )
+        {
+            index = i;
+            break;
+        }
+    }
+    if (index >= 0 && index < global_path.size()-1 )
+    {
+        global_path.erase(global_path.begin(), global_path.begin() + index);
+    }
+    //TODO select nodes 40m far from the vehicle to form local reference path
+    std::vector<type_road_point> candidate_path;
+    for ( int i=0; i < global_path.size(); i++ )
+    {
+        if ( norm_sqrt(vehicle_loc, global_path[i]) >= THRESHOLD)
+        {
+            local_goal = global_path[i];
+            break;
+        }else if ( norm_sqrt(goal_point, global_path[i]) <= goal_size ){
+            local_goal = goal_point;
+            local_reference_path.push_back( local_goal );
+            break;
+        }else{
+            candidate_path.push_back( global_path[i] );
+        }
+    }
+
+    for (int i=1; i <= JOINTS_NUMBER; i++ ){
+        double gap = i * THRESHOLD / (JOINTS_NUMBER + 1);
+        double head, tail = -1;
+        for (int j=1; j < candidate_path.size(); j++ )
+        {
+            double distance = norm_sqrt(vehicle_loc, candidate_path[j]);
+            if ( abs(gap - distance) <= PERCISION )
+            {
+                local_reference_path.push_back( candidate_path[j] );
+                break;
+            }else if ( distance - gap < 0 ){
+                head = j;
+            }else{
+                tail = j;
+                break;
+            }
+        }
+        type_road_point trp;
+        if ( head != -1 && tail != -1 ){
+            trp = yield_joints_by_distance( 
+                candidate_path[head], candidate_path[tail], gap, THRESHOLD);
+            local_reference_path.push_back( trp );
+        }else if ( head == -1 && tail != -1 ){
+            trp = yield_joints_by_distance( 
+                vehicle_loc, candidate_path[tail], gap, THRESHOLD);
+            local_reference_path.push_back( trp );
+        }else if ( head != -1 && tail == -1 ){
+            trp = yield_joints_by_distance( 
+                candidate_path[head], local_goal, gap, THRESHOLD*2);
+            local_reference_path.push_back( trp );
+        }else{
+            trp = yield_joints_by_distance( 
+                vehicle_loc, local_goal, gap, THRESHOLD*2);
+            local_reference_path.push_back( trp );
+        }
+    }
+
+}
+
+type_road_point fun_simple::yield_joints_by_distance( 
+    type_road_point begin, type_road_point end, double distance, double number)
+{
+    if ( norm_sqrt( begin, end ) < PERCISION*2 )
+    {
+        return end;
+    }
+    type_road_point trp;
+    double k, dk, L;
+    std::vector<double> X,Y,Theta;
+    buildClothoid(
+        begin.x, begin.y, begin.angle,
+        end.x, end.y, end.angle,
+        k, dk, L);
+    pointsOnClothoid(
+        begin.x, begin.y, begin.angle,
+        k, dk, L, number, X, Y, Theta
+    );
+    double min = 1e9;
+    double index = -1;
+    for ( int i = 0; i < number; i++ )
+    {
+        double temp = sqrt(
+            pow( (X[i] - vehicle_loc.x), 2) + pow( (Y[i] - vehicle_loc.y), 2) );
+        if ( abs( temp - distance ) < min )
+        {
+            min = abs( temp - distance );
+            index = i;
+        }
+    }
+    trp.x = X[index]; trp.y = Y[index]; trp.angle = Theta[index];
+    return trp;
 }
 
 }

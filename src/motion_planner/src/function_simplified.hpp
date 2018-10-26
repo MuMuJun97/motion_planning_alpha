@@ -51,6 +51,15 @@ public:
      * re-propagating the updated vehicle state with the selected best path
      */
     bool repropagating();
+    /*
+     * yield local reference path from grobal path
+     */
+    void set_local_reference_path();
+    /*
+     * yield the node by distance between it and the vehicle location.
+     */
+    type_road_point yield_joints_by_distance(
+        type_road_point begin, type_road_point end, double distance, double number);
 
 public:
     /*
@@ -70,6 +79,10 @@ public:
        */
       vehicle_velocity vehicle_vel;
       /*
+       * global path from global planner
+       */
+      std::vector<type_road_point> global_path;
+      /*
        * reference path
        */
       std::vector<type_road_point> local_reference_path;
@@ -85,6 +98,10 @@ public:
        * goal nodes
        */
       type_road_point goal_point;
+      /*
+       * goal nodes before got the global goal point 
+       */
+      type_road_point local_goal;
       /*
        * save the best path
        */
@@ -102,6 +119,19 @@ public://parameters used in the planner
        * weight coff for the selection of the parameters
        */
       double weight_dk,weight_diff_curvature,weight_length;
+      /*
+       * if distance between two nodes is smaller than this, 
+       * they are considered as one nodes.
+       */
+      double PERCISION = 1; 
+      /*
+       * length of local reference path
+       */
+      double THRESHOLD = 40;
+      /*
+       * number of nodes in local reference path
+       */
+      double JOINTS_NUMBER = 3;
       /*
        * selected path
        */

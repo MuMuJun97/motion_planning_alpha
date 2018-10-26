@@ -190,32 +190,31 @@ public:
 
     void update_state()
     {
-        type_road_point predicted_vehicle_loc;
-        predicted_vehicle_loc.x =
-            p_fun_main -> vehicle_loc.x + 
-            p_fun_main -> vehicle_vel.vx * PROPAGATION_TIME;
-        
-        predicted_vehicle_loc.y =
-            p_fun_main -> vehicle_loc.y + 
-            p_fun_main -> vehicle_vel.vy * PROPAGATION_TIME;
-        
-        predicted_vehicle_loc.angle = p_fun_main -> vehicle_loc.angle;
-
         p_fun_main -> vehicle_loc.size = false;
         p_fun_main -> vehicle_vel.size = false;
 
         // TODO Initialize tree-expanding-related utility object
-        p_fun_main->update_info( predicted_vehicle_loc );
+        p_fun_main->update_info( p_fun_main -> vehicle_loc );
         p_fun_main->setup();
         p_fun_main->initialize_tree();
+        p_fun_main->set_local_reference_path();
 
         printf(
             "Motion Planning From source: (x: %f @%f, y: %f @%f) to Goal: (x: %f, y: %f), goal size is: %f\n",
-            predicted_vehicle_loc.x, p_fun_main -> vehicle_vel.vx,
-            predicted_vehicle_loc.y, p_fun_main -> vehicle_vel.vy,
+            p_fun_main -> vehicle_loc.x, p_fun_main -> vehicle_vel.vx,
+            p_fun_main -> vehicle_loc.y, p_fun_main -> vehicle_vel.vy,
             p_fun_main -> goal_point.x, p_fun_main -> goal_point.y,
             p_fun_main -> goal_size
         );
+        printf("Local Reference Path is: \n");
+        for ( int i = 0; i < p_fun_main->local_reference_path.size(); i++ ){
+            printf(
+            ">>>>>>: (x: %f, y: %f, angle: %f)\n",
+            p_fun_main -> local_reference_path[i].x,
+            p_fun_main -> local_reference_path[i].y,
+            p_fun_main -> local_reference_path[i].angle
+            );
+        }
     }
 
     void propegate_tree()
@@ -309,9 +308,9 @@ public:
             // printf("Missing vehicle velocity\n");
             return false;
         }
-        if ( p_fun_main -> local_reference_path.size() <= 0 )
+        if ( p_fun_main -> global_path.size() <= 0 )
         {
-            printf("Missing reference path\n");
+            printf("Missing global path\n");
             return false;
         }
         if ( ! p_fun_main -> goal_point.size )

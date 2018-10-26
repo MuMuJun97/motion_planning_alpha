@@ -125,7 +125,7 @@ private:
         _subs.push_back( make_pair( "/grid_test/obstacle_grid_map", sub_0 ) );
 
         ros::Subscriber sub_1 = _nh.subscribe(
-            "/route/path", 10, &Listener::reference_path_callback, this
+            "/route/path", 10, &Listener::global_path_callback, this
         );
         _subs.push_back( make_pair( "/route/path", sub_1 ) );
 
@@ -160,7 +160,7 @@ private:
         _fun_simple -> local_grid_map.size = true;
     }
 
-    void reference_path_callback(
+    void global_path_callback(
         const autopilot_msgs::RoutePath::ConstPtr& msg
     ){
         ROS_INFO("Starting get the global path");
@@ -183,7 +183,7 @@ private:
                     (msg->goals[i].y - msg->goals[i-1].y)/
                     (msg->goals[i].x - msg->goals[i-1].x));
             }
-            _fun_simple -> local_reference_path.push_back(rp);
+            _fun_simple -> global_path.push_back(rp);
             ROS_INFO("(x : %f, y : %f, angle : %f)", rp.x, rp.y, rp.angle);
         }
 
