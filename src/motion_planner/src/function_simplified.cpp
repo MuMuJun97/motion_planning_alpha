@@ -464,4 +464,94 @@ type_road_point fun_simple::yield_joints_by_distance(
     return trp;
 }
 
+void fun_simple::yield_expected_speeds()
+{
+    int mode = 1;
+    type_road_point the_end_point = selected_path[ selected_path.size() - 1 ];
+    if ( norm_sqrt( goal_point, the_end_point ) <= goal_size )
+    {
+        mode = 1;
+    }else{
+        mode = 0;
+    }
+
+    for ( int i = 0; i < selected_path.size(); i++ )
+    {   
+        type_road_point from, here;
+        here = selected_path[i];
+        if ( i == 0 )
+        {   
+            from.x = vehicle_loc.x;
+            from.y = vehicle_loc.y;
+            from.angle = vehicle_loc.angle;
+            from.speed = sqrt( pow( vehicle_vel.vx, 2 ) + pow( vehicle_vel.vy, 2 ) );
+        }else{
+            from = selected_path[i-1];
+        }
+        
+        selected_path[i].speed = yield_expected_speed(from, here, mode);
+    }
+}
+
+double fun_simple::yield_expected_speed( type_road_point from, type_road_point here, int mode )
+{
+    if ( norm_sqrt( goal_point, here ) <= goal_size )
+    {
+        return 0;
+    }
+    if ( mode == 0 )
+    {
+        double k, dk, L, k_i;
+        double cur_vel, uniacc_vel;
+        std::vector<double> velocity_candidates;
+        velocity_candidates.push_back( speed.speed );
+
+        //TODO calculate velocity by curvature
+        buildClothoid( 
+            from.x, from.y, from.angle,
+            here.x, here.y, here.angle,
+            k, dk, L );
+        k_i = k + L * dk;
+        cur_vel = sqrt( LATERAL_ACC / k_i );
+        velocity_candidates.push_back( cur_vel ) ;
+
+        //TODO calculate velocity by uniform acceleration
+        uniacc_vel = sqrt( pow( from.speed, 2 ) + 2 * LONGITUDINAL_ACC * L );
+        velocity_candidates.push_back( uniacc_vel );
+
+        //TODO take the minmum
+        vector<double>::iterator min_velocity = min_element(
+            velocity_candidates.begin(), velocity_candidates.end());
+        
+        return *min_velocity;
+    }
+
+    if ( mode == 1 )
+    {
+        double k, dk, L, k_i;
+        double cur_vel, nunidcc_vel;
+        std::vector<double> velocity_candidates;
+
+        //TODO calculate velocity by curvature
+        buildClothoid( 
+            from.x, from.y, from.angle,
+            here.x, here.y, here.angle,
+            k, dk, L );
+        k_i = k + L * dk;
+        cur_vel = sqrt( LATERAL_ACC / k_i );
+        velocity_candidates.push_back( cur_vel ) ;
+
+        //TODO calculate velocity by non-uniform deceleration
+        nunidcc_vel = pow( pow( from.speed, 3/2 ) - 3 * L / DEC_COEFF, 2/3 );
+        velocity_candidates.push_back( nunidcc_vel );
+
+        //TODO take the minmum
+        vector<double>::iterator min_velocity = min_element(
+            velocity_candidates.begin(), velocity_candidates.end());
+        
+        return *min_velocity;
+    }
+}
+
+
 }

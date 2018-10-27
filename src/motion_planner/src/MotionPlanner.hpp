@@ -275,7 +275,9 @@ public:
             printf("Starting  Repropagating\n");
 
             p_fun_main->repropagating();
-            
+
+            p_fun_main->yield_expected_speeds();
+
             printf("Finished  Repropagating\n");
             printf("Found the path\n");
             printf("The best path is :\n");
@@ -323,6 +325,8 @@ public:
 
         return true;
     }
+
+
 
 };
 

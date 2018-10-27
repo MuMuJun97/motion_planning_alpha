@@ -15,6 +15,7 @@ typedef struct type_road_point
     double latitude;
     double longitude;
     double angle;
+    double speed = 0;
     bool size = false;
 }type_road_point;
 typedef struct type_node_point
@@ -60,7 +61,7 @@ typedef struct GridMap
 
 typedef struct Speed
 {
-    double speed = 5;
+    double speed = 15;
     bool size = false; //for checking if it has been manual initialized
 }Speed;
 

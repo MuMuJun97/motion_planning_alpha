@@ -60,6 +60,16 @@ public:
      */
     type_road_point yield_joints_by_distance(
         type_road_point begin, type_road_point end, double distance, double number);
+    /*
+     * yield the expected velocity of selected path
+     */
+    void yield_expected_speeds();
+    /*
+     * yield the expected velocity of each road point
+     * mode = 0: cruise situation
+     * mode = 1: norm slow down
+     */
+    double yield_expected_speed( type_road_point from, type_road_point here, int mode );
 
 public:
     /*
@@ -132,6 +142,19 @@ public://parameters used in the planner
        * number of nodes in local reference path
        */
       double JOINTS_NUMBER = 3;
+      /*
+       * the max longitudinal acceleration
+       */
+      double LONGITUDINAL_ACC = 3;
+      /*
+       * the max lateral acceleration
+       */
+      double LATERAL_ACC = 2;
+      /*
+       * the coefficient of deceleration process, velocity of end point == 0
+       * duration of the whole deceleration process = sqrt( start_velocity / coefficient )
+       */
+      double DEC_COEFF = 1;
       /*
        * selected path
        */
