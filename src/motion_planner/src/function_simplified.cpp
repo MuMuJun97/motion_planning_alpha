@@ -17,23 +17,72 @@ fun_simple::~fun_simple()
 
 bool fun_simple::collision_check(type_road_point point)
 {
-    unsigned long point_height = 
-        (local_grid_map.height / 2 - point.x - global_coord.x) /
-        local_grid_map.resolution;
-    unsigned long point_width =
-        (point.y + local_grid_map.width / 2 - global_coord.y) /
-        local_grid_map.resolution;
-
+    //TODO coordination transform
+    double delta_x = point.x - global_coord.x;
+    double delta_y = point.y - global_coord.y;
+    std::vector<double> RT = yield_ratation_matrix( global_coord.angle, 0 );
+    double tfd_x = RT[0] * delta_x + RT[1] * delta_y;
+    double tfd_y = RT[2] * delta_x + RT[3] * delta_y;
+    //TODO find the position of the point in the grid map.
+    unsigned long point_height = (unsigned long)
+        ( local_grid_map.height * local_grid_map.resolution / 2 - tfd_x) 
+        / local_grid_map.resolution;
+    unsigned long point_width = (unsigned long)
+        ( local_grid_map.width * local_grid_map.resolution / 2 + tfd_y ) 
+        / local_grid_map.resolution;
+    //TODO check if there is collision. 
     if (local_grid_map.width > point_width && 
         local_grid_map.height > point_height)
     {
         if (local_grid_map.data.at(
-            point_height*local_grid_map.width + point_width) > 10)
+            point_height*local_grid_map.width + point_width) > 0)
         {
+            std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] ";
+            printf( 
+                "Collision happened at point(x: %f& %f, y: %f & %f)\n", 
+                point.x, tfd_x, point.y, tfd_y);
             return true;
         }
     }
+
     return false;
+}
+
+bool fun_simple::passability_check( type_road_point point )
+{
+    int box_length = ceil( VEHICLE_BOX_LENGTH / VEHICLE_BOX_RESOLUTION );
+    int box_width = ceil( VEHICLE_BOX_WIDTH  / VEHICLE_BOX_RESOLUTION );
+    std::vector<double> RT = yield_ratation_matrix( 0, point.angle );
+    for (int l = 0; l < box_length; l++)
+    {
+        double unit_x = VEHICLE_BOX_LENGTH / 2 - l * VEHICLE_BOX_RESOLUTION;
+        for ( int w = 0; w < box_width; w++)
+        {
+            double unit_y = VEHICLE_BOX_WIDTH / 2 - w * VEHICLE_BOX_RESOLUTION;
+            double tfd_unit_x = RT[0] * unit_x + RT[1] * unit_y + point.x;
+            double tfd_unit_y = RT[2] * unit_x + RT[3] * unit_y + point.y;
+            type_road_point trp;
+            trp.x = tfd_unit_x; 
+            trp.y = tfd_unit_y; 
+            trp.angle = point.angle;
+            if ( collision_check( trp ) )
+            {
+                std::cout<< "[IN(FUN) passability_check]" << "[>>>>INFO<<<<]\n";
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+std::vector<double> fun_simple::yield_ratation_matrix( double source, double target )
+{
+    double theta = target - source;
+    std::vector<double> matrix;
+    matrix.push_back(  cos( theta ) );
+    matrix.push_back( -sin( theta ) );
+    matrix.push_back(  sin( theta ) );
+    matrix.push_back(  cos( theta ) );
 }
 
 
@@ -241,6 +290,7 @@ bool fun_simple::search_best_path()
     // SORT THE COST OF ALL THE PATH
     std::sort(save_cost.begin(),save_cost.end(),smalltogreat);
     it = save_goal_nodes[save_cost.begin()->second];
+    local_goal_it = it;
     std::vector<double> X,Y,Theta;
     while(m_tree.is_valid(it) && m_tree.parent(it) != NULL)
     {
@@ -261,6 +311,31 @@ bool fun_simple::search_best_path()
     //std::cout << "hhhhhhhhhhhhhhhhhhhhhhhhhhhh" << std::endl;
     std::reverse(selected_path.begin(), selected_path.end());
     return true;
+}
+
+void fun_simple::trim_tree()
+{
+    tree<type_node_point>::iterator it, top, first, first_child;
+    type_node_point pts;
+    tree<type_node_point> td_tree;
+
+    pts.x=vehicle_loc.x;
+    pts.y=vehicle_loc.y;
+    pts.theta=vehicle_loc.angle;
+    pts.cost=0;
+    pts.flag_effective=true;
+    top=td_tree.begin();
+    first=td_tree.insert(top,pts);
+
+    it = local_goal_it;
+    while( m_tree.is_valid(it) && m_tree.parent(it) != m_tree.begin() )
+    {
+        it = m_tree.parent(it);
+    }
+    first_child = it;
+    td_tree.append_child( first, first_child );
+    m_tree.clear();
+    m_tree = td_tree;
 }
 
 bool fun_simple::repropagating()
@@ -374,7 +449,8 @@ void fun_simple::set_local_reference_path()
     {
         global_path.erase(global_path.begin(), global_path.begin() + index);
     }
-    //TODO select nodes 40m far from the vehicle to form local reference path
+    //TODO select three nodes that are 10m, 20m 30m far from the vehicle 
+    //     to form local reference path
     std::vector<type_road_point> candidate_path;
     for ( int i=0; i < global_path.size(); i++ )
     {
@@ -410,28 +486,76 @@ void fun_simple::set_local_reference_path()
         }
         type_road_point trp;
         if ( head != -1 && tail != -1 ){
-            trp = yield_joints_by_distance( 
-                candidate_path[head], candidate_path[tail], gap, THRESHOLD);
+            trp = yield_joint_by_distance( 
+                candidate_path[head], candidate_path[tail], gap );
             local_reference_path.push_back( trp );
         }else if ( head == -1 && tail != -1 ){
-            trp = yield_joints_by_distance( 
-                vehicle_loc, candidate_path[tail], gap, THRESHOLD);
+            trp = yield_joint_by_distance( 
+                vehicle_loc, candidate_path[tail], gap );
             local_reference_path.push_back( trp );
         }else if ( head != -1 && tail == -1 ){
-            trp = yield_joints_by_distance( 
-                candidate_path[head], local_goal, gap, THRESHOLD*2);
+            trp = yield_joint_by_distance( 
+                candidate_path[head], local_goal, gap );
             local_reference_path.push_back( trp );
         }else{
-            trp = yield_joints_by_distance( 
-                vehicle_loc, local_goal, gap, THRESHOLD*2);
+            trp = yield_joint_by_distance( 
+                vehicle_loc, local_goal, gap );
             local_reference_path.push_back( trp );
+        }
+    }
+
+    //TODO yield joints by collision
+    for ( int i = 0; i < local_reference_path.size(); i++ )
+    {
+        type_road_point begin, end;
+        double k, dk, L;
+        std::vector<double> X,Y,Theta;
+        if( i == 0 )
+        {
+            begin.x = vehicle_loc.x;
+            begin.y = vehicle_loc.y;
+            begin.angle = vehicle_loc.angle;
+        }else{
+            begin = local_reference_path[i-1];
+        }
+        end = local_reference_path[i];
+        buildClothoid(
+        begin.x, begin.y, begin.angle,
+        end.x, end.y, end.angle,
+        k, dk, L);
+        pointsOnClothoid(
+            begin.x, begin.y, begin.angle,
+            k, dk, L, ceil(L), X, Y, Theta
+        );
+
+        for ( int j = 0; j < X.size(); j++ )
+        {
+            type_road_point trp;
+            trp.x = X[j]; trp.y = Y[j]; trp.angle = Theta[j];
+            if ( collision_check(trp) )
+            {
+                if ( norm_sqrt( trp, end ) <= PERCISION*3 )
+                {
+                    local_reference_path[i].x = trp.x;
+                    local_reference_path[i].y = trp.y;
+                    local_reference_path[i].angle = trp.angle;
+                }else if ( norm_sqrt( trp, begin ) <= PERCISION*3 )
+                {
+                    break;
+                }
+                else{
+                    local_reference_path.insert(
+                        local_reference_path.begin()+i, trp);
+                }
+                break;
+            }
         }
     }
 
 }
 
-type_road_point fun_simple::yield_joints_by_distance( 
-    type_road_point begin, type_road_point end, double distance, double number)
+type_road_point fun_simple::yield_joint_by_distance( 
+    type_road_point begin, type_road_point end, double distance )
 {
     if ( norm_sqrt( begin, end ) < PERCISION*2 )
     {
@@ -446,11 +570,11 @@ type_road_point fun_simple::yield_joints_by_distance(
         k, dk, L);
     pointsOnClothoid(
         begin.x, begin.y, begin.angle,
-        k, dk, L, number, X, Y, Theta
+        k, dk, L, ceil(L), X, Y, Theta
     );
     double min = 1e9;
     double index = -1;
-    for ( int i = 0; i < number; i++ )
+    for ( int i = 0; i < X.size(); i++ )
     {
         double temp = sqrt(
             pow( (X[i] - vehicle_loc.x), 2) + pow( (Y[i] - vehicle_loc.y), 2) );
@@ -468,7 +592,8 @@ void fun_simple::yield_expected_speeds()
 {
     int mode = 1;
     type_road_point the_end_point = selected_path[ selected_path.size() - 1 ];
-    if ( norm_sqrt( goal_point, the_end_point ) <= goal_size )
+    if ( norm_sqrt( goal_point, the_end_point ) <= goal_size ||
+         the_end_point.state == 2)
     {
         mode = 1;
     }else{
@@ -552,6 +677,5 @@ double fun_simple::yield_expected_speed( type_road_point from, type_road_point h
         return *min_velocity;
     }
 }
-
 
 }

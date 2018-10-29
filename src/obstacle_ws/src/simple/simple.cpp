@@ -29,7 +29,7 @@ public:
     GridMap map({"obstacle"});
     map.setFrameId("lidar_0");
     // length(x_direction,y_direction), resolution
-    map.setGeometry(Length(40, 40), 0.20);
+    map.setGeometry(Length(80, 80), 0.20);
     ROS_INFO("Created map with size %f x %f m (%i x %i cells).",
     map.getLength().x(), map.getLength().y(),
     map.getSize()(0), map.getSize()(1));
@@ -40,7 +40,7 @@ public:
         float x_x = cloud[i].x;
         float y_y = cloud[i].y;
         float z_z = cloud[i].z;
-        if(fabs(x_x) <= 20 && fabs(x_x) >= 2 && fabs(y_y) <= 20 && fabs(y_y) >= 1 && z_z < 3){
+        if(fabs(x_x) <= 40 && fabs(x_x) >= 2 && fabs(y_y) <= 40 && fabs(y_y) >= 1 && z_z < 3){
             Position position(x_x, y_y);
             map.atPosition("obstacle", position) = 1;
         }  

@@ -4,8 +4,8 @@ carla:
   QualityLevel: Low  # Low or Epic
   SynchronousMode: True
   SendNonPlayerAgentsInfo: True
-  NumberOfVehicles: 30
-  NumberOfPedestrians: 10
+  NumberOfVehicles: 1
+  NumberOfPedestrians: 1
   WeatherId: 1
   Framesperepisode: -1 # -1: run episode indefinitely until interrupted
   Episodes: 2
@@ -42,12 +42,12 @@ carla:
     lidar_0:
       SensorType: LIDAR_RAY_CAST
       carla_settings:
-        Channels: 32
-        Range: 40
-        PointsPerSecond: 500000
-        RotationFrequency: 50
-        UpperFovLimit: 5
-        LowerFovLimit: -30
+        Channels: 40
+        Range: 100
+        PointsPerSecond: 720000
+        RotationFrequency: 10
+        UpperFovLimit: 7
+        LowerFovLimit: -16
         PositionX: 0.2
         PositionY: 0
         PositionZ: 2.00

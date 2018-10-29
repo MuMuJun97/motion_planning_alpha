@@ -22,6 +22,14 @@ public:
      */
     bool collision_check(type_road_point point);
     /*
+     * check if the path or the node is passable.
+     */
+    bool passability_check( type_road_point );
+    /*
+     * yield ratation transform matrix(2x2), row-major order.
+     */
+    std::vector<double> yield_ratation_matrix( double source, double target );
+    /*
      * update the infomation include:
      * reference path,global coordinate, current speed.
      */
@@ -58,8 +66,8 @@ public:
     /*
      * yield the node by distance between it and the vehicle location.
      */
-    type_road_point yield_joints_by_distance(
-        type_road_point begin, type_road_point end, double distance, double number);
+    type_road_point yield_joint_by_distance(
+        type_road_point begin, type_road_point end, double distance);
     /*
      * yield the expected velocity of selected path
      */
@@ -70,6 +78,10 @@ public:
      * mode = 1: norm slow down
      */
     double yield_expected_speed( type_road_point from, type_road_point here, int mode );
+    /*
+     * yield the expected velocity of selected path
+     */
+    void trim_tree();
 
 public:
     /*
@@ -130,6 +142,10 @@ public://parameters used in the planner
        */
       double weight_dk,weight_diff_curvature,weight_length;
       /*
+       * delta_drain
+       */
+      tree<type_node_point>::iterator local_goal_it;
+      /*
        * if distance between two nodes is smaller than this, 
        * they are considered as one nodes.
        */
@@ -156,11 +172,21 @@ public://parameters used in the planner
        */
       double DEC_COEFF = 1;
       /*
+       * 
+       */
+      double VEHICLE_BOX_LENGTH = 5;
+      /*
+       * 
+       */
+      double VEHICLE_BOX_WIDTH = 2.2;
+     /*
+       * 
+       */
+      double VEHICLE_BOX_RESOLUTION = 0.18;
+      /*
        * selected path
        */
       std::vector<type_road_point> selected_path;
-
-
 };
 
 }

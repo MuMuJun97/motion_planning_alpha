@@ -17,6 +17,9 @@ typedef struct type_road_point
     double angle;
     double speed = 0;
     bool size = false;
+    /* 0 means free, 1 means transit (can pass but no stop), 
+       2 means stop (no passable), 3 means unsafe */
+    int state = 0; 
 }type_road_point;
 typedef struct type_node_point
 {
