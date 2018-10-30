@@ -63,7 +63,7 @@ bool fun_simple::passability_check( type_road_point point )
             double tfd_unit_y = RT[2] * unit_x + RT[3] * unit_y + point.y;
             type_road_point trp;
             trp.x = tfd_unit_x; 
-            trp.y = tfd_unit_y; 
+            trp.y = tfd_unit_y;
             trp.angle = point.angle;
             if ( collision_check( trp ) )
             {
@@ -169,16 +169,31 @@ void fun_simple::setup()
 
 void fun_simple::initialize_tree()
 {
-    m_tree.clear();
-    tree<type_node_point>::iterator top,first;
-    type_node_point pts;
-    pts.x=global_coord.x;
-    pts.y=global_coord.y;
-    pts.theta=global_coord.angle;
-    pts.cost=0;
-    pts.flag_effective=true;
-    top=m_tree.begin();
-    first=m_tree.insert(top,pts);
+    if ( m_tree.size() == 0 )
+    {
+        m_tree.clear();
+        tree<type_node_point>::iterator top,first;
+        type_node_point pts;
+        pts.x=global_coord.x;
+        pts.y=global_coord.y;
+        pts.theta=global_coord.angle;
+        pts.cost=0;
+        pts.flag_effective=true;
+        top=m_tree.begin();
+        first=m_tree.insert(top,pts);
+
+        std::cout<< "[IN(FUN) initialize_tree]" << "[>>>>INFO<<<<] " <<
+            "initialized the tree"
+            <<endl;
+    }else if ( m_tree.size > 0 ){
+
+        trim_tree();
+    }else{
+        
+        std::cout<< "[IN(FUN) initialize_tree]" << "[>>>>WARN<<<<] " <<
+            "value that should not appear is present, you should stop the whole system"
+            <<endl;
+    }
 }
 
 
@@ -190,7 +205,7 @@ bool fun_simple::search_best_path()
 
     if ( m_tree.size() <= 1 )
     {
-        std::cout<< "[IN(FUN) search_best_path]" << "[>>>WARNING<<] " <<
+        std::cout<< "[IN(FUN) search_best_path]" << "[>>>>WARN<<<<] " <<
             "Tree is empty, no need to search, SKIP"
         <<std::endl;
 
@@ -213,7 +228,7 @@ bool fun_simple::search_best_path()
         std::cout << "Can't find the goal_point, continuing with local goal:" \
             << std::endl;
         tree<type_node_point>::iterator the_nearest_to_goal;
-        double min_cost = 100000000;
+        double min_cost = 1e9;
         for(it=m_tree.begin();it!=m_tree.end();it++)
         {
             double distance_to_goal = sqrt(
@@ -270,7 +285,7 @@ bool fun_simple::search_best_path()
         path_cost.index = i;
         save_path_cost.push_back(path_cost);
     }
-    double sum_diff_curvature = 0.0000001,sum_dk = 0.0000001, sum_L = 0.0000001;
+    double sum_diff_curvature = 1e-9,sum_dk = 1e-9, sum_L = 1e-9;
     for(int m = 0; m < save_path_cost.size(); m++)
     {
         sum_diff_curvature += save_path_cost[m].diff_curvature;
@@ -294,8 +309,14 @@ bool fun_simple::search_best_path()
     std::vector<double> X,Y,Theta;
     while(m_tree.is_valid(it) && m_tree.parent(it) != NULL)
     {
-        std::cout << "tree node :  x: "<< it->x << ",  y: " << it->y << ",  heading: " << it->theta << std::endl;
-        pointsOnClothoid((m_tree.parent(it))->x,(m_tree.parent(it))->y,(m_tree.parent(it))->theta, it->k,it->dk,it->L,30,X,Y,Theta);
+        std::cout << "tree node :  x: "<< it->x << ",  y: " << it->y 
+            << ",  heading: " << it->theta << std::endl;
+        pointsOnClothoid(
+            (m_tree.parent(it))->x,
+            (m_tree.parent(it))->y,
+            (m_tree.parent(it))->theta, 
+            it->k, it->dk, it->L, 
+            round( it->L * WAYPOINTS_DENSITY )-1, X, Y, Theta);
         for(int k = X.size()-1; k >= 0; k--)
         {
             type_road_point tps;
@@ -307,7 +328,8 @@ bool fun_simple::search_best_path()
         it = m_tree.parent(it);
         //std::cout << "hhhhhhhhhhhhh" << std::endl;
     }
-    std::cout << "tree node :  x: "<< it->x << ",  y: " << it->y << ",  heading: " << it->theta << std::endl;
+    std::cout << "tree node :  x: "<< it->x << ",  y: " << it->y 
+        << ",  heading: " << it->theta << std::endl;
     //std::cout << "hhhhhhhhhhhhhhhhhhhhhhhhhhhh" << std::endl;
     std::reverse(selected_path.begin(), selected_path.end());
     return true;
@@ -315,27 +337,53 @@ bool fun_simple::search_best_path()
 
 void fun_simple::trim_tree()
 {
-    tree<type_node_point>::iterator it, top, first, first_child;
-    type_node_point pts;
-    tree<type_node_point> td_tree;
-
-    pts.x=vehicle_loc.x;
-    pts.y=vehicle_loc.y;
-    pts.theta=vehicle_loc.angle;
-    pts.cost=0;
-    pts.flag_effective=true;
-    top=td_tree.begin();
-    first=td_tree.insert(top,pts);
-
+    std::cout<< "[IN(FUN) trim_tree]" << "[>>>>info<<<<] " <<
+        "starting trim tree"
+        <<endl;
+    tree<type_node_point>::iterator it, first_child;
+    
     it = local_goal_it;
     while( m_tree.is_valid(it) && m_tree.parent(it) != m_tree.begin() )
     {
         it = m_tree.parent(it);
     }
     first_child = it;
-    td_tree.append_child( first, first_child );
-    m_tree.clear();
-    m_tree = td_tree;
+
+    tree<type_node_point>::sibling_iterator sib = m_tree.begin(m_tree.begin());
+    while( sib != m_tree.begin() )
+    {
+        if ( sib != first_child )
+            m_tree.erase(sib);
+    }
+
+    m_tree.begin() -> x = vehicle_loc.x;
+    m_tree.begin() -> y = vehicle_loc.y;
+    m_tree.begin() -> theta = vehicle_loc.angle;
+
+    double k, dk, L;
+    buildClothoid(
+        m_tree.begin() -> x,
+        m_tree.begin() -> y,
+        m_tree.begin() -> theta,
+        first_child -> x,
+        first_child -> y,
+        first_child -> theta,
+        k, dk, L
+    );
+
+    double cost_delta = L - first_child->cost;
+    it = m_tree.begin();
+    ++it;
+    while( it != m_tree.end() )
+    {
+        it -> cost += cost_delta;
+        ++it;
+    }
+
+    std::cout<< "[IN(FUN) trim_tree]" << "[>>>>info<<<<] " <<
+        "finished trim tree"
+        <<endl;
+
 }
 
 bool fun_simple::repropagating()
@@ -357,7 +405,7 @@ bool fun_simple::repropagating()
     vehicle_loc_updated.x = vehicle_loc.x;
     vehicle_loc_updated.y = vehicle_loc.y;
 
-    if( norm_sqrt( vehicle_loc_updated, global_coord ) <= 1 )
+    if( norm_sqrt( vehicle_loc_updated, global_coord ) <= PERCISION )
     {
         return true;
     }
@@ -412,7 +460,7 @@ bool fun_simple::repropagating()
         vehicle_loc_updated.y,
         vehicle_loc_updated.angle,
         k, dk, L,
-        2,X,Y,Theta);
+        round(L * WAYPOINTS_DENSITY)-1, X,Y,Theta);
 
     //TODO delete the useless points in the selected path.
     selected_path.erase(
@@ -438,7 +486,7 @@ void fun_simple::set_local_reference_path()
     int index = -1;
     for (int i = 0; i < global_path.size(); i++)
     {
-        double temp = norm_sqrt(vehicle_loc, global_path[i]);
+        double temp = norm_sqrt(global_coord, global_path[i]);
         if ( temp <= PERCISION*2 )
         {
             index = i;
@@ -454,7 +502,7 @@ void fun_simple::set_local_reference_path()
     std::vector<type_road_point> candidate_path;
     for ( int i=0; i < global_path.size(); i++ )
     {
-        if ( norm_sqrt(vehicle_loc, global_path[i]) >= THRESHOLD)
+        if ( norm_sqrt(global_coord, global_path[i]) >= THRESHOLD)
         {
             local_goal = global_path[i];
             break;
@@ -472,7 +520,7 @@ void fun_simple::set_local_reference_path()
         double head, tail = -1;
         for (int j=1; j < candidate_path.size(); j++ )
         {
-            double distance = norm_sqrt(vehicle_loc, candidate_path[j]);
+            double distance = norm_sqrt(global_coord, candidate_path[j]);
             if ( abs(gap - distance) <= PERCISION )
             {
                 local_reference_path.push_back( candidate_path[j] );
@@ -491,7 +539,7 @@ void fun_simple::set_local_reference_path()
             local_reference_path.push_back( trp );
         }else if ( head == -1 && tail != -1 ){
             trp = yield_joint_by_distance( 
-                vehicle_loc, candidate_path[tail], gap );
+                global_coord, candidate_path[tail], gap );
             local_reference_path.push_back( trp );
         }else if ( head != -1 && tail == -1 ){
             trp = yield_joint_by_distance( 
@@ -499,7 +547,7 @@ void fun_simple::set_local_reference_path()
             local_reference_path.push_back( trp );
         }else{
             trp = yield_joint_by_distance( 
-                vehicle_loc, local_goal, gap );
+                global_coord, local_goal, gap );
             local_reference_path.push_back( trp );
         }
     }
@@ -512,9 +560,9 @@ void fun_simple::set_local_reference_path()
         std::vector<double> X,Y,Theta;
         if( i == 0 )
         {
-            begin.x = vehicle_loc.x;
-            begin.y = vehicle_loc.y;
-            begin.angle = vehicle_loc.angle;
+            begin.x = global_coord.x;
+            begin.y = global_coord.y;
+            begin.angle = global_coord.angle;
         }else{
             begin = local_reference_path[i-1];
         }
@@ -534,12 +582,12 @@ void fun_simple::set_local_reference_path()
             trp.x = X[j]; trp.y = Y[j]; trp.angle = Theta[j];
             if ( collision_check(trp) )
             {
-                if ( norm_sqrt( trp, end ) <= PERCISION*3 )
+                if ( norm_sqrt( trp, end ) <= PERCISION*2 )
                 {
                     local_reference_path[i].x = trp.x;
                     local_reference_path[i].y = trp.y;
                     local_reference_path[i].angle = trp.angle;
-                }else if ( norm_sqrt( trp, begin ) <= PERCISION*3 )
+                }else if ( norm_sqrt( trp, begin ) <= PERCISION*2 )
                 {
                     break;
                 }
@@ -577,7 +625,7 @@ type_road_point fun_simple::yield_joint_by_distance(
     for ( int i = 0; i < X.size(); i++ )
     {
         double temp = sqrt(
-            pow( (X[i] - vehicle_loc.x), 2) + pow( (Y[i] - vehicle_loc.y), 2) );
+            pow( (X[i] - global_coord.x), 2) + pow( (Y[i] - global_coord.y), 2) );
         if ( abs( temp - distance ) < min )
         {
             min = abs( temp - distance );

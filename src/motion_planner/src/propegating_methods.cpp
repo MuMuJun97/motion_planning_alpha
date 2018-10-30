@@ -8,7 +8,9 @@ propegating_methods::~propegating_methods()
 {
     //delete p_func_method_propegating;
 }
-bool propegating_methods::curve_propegation(tree<type_node_point>::iterator parent_node, type_road_point sample_node,type_node_point& new_node)
+bool propegating_methods::curve_propegation(
+    tree<type_node_point>::iterator parent_node, 
+    type_road_point sample_node, type_node_point& new_node )
 {
     double x = parent_node->x;
     double y = parent_node->y;
@@ -19,7 +21,9 @@ bool propegating_methods::curve_propegation(tree<type_node_point>::iterator pare
     double k, dk, L;
     buildClothoid(x, y, angle, sx, sy, sangle, k, dk, L);
     std::vector<double> X, Y, Theta;
-    pointsOnClothoid(x, y, angle, k, dk, L, 100, X, Y, Theta);
+    pointsOnClothoid( x, y, angle, k, dk, L, 
+        round(L * func_simplified::fun_simple::WAYPOINTS_DENSITY)-1, 
+        X, Y, Theta );
     new_node.x = sx;
     new_node.y = sy;
     new_node.theta = sangle;

@@ -27,7 +27,7 @@ bool searching_parent_methods::searching_parent_node()
         std::cout << "can not find a parent node, error happened in searching_parent_node" << std::endl;
         return false;
     }*/
-    double min_cost = 1000000;
+    double min_cost = 1e9;
     for (it = (*p_func_methods_searching_parent)->m_tree.begin(); it != (*p_func_methods_searching_parent)->m_tree.end(); it++)
     {
         double x = it->x;
