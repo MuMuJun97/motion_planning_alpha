@@ -497,18 +497,18 @@ void fun_simple::set_local_reference_path()
     {
         global_path.erase(global_path.begin(), global_path.begin() + index);
     }
-    //TODO select three nodes that are 10m, 20m 30m far from the vehicle 
+    //TODO select three nodes that are 10m, 20m 30m 40m(as local goal) far from the vehicle 
     //     to form local reference path
+    type_road_point reference_point;
     std::vector<type_road_point> candidate_path;
     for ( int i=0; i < global_path.size(); i++ )
     {
         if ( norm_sqrt(global_coord, global_path[i]) >= THRESHOLD)
         {
-            local_goal = global_path[i];
+            reference_point = global_path[i];
             break;
         }else if ( norm_sqrt(goal_point, global_path[i]) <= goal_size ){
-            local_goal = goal_point;
-            local_reference_path.push_back( local_goal );
+            reference_point = global_path[i];
             break;
         }else{
             candidate_path.push_back( global_path[i] );
@@ -516,7 +516,12 @@ void fun_simple::set_local_reference_path()
     }
 
     for (int i=1; i <= JOINTS_NUMBER; i++ ){
-        double gap = i * THRESHOLD / (JOINTS_NUMBER + 1);
+        double gap = i * THRESHOLD / JOINTS_NUMBER;
+        if ( norm_sqrt( global_coord, reference_point ) < gap + PERCISION*2 )
+        {
+            local_reference_path.push_back( reference_point );
+            break;
+        }
         double head, tail = -1;
         for (int j=1; j < candidate_path.size(); j++ )
         {
@@ -543,11 +548,11 @@ void fun_simple::set_local_reference_path()
             local_reference_path.push_back( trp );
         }else if ( head != -1 && tail == -1 ){
             trp = yield_joint_by_distance( 
-                candidate_path[head], local_goal, gap );
+                candidate_path[head], reference_point, gap );
             local_reference_path.push_back( trp );
         }else{
             trp = yield_joint_by_distance( 
-                global_coord, local_goal, gap );
+                global_coord, reference_point, gap );
             local_reference_path.push_back( trp );
         }
     }
@@ -568,9 +573,10 @@ void fun_simple::set_local_reference_path()
         }
         end = local_reference_path[i];
         buildClothoid(
-        begin.x, begin.y, begin.angle,
-        end.x, end.y, end.angle,
-        k, dk, L);
+            begin.x, begin.y, begin.angle,
+            end.x, end.y, end.angle,
+            k, dk, L
+        );
         pointsOnClothoid(
             begin.x, begin.y, begin.angle,
             k, dk, L, ceil(L), X, Y, Theta
@@ -600,12 +606,18 @@ void fun_simple::set_local_reference_path()
         }
     }
 
+    local_goal = local_reference_path[ local_reference_path.size() - 1 ];
+
 }
 
 type_road_point fun_simple::yield_joint_by_distance( 
     type_road_point begin, type_road_point end, double distance )
 {
     if ( norm_sqrt( begin, end ) < PERCISION*2 )
+    {
+        return end;
+    }
+    if ( norm_sqrt( global_coord, end ) <= distance )
     {
         return end;
     }
