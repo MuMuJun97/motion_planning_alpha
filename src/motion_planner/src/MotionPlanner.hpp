@@ -222,44 +222,55 @@ public:
         printf("Starting Propagating tree\n");
         ros::Duration timeout(PROPAGATION_TIME);
         ros::Time start_time = ros::Time::now();
+
         while ( ros::Time::now() - start_time < timeout )
         {
+            bool 
+            flag_sample = false,
+            flag_search_parent = false,
+            flag_prop = false;
+            std::vector<type_node_point> new_nodes;
+
             // TODO Node-sampling and collision-checking.
-            bool flag_sample = p_sample_main -> sampling_nearby_reference_path(
+            flag_sample = p_sample_main -> sampling_nearby_reference_path(
                 p_fun_main->local_reference_path
             );
 
             if ( flag_sample )
             {
                 // TODO Parent-searching.
-                bool flag_search_parent =
-                    p_search_main->searching_parent_node();
+                flag_search_parent = p_search_main->searching_parent_node();
+            }
 
-                if ( flag_search_parent )
+            if ( flag_search_parent )
+            {
+
+                // TODO Curve-propegation and collision-checking.
+                flag_prop = p_propegate_main -> curve_propegation(
+                    p_search_main -> parent_node, 
+                    p_sample_main -> sample_node, 
+                    new_nodes);
+            }
+
+            if( flag_prop )
+            {
+                // TODO Node-adding.
+                tree<type_node_point>::iterator it;
+                it = p_search_main -> parent_node;
+                for (int i = 0; i < new_nodes.size(); i++)
                 {
-                    type_node_point new_node;
-
-                    // TODO Curve-propegation and collision-checking.
-                    bool flag_prop = p_propegate_main -> curve_propegation(
-                        p_search_main -> parent_node, 
-                        p_sample_main -> sample_node, new_node
-                    );
-
-                    sample_nodes.push_back( p_sample_main -> sample_node );
-
-                    if( flag_prop )
+                    if( p_fun_main->add_node_into_tree( new_nodes[i] ) )
                     {
-                        // TODO Node-adding.
-                        if( p_fun_main->add_node_into_tree( new_node ) )
-                        {
-                            p_fun_main -> m_tree.append_child(
-                                p_search_main -> parent_node, new_node
-                            );
-                        }
+                        it = p_fun_main -> m_tree.append_child( it, new_nodes[i]);
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
-
             }
+            
+            sample_nodes.push_back( p_sample_main -> sample_node );
             
         }
         printf("Finished  Propagating tree\n");

@@ -15,7 +15,10 @@ public:
      * propegate with curve
      * /
      */
-    bool curve_propegation(tree<type_node_point>::iterator parent_node, type_road_point sample_node,type_node_point& new_node);
+    bool curve_propegation(
+        tree<type_node_point>::iterator parent_node, 
+        type_road_point sample_node, 
+        std::vector<type_node_point>& new_nodes);
     /*
      * pointer to propegating method.
      */

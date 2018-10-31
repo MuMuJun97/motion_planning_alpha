@@ -10,6 +10,8 @@ namespace utility_functions {
 	    rp.angle = np.theta;
 	    rp.latitude = np.latitude;
 	    rp.longitude = np.longitude;
+		rp.state = np.state;
+		rp.size = true;
 	    return rp;
 	}
 	double norm_sqrt(type_road_point rp1,type_road_point rp2)

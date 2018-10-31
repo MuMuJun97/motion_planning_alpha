@@ -34,7 +34,7 @@ bool sampling_methods::sampling_nearby_reference_path(std::vector<type_road_poin
         sample_node.y = reference_path[selected_index_in_reference_path].y + dist_real(mt);//+R*sin(theta);
         //sample_node.angle = M_PI/2+angle_dist(mt);
         sample_node.angle = reference_path[selected_index_in_reference_path].angle + angle_dist(mt);
-        if(!(*p_func_from_sampling)->collision_check(sample_node))
+        if ( (*p_func_from_sampling) -> passability_check(sample_node) )
         {
             return true;
         }

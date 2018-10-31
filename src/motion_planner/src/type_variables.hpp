@@ -33,6 +33,9 @@ typedef struct type_node_point
     double cost;
     double k,dk,L;
     bool size = false;
+    /* 0 means free, 1 means transit (can pass but no stop), 
+       2 means stop (no passable), 3 means unsafe */
+    int state = 0; 
 }type_node_point;
 typedef struct type_path_cost
 {

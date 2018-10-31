@@ -82,6 +82,23 @@ public:
      * yield the expected velocity of selected path
      */
     void trim_tree();
+    /*
+     * selected select possible end nodes of potential paths.
+     */
+    std::vector<tree<type_node_point>::iterator> select_path_end_nodes();
+    /*
+     * selecte the end node with the minimum cost.
+     */
+    tree<type_node_point>::iterator select_path_end_node(
+        std::vector<tree<type_node_point>::iterator> candidate_ends );
+    /*
+     * yield path base on the given path end node.
+     */
+    bool yield_selected_path( tree<type_node_point>::iterator path_end );
+    /*
+     * search parent of a node.
+     */
+    bool search_parent_node(type_node_point tnp);
 
 public:
     /*
@@ -144,7 +161,7 @@ public://parameters used in the planner
       /*
        * delta_drain
        */
-      tree<type_node_point>::iterator local_goal_it;
+      tree<type_node_point>::iterator selected_path_end;
       /*
        * if distance between two nodes is smaller than this, 
        * they are considered as one nodes.
@@ -157,7 +174,7 @@ public://parameters used in the planner
       /*
        * number of nodes in local reference path
        */
-      static const double JOINTS_NUMBER = 3;
+      static const double JOINTS_NUMBER = 4;
       /*
        * the max longitudinal acceleration
        */

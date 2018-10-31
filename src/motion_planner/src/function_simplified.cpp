@@ -96,7 +96,7 @@ bool fun_simple::is_goal(type_node_point node)
 {
     type_road_point ps;
     ps = transform_from_node_to_point(node);
-    if(norm_sqrt(ps, goal_point) < goal_size)
+    if(norm_sqrt(ps, local_goal) < goal_size)
     {
         //std::cout << "goal point : " << goal_point.x << " " << goal_point.y << std::endl;
         return true;
@@ -160,7 +160,7 @@ bool fun_simple::add_node_into_tree(type_node_point new_node)
 void fun_simple::setup()
 {
     delta_drain = 0.1;
-    goal_size = 5;
+    goal_size = 1;
     weight_dk = 0.3;
     weight_diff_curvature = 0.3;
     weight_length = 0.4;
@@ -196,6 +196,192 @@ void fun_simple::initialize_tree()
     }
 }
 
+std::vector<tree<type_node_point>::iterator> fun_simple::select_path_end_nodes()
+{
+    //TODO select possible end nodes of potential paths.
+    std::vector<tree<type_node_point>::iterator> candidate_ends;
+    type_road_point rep = local_reference_path[ local_reference_path.size()-1 ];
+    int required_states[] = {0, 1 ,2};
+    if ( norm_sqrt( rep , goal_point ) < goal_size )
+    {
+        required_states[1] = 2; required_states[2] = 1;
+    }
+    int state_index = 0;
+    while( candidate_ends.empty() || state_index < 3 )
+    {
+        //TODO select node with free state and nearby the local goal as possible end nodes
+        tree<type_node_point>::iterator it;
+        for( it=m_tree.begin();it!=m_tree.end();it++ )
+        {   
+            if ( is_goal(*it) && it -> state == required_states[state_index] )
+            {
+                candidate_ends.push_back(it);
+            }
+        }
+        //TODO select leaf node with free state as possible end nodes
+        if( candidate_ends.empty() )
+        {
+            tree<type_node_point>::leaf_iterator lit = m_tree.begin_leaf();
+            tree<type_node_point>::leaf_iterator end = m_tree.end_leaf();
+            while ( lit != end )
+            {
+                if ( lit -> state == required_states[state_index] )
+                {
+                    candidate_ends.push_back( lit );
+                }
+                ++lit;
+            }
+        }
+
+        ++state_index;
+    }
+
+    return candidate_ends;
+}
+
+tree<type_node_point>::iterator fun_simple::select_path_end_node(
+    std::vector<tree<type_node_point>::iterator> candidate_ends )
+{
+    //TODO calculate cost of each path.
+    std::vector< type_node_point > candidate_path;
+    std::vector< type_path_cost > candidate_paths_costs;
+    std::vector< std::pair<double,int> > save_cost;
+
+    for (int i = 0; i < candidate_ends.size(); i++)
+    {
+        type_path_cost path_cost;
+        tree<type_node_point>::iterator pit;
+        pit = candidate_ends[i];
+        candidate_path.clear();
+
+        while ( pit != m_tree.begin() && pit != NULL )
+        {
+            candidate_path.push_back( *pit );
+            pit = m_tree.parent( pit );
+        }
+
+        double end_k = candidate_path[0].k + 
+            candidate_path[0].dk * ( candidate_path[0].L - candidate_path[1].L );
+        double cost_dk = 0;
+        double cost_k = end_k;
+        double cost_L = candidate_ends[i] -> L;
+
+        for( int j = 0; j < candidate_path.size(); j++ )
+        {
+            cost_dk += candidate_path[j].dk;
+            cost_k += candidate_path[j].k;
+        }
+        cost_dk /= ( candidate_path.size() + 1 );
+        cost_k /= ( candidate_path.size() + 1 );
+
+        path_cost.diff_curvature = cost_k;
+        path_cost.dk = cost_dk;
+        path_cost.length = cost_L;
+        path_cost.index = i;
+
+        candidate_paths_costs.push_back(path_cost);
+    }
+
+    double sum_k = 1e-9, sum_dk = 1e-9, sum_L = 1e-9;
+    for ( int m = 0; m < candidate_paths_costs.size(); m++ )
+    {
+        sum_k += candidate_paths_costs[m].diff_curvature;
+        sum_dk += candidate_paths_costs[m].dk;
+        sum_L += candidate_paths_costs[m].length;
+    }
+
+    for(int m = 0; m < candidate_paths_costs.size(); m++)
+    {
+        candidate_paths_costs[m].diff_curvature /= sum_k;
+        candidate_paths_costs[m].dk /= sum_dk;
+        candidate_paths_costs[m].length /= sum_L;
+        
+        type_path_cost tpc = candidate_paths_costs[m];
+        save_cost.push_back( 
+            std::make_pair(
+                tpc.length * weight_length + 
+                tpc.diff_curvature * weight_diff_curvature +
+                tpc.dk * weight_dk
+                , tpc.index
+            )
+        );
+
+    }
+
+    //TODO sort the cost of all paths and selected the minimum
+    std::sort( save_cost.begin(), save_cost.end(), smalltogreat );
+    tree<type_node_point>::iterator it = candidate_ends[ save_cost.begin()->second ];
+
+    return it;
+}
+
+bool fun_simple::yield_selected_path( 
+    tree<type_node_point>::iterator path_end )
+{   
+    selected_path.clear();
+
+    std::vector<tree<type_node_point>::iterator> path_its;
+    tree<type_node_point>::iterator it = path_end;
+
+    while ( m_tree.is_valid(it) )
+    {
+        path_its.push_back( it );
+        it = m_tree.parent( it );
+    }
+
+    std::reverse( path_its.begin(), path_its.end() );
+
+    for (int i = 0; i < path_its.size()-1; i++ )
+    {
+        std::vector<double> X,Y,Theta;
+        tree<type_node_point>::iterator begin = path_its[i];
+        tree<type_node_point>::iterator end = path_its[i+1];
+
+        Clothoid::pointsOnClothoid(
+            begin -> x, begin -> y, begin -> theta,
+            end -> k, end -> dk, end -> L,
+            round( it->L * WAYPOINTS_DENSITY ), X, Y, Theta
+        );
+
+        X.push_back( end -> x);
+        Y.push_back( end -> y);
+        Theta.push_back( end -> theta);
+        
+        for ( int i = 1; i < X.size(); i++ )
+        {
+            type_road_point trp;
+            trp.x = X[i];
+            trp.y = Y[i];
+            trp.angle = Theta[i];
+            if( !passability_check( trp ) )
+            {
+                if ( i > 1 )
+                {
+                    double k, dk, L;
+                    Clothoid::buildClothoid(
+                        begin -> x, begin -> y, begin -> theta,
+                        X[i-1], Y[i-1], Theta[i-1], k, dk, L);
+                    type_node_point tnp;
+                    tnp.x = X[i-1]; tnp.y = Y[i-1]; tnp.theta = Theta[i-1];
+                    tnp.k = k; tnp.dk = dk; tnp.L = L;
+                    tnp.cost = begin->cost + L;
+                    tnp.state = 2;
+                    tnp.flag_effective = true;
+                    tnp.size = true;
+                    m_tree.append_child( begin, tnp );
+                }
+                m_tree.erase(end);
+                selected_path.clear();
+                return false;
+            }else{
+
+                selected_path.push_back(trp);
+            }
+        }
+    }
+    selected_path.push_back( transform_from_node_to_point( *path_end ) );
+    return true;
+}
 
 bool fun_simple::search_best_path()
 {
@@ -211,127 +397,16 @@ bool fun_simple::search_best_path()
 
         return false;
     }
+    
+    do
+    {
+        std::vector<tree<type_node_point>::iterator> candidate_ends;
+        candidate_ends = select_path_end_nodes();
+    
+        selected_path_end = select_path_end_node( candidate_ends );
 
-    tree<type_node_point>::iterator it;
-    std::vector<tree<type_node_point>::iterator> save_goal_nodes;
-    std::cout << "tree size: " << m_tree.size() << std::endl;
-    for(it=m_tree.begin();it!=m_tree.end();it++)
-    {
-        if(is_goal(*it))
-        {
-            //std::cout << "Found a goal: " << std::endl;
-            save_goal_nodes.push_back(it);
-        }
-    }
-    if(save_goal_nodes.empty())
-    {
-        std::cout << "Can't find the goal_point, continuing with local goal:" \
-            << std::endl;
-        tree<type_node_point>::iterator the_nearest_to_goal;
-        double min_cost = 1e9;
-        for(it=m_tree.begin();it!=m_tree.end();it++)
-        {
-            double distance_to_goal = sqrt(
-                pow((it->x - goal_point.x),2) + pow((it->y - goal_point.y),2));
-            if (distance_to_goal < min_cost)
-            {
-                min_cost = distance_to_goal;
-                the_nearest_to_goal = it;
-            }
-        }
-        save_goal_nodes.push_back(the_nearest_to_goal);
-    }
-
-    std::vector<type_node_point> path;
-
-    std::vector<type_path_cost> save_path_cost;
-    for (int i = 0; i < save_goal_nodes.size(); i++)
-    {
-        std::cout << "save_goal_nodes.size(): " << save_goal_nodes.size() << std::endl;
-        std::cout << save_goal_nodes.at(i)->x << save_goal_nodes.at(i)->y << std::endl;
-        it = save_goal_nodes[i];
-        path.clear();
-        while (it != m_tree.begin() && it != NULL)
-        {
-            it = m_tree.parent(it);
-            //std::cout << "save_goal_nodes[i]: " << save_goal_nodes[i]->x << "  parent: " << it->x << std::endl;
-            path.push_back(*it);
-        }
-        std::cout << "path.size: " << path.size() << std::endl;
-        double cost_dk = 0;
-        double cost_diff_curvature = 0;
-        double cost_L = (*save_goal_nodes[i]).L;
-        //std::cout << "i = " << i << ", (*save_goal_nodes[i]).L: " << (*save_goal_nodes[i]).L << std::endl; 
-        //int n = 0;
-        for(int j = 0; j < path.size(); j++)
-        {
-            cost_dk += (path[j]).dk;
-            //n++;
-        }
-        //std::cout << path.size() << std::endl; 
-        cost_dk /= path.size();
-        //n = 0;
-
-        for(int j = 0; j < path.size()-1; j++)
-        {
-            cost_diff_curvature += (path[j+1]).k + (path[j+1]).dk * (*save_goal_nodes[i]).L;
-            //n++;
-        }
-        cost_diff_curvature /= path.size();
-        type_path_cost path_cost;
-        path_cost.diff_curvature = cost_diff_curvature;
-        path_cost.dk = cost_dk;
-        path_cost.length = cost_L;
-        path_cost.index = i;
-        save_path_cost.push_back(path_cost);
-    }
-    double sum_diff_curvature = 1e-9,sum_dk = 1e-9, sum_L = 1e-9;
-    for(int m = 0; m < save_path_cost.size(); m++)
-    {
-        sum_diff_curvature += save_path_cost[m].diff_curvature;
-        sum_dk += save_path_cost[m].dk;
-        sum_L += save_path_cost[m].length;
-    }
-    std::vector<std::pair<double,int> > save_cost;
-    for(int m = 0; m < save_path_cost.size(); m++)
-    {
-        save_path_cost[m].diff_curvature /= sum_diff_curvature;
-        save_path_cost[m].dk /= sum_dk;
-        save_path_cost[m].length /= sum_L;
-        save_cost.push_back(std::make_pair(save_path_cost[m].length*weight_length+save_path_cost[m].diff_curvature*weight_diff_curvature+
-                            save_path_cost[m].dk*weight_dk,save_path_cost[m].index));
-
-    }
-    // SORT THE COST OF ALL THE PATH
-    std::sort(save_cost.begin(),save_cost.end(),smalltogreat);
-    it = save_goal_nodes[save_cost.begin()->second];
-    local_goal_it = it;
-    std::vector<double> X,Y,Theta;
-    while(m_tree.is_valid(it) && m_tree.parent(it) != NULL)
-    {
-        std::cout << "tree node :  x: "<< it->x << ",  y: " << it->y 
-            << ",  heading: " << it->theta << std::endl;
-        pointsOnClothoid(
-            (m_tree.parent(it))->x,
-            (m_tree.parent(it))->y,
-            (m_tree.parent(it))->theta, 
-            it->k, it->dk, it->L, 
-            round( it->L * WAYPOINTS_DENSITY )-1, X, Y, Theta);
-        for(int k = X.size()-1; k >= 0; k--)
-        {
-            type_road_point tps;
-            tps.x = X[k];
-            tps.y = Y[k];
-            tps.angle = Theta[k];
-            selected_path.push_back(tps);
-        }
-        it = m_tree.parent(it);
-        //std::cout << "hhhhhhhhhhhhh" << std::endl;
-    }
-    std::cout << "tree node :  x: "<< it->x << ",  y: " << it->y 
-        << ",  heading: " << it->theta << std::endl;
-    //std::cout << "hhhhhhhhhhhhhhhhhhhhhhhhhhhh" << std::endl;
-    std::reverse(selected_path.begin(), selected_path.end());
+    }while( !yield_selected_path( selected_path_end ) );
+    
     return true;
 }
 
@@ -342,7 +417,7 @@ void fun_simple::trim_tree()
         <<endl;
     tree<type_node_point>::iterator it, first_child;
     
-    it = local_goal_it;
+    it = selected_path_end;
     while( m_tree.is_valid(it) && m_tree.parent(it) != m_tree.begin() )
     {
         it = m_tree.parent(it);
@@ -350,10 +425,12 @@ void fun_simple::trim_tree()
     first_child = it;
 
     tree<type_node_point>::sibling_iterator sib = m_tree.begin(m_tree.begin());
-    while( sib != m_tree.begin() )
+    tree<type_node_point>::sibling_iterator end = m_tree.end(m_tree.begin());
+    while( sib != end )
     {
         if ( sib != first_child )
             m_tree.erase(sib);
+        ++sib;
     }
 
     m_tree.begin() -> x = vehicle_loc.x;
@@ -361,7 +438,7 @@ void fun_simple::trim_tree()
     m_tree.begin() -> theta = vehicle_loc.angle;
 
     double k, dk, L;
-    buildClothoid(
+    Clothoid::buildClothoid(
         m_tree.begin() -> x,
         m_tree.begin() -> y,
         m_tree.begin() -> theta,
@@ -429,7 +506,7 @@ bool fun_simple::repropagating()
         tps.x = selected_path.at(i).x;
         tps.y = selected_path.at(i).y;
         tps.angle = selected_path.at(i).angle;
-        buildClothoid(
+        Clothoid::buildClothoid(
             vehicle_loc_updated.x,
             vehicle_loc_updated.y,
             vehicle_loc_updated.angle,
@@ -446,7 +523,7 @@ bool fun_simple::repropagating()
 
     //TODO generate additional points on the trajectory from updated vehicle location 
     //     to the nearest point.
-    buildClothoid(
+    Clothoid::buildClothoid(
         vehicle_loc_updated.x, 
         vehicle_loc_updated.y,
         vehicle_loc_updated.angle,
@@ -455,12 +532,12 @@ bool fun_simple::repropagating()
         selected_path.at(selected_index).angle,
         k, dk, L
     );
-    pointsOnClothoid(
+    Clothoid::pointsOnClothoid(
         vehicle_loc_updated.x, 
         vehicle_loc_updated.y,
         vehicle_loc_updated.angle,
         k, dk, L,
-        round(L * WAYPOINTS_DENSITY)-1, X,Y,Theta);
+        round(L * WAYPOINTS_DENSITY), X,Y,Theta);
 
     //TODO delete the useless points in the selected path.
     selected_path.erase(
@@ -572,12 +649,12 @@ void fun_simple::set_local_reference_path()
             begin = local_reference_path[i-1];
         }
         end = local_reference_path[i];
-        buildClothoid(
+        Clothoid::buildClothoid(
             begin.x, begin.y, begin.angle,
             end.x, end.y, end.angle,
             k, dk, L
         );
-        pointsOnClothoid(
+        Clothoid::pointsOnClothoid(
             begin.x, begin.y, begin.angle,
             k, dk, L, ceil(L), X, Y, Theta
         );
@@ -624,11 +701,11 @@ type_road_point fun_simple::yield_joint_by_distance(
     type_road_point trp;
     double k, dk, L;
     std::vector<double> X,Y,Theta;
-    buildClothoid(
+    Clothoid::buildClothoid(
         begin.x, begin.y, begin.angle,
         end.x, end.y, end.angle,
         k, dk, L);
-    pointsOnClothoid(
+    Clothoid::pointsOnClothoid(
         begin.x, begin.y, begin.angle,
         k, dk, L, ceil(L), X, Y, Theta
     );
@@ -692,7 +769,7 @@ double fun_simple::yield_expected_speed( type_road_point from, type_road_point h
         velocity_candidates.push_back( speed.speed );
 
         //TODO calculate velocity by curvature
-        buildClothoid( 
+        Clothoid::buildClothoid( 
             from.x, from.y, from.angle,
             here.x, here.y, here.angle,
             k, dk, L );
@@ -718,7 +795,7 @@ double fun_simple::yield_expected_speed( type_road_point from, type_road_point h
         std::vector<double> velocity_candidates;
 
         //TODO calculate velocity by curvature
-        buildClothoid( 
+        Clothoid::buildClothoid( 
             from.x, from.y, from.angle,
             here.x, here.y, here.angle,
             k, dk, L );
