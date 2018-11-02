@@ -278,13 +278,12 @@ public:
 
     void search_path()
     {
-        printf("Starting  Searching best path\n");
-        printf("Starting  Searching path\n");
+        std::cout<< "[IN(FUN) search_path]" << "[>>>>INFO<<<<] " <<
+            "starting  Searching path"
+        <<std::endl;
+
         if( p_fun_main->search_best_path() )
         {
-            printf("Finished  Searching path\n");
-            printf("Starting  Repropagating\n");
-
             p_fun_main->repropagating();
 
             p_fun_main->yield_expected_speeds();

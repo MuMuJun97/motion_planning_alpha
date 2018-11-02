@@ -17,20 +17,38 @@ fun_simple::~fun_simple()
 
 bool fun_simple::collision_check(type_road_point point)
 {
+    // std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] " <<
+    //     "starting collision check"
+    // <<std::endl;
+
     //TODO coordination transform
+    // std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] " <<
+    //     "transforming to vehicle local coordination"
+    // <<std::endl;
+
     double delta_x = point.x - global_coord.x;
     double delta_y = point.y - global_coord.y;
     std::vector<double> RT = yield_ratation_matrix( global_coord.angle, 0 );
     double tfd_x = RT[0] * delta_x + RT[1] * delta_y;
     double tfd_y = RT[2] * delta_x + RT[3] * delta_y;
+
     //TODO find the position of the point in the grid map.
+    // std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] " <<
+    //     "finding the position of the point in the grid map"
+    // <<std::endl;
+
     unsigned long point_height = (unsigned long)
         ( local_grid_map.height * local_grid_map.resolution / 2 - tfd_x) 
         / local_grid_map.resolution;
     unsigned long point_width = (unsigned long)
         ( local_grid_map.width * local_grid_map.resolution / 2 + tfd_y ) 
         / local_grid_map.resolution;
+    
     //TODO check if there is collision. 
+    // std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] " <<
+    //     "check if there is a collision"
+    // <<std::endl;
+
     if (local_grid_map.width > point_width && 
         local_grid_map.height > point_height)
     {
@@ -41,9 +59,18 @@ bool fun_simple::collision_check(type_road_point point)
             printf( 
                 "Collision happened at point(x: %f& %f, y: %f & %f)\n", 
                 point.x, tfd_x, point.y, tfd_y);
+
+            // std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] " <<
+            //     "finished collision check"
+            // <<std::endl;
+
             return true;
         }
     }
+
+    // std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] " <<
+    //     "finished collision check"
+    // <<std::endl;
 
     return false;
 }
@@ -83,6 +110,8 @@ std::vector<double> fun_simple::yield_ratation_matrix( double source, double tar
     matrix.push_back( -sin( theta ) );
     matrix.push_back(  sin( theta ) );
     matrix.push_back(  cos( theta ) );
+    
+    return matrix;
 }
 
 
@@ -184,7 +213,8 @@ void fun_simple::initialize_tree()
 
         std::cout<< "[IN(FUN) initialize_tree]" << "[>>>>INFO<<<<] " <<
             "initialized the tree"
-            <<endl;
+        <<endl;
+
     }else if ( m_tree.size() > 0 ){
 
         trim_tree();
@@ -199,6 +229,10 @@ void fun_simple::initialize_tree()
 std::vector<tree<type_node_point>::iterator> fun_simple::select_path_end_nodes()
 {
     //TODO select possible end nodes of potential paths.
+    std::cout<< "[IN(FUN) select_path_end_nodes]" << "[>>>>INFO<<<<] " <<
+        "select possible end nodes of potential paths"
+    <<endl;
+
     std::vector<tree<type_node_point>::iterator> candidate_ends;
     type_road_point rep = local_reference_path[ local_reference_path.size()-1 ];
     int required_states[] = {0, 1 ,2};
@@ -210,6 +244,10 @@ std::vector<tree<type_node_point>::iterator> fun_simple::select_path_end_nodes()
     while( candidate_ends.empty() || state_index < 3 )
     {
         //TODO select node with free state and nearby the local goal as possible end nodes
+        std::cout<< "[IN(FUN) select_path_end_nodes]" << "[>>>>INFO<<<<] " <<
+            "select path ends with free state and nearby the local goal"
+        <<endl;
+
         tree<type_node_point>::iterator it;
         for( it=m_tree.begin();it!=m_tree.end();it++ )
         {   
@@ -218,7 +256,12 @@ std::vector<tree<type_node_point>::iterator> fun_simple::select_path_end_nodes()
                 candidate_ends.push_back(it);
             }
         }
+
         //TODO select leaf node with free state as possible end nodes
+        std::cout<< "[IN(FUN) select_path_end_nodes]" << "[>>>>INFO<<<<] " <<
+            "select leaf node with free state as possible path ends"
+        <<endl;
+
         if( candidate_ends.empty() )
         {
             tree<type_node_point>::leaf_iterator lit = m_tree.begin_leaf();
@@ -243,6 +286,10 @@ tree<type_node_point>::iterator fun_simple::select_path_end_node(
     std::vector<tree<type_node_point>::iterator> candidate_ends )
 {
     //TODO calculate cost of each path.
+    std::cout<< "[IN(FUN) select_path_end_node]" << "[>>>>INFO<<<<] " <<
+        "calculate cost of each path"
+    <<endl;
+
     std::vector< type_node_point > candidate_path;
     std::vector< type_path_cost > candidate_paths_costs;
     std::vector< std::pair<double,int> > save_cost;
@@ -309,6 +356,10 @@ tree<type_node_point>::iterator fun_simple::select_path_end_node(
     }
 
     //TODO sort the cost of all paths and selected the minimum
+    std::cout<< "[IN(FUN) select_path_end_node]" << "[>>>>INFO<<<<] " <<
+        "sort the cost of all paths and selected the minimum"
+    <<endl;
+
     std::sort( save_cost.begin(), save_cost.end(), smalltogreat );
     tree<type_node_point>::iterator it = candidate_ends[ save_cost.begin()->second ];
 
@@ -318,10 +369,18 @@ tree<type_node_point>::iterator fun_simple::select_path_end_node(
 bool fun_simple::yield_selected_path( 
     tree<type_node_point>::iterator path_end )
 {   
+    std::cout<< "[IN(FUN) yield_selected_path]" << "[>>>>INFO<<<<] " <<
+        "yielding selected path by selected path end"
+    <<endl;
+
     selected_path.clear();
 
     std::vector<tree<type_node_point>::iterator> path_its;
     tree<type_node_point>::iterator it = path_end;
+
+    std::cout<< "[IN(FUN) yield_selected_path]" << "[>>>>INFO<<<<] " <<
+        "select parents of the path end to form the path"
+    <<endl;
 
     while ( m_tree.is_valid(it) )
     {
@@ -331,28 +390,38 @@ bool fun_simple::yield_selected_path(
 
     std::reverse( path_its.begin(), path_its.end() );
 
+    std::cout<< "[IN(FUN) yield_selected_path]" << "[>>>>INFO<<<<] " <<
+        "check passability of the path, path size: " << path_its.size()
+    <<endl;
+
     for (int i = 0; i < path_its.size()-1; i++ )
     {
+        std::cout<< " start " << std::endl;
         std::vector<double> X,Y,Theta;
         tree<type_node_point>::iterator begin = path_its[i];
         tree<type_node_point>::iterator end = path_its[i+1];
 
+        std::cout<< " build curve " <<  begin -> y << std::endl;
+
         Clothoid::pointsOnClothoid(
             begin -> x, begin -> y, begin -> theta,
             end -> k, end -> dk, end -> L,
-            ceil( it->L * WAYPOINTS_DENSITY ), X, Y, Theta
+            ceil( end -> L * WAYPOINTS_DENSITY ), X, Y, Theta
         );
-
+        std::cout<< " built curve " << std::endl;
         X.push_back( end -> x);
         Y.push_back( end -> y);
         Theta.push_back( end -> theta);
         
+        std::cout<< " check each point " << std::endl;
         for ( int i = 1; i < X.size(); i++ )
         {
             type_road_point trp;
             trp.x = X[i];
             trp.y = Y[i];
             trp.angle = Theta[i];
+
+            std::cout<< " check passability " << std::endl;
             if( !passability_check( trp ) )
             {
                 if ( i > 1 )
@@ -370,8 +439,14 @@ bool fun_simple::yield_selected_path(
                     tnp.size = true;
                     m_tree.append_child( begin, tnp );
                 }
+                std::cout<< " erase end " << std::endl;
                 m_tree.erase(end);
                 selected_path.clear();
+
+                std::cout<< "[IN(FUN) yield_selected_path]" << "[>>>>INFO<<<<] " <<
+                    "fail to select best path"
+                <<endl;
+
                 return false;
             }else{
 
@@ -379,6 +454,10 @@ bool fun_simple::yield_selected_path(
             }
         }
     }
+
+    std::cout<< "[IN(FUN) yield_selected_path]" << "[>>>>INFO<<<<] " <<
+        "select best path seccessfully"
+    <<endl;
     selected_path.push_back( transform_from_node_to_point( *path_end ) );
     return true;
 }
@@ -386,8 +465,8 @@ bool fun_simple::yield_selected_path(
 bool fun_simple::search_best_path()
 {
     std::cout<< "[IN(FUN) search_best_path]" << "[>>>>INFO<<<<] " <<
-        "tree size: " << m_tree.size() 
-    << std::endl;
+        "starting  searching best path. " << "tree size: " << m_tree.size() 
+    <<std::endl;
 
     if ( m_tree.size() <= 1 )
     {
@@ -558,8 +637,15 @@ bool fun_simple::repropagating()
 
 void fun_simple::set_local_reference_path()
 {
+    std::cout<< "[IN(FUN) set_local_reference_path]" << "[>>>>INFO<<<<] " <<
+        "starting set local reference path"
+    <<std::endl;
     local_reference_path.clear();
     //TODO delete nodes in global path that vehicle has passed.
+    std::cout<< "[IN(FUN) set_local_reference_path]" << "[>>>>INFO<<<<] " <<
+        "deleting nodes in global path that vehicle has passed"
+    <<std::endl;
+
     int index = -1;
     for (int i = 0; i < global_path.size(); i++)
     {
@@ -576,6 +662,10 @@ void fun_simple::set_local_reference_path()
     }
     //TODO select three nodes that are 10m, 20m 30m 40m(as local goal) far from the vehicle 
     //     to form local reference path
+    std::cout<< "[IN(FUN) set_local_reference_path]" << "[>>>>INFO<<<<] " <<
+        "selecting three nodes that are at 10m, 20m 30m 40m(as local goal)"
+    <<std::endl;
+
     type_road_point reference_point;
     std::vector<type_road_point> candidate_path;
     for ( int i=0; i < global_path.size(); i++ )
@@ -634,7 +724,13 @@ void fun_simple::set_local_reference_path()
         }
     }
 
+    std::cout<< " reference path size is: " << local_reference_path.size() <<std::endl;
+
     //TODO yield joints by collision
+    std::cout<< "[IN(FUN) set_local_reference_path]" << "[>>>>INFO<<<<] " <<
+        "adjust positions of joints by collision"
+    <<std::endl;
+
     for ( int i = 0; i < local_reference_path.size(); i++ )
     {
         type_road_point begin, end;
@@ -663,6 +759,7 @@ void fun_simple::set_local_reference_path()
         {
             type_road_point trp;
             trp.x = X[j]; trp.y = Y[j]; trp.angle = Theta[j];
+
             if ( collision_check(trp) )
             {
                 if ( norm_sqrt( trp, end ) <= PERCISION*2 )
@@ -684,6 +781,10 @@ void fun_simple::set_local_reference_path()
     }
 
     local_goal = local_reference_path[ local_reference_path.size() - 1 ];
+    
+    std::cout<< "[IN(FUN) set_local_reference_path]" << "[>>>>INFO<<<<] " <<
+        "finished set local reference path"
+    <<std::endl;
 
 }
 

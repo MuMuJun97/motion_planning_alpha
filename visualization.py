@@ -23,7 +23,7 @@ def show_tree():
             child = [ child_x, child_y ]
             children.append( child )
 
-    for no in [0]:
+    for no in range( len(sums) ):
         gap = sum(sums[0:no])
         number = sums[no]
         p_parts = parents[gap: gap + number]
@@ -49,7 +49,7 @@ def show_waypoints():
             point = [ point_x, point_y ]
             points.append( point )
 
-    for no in range( len( sums )):
+    for no in range( len(sums) ):
         points_X = []
         points_Y = []
         gap = sum(sums[0:no])
@@ -58,17 +58,19 @@ def show_waypoints():
         for point in parts:
             points_X.append( point[0] )
             points_Y.append( point[1] )
-        plt.plot( points_X, points_Y )
+        plt.plot( points_X, points_Y ,linewidth=5)
 
 def show_reference_path():
     nodes = []
     nodes_X = []
     nodes_Y = []
+    sums = []
     
     with open( 'logs/reference_path.txt', 'rt' ) as pos_file:
         for line in pos_file:
             splits = line.split( '\n' )[0].split( ',' )
             if len(splits) == 1:
+                sums.append( int( splits[0] ) )
                 continue
             node_x = float( splits[0] )
             node_y = float( splits[1] )
@@ -78,7 +80,7 @@ def show_reference_path():
             nodes_Y.append( node_y )
             nodes.append( node )
 
-    for index in range( len( nodes ) ):
+    for index in range( sums[0] ):
         node = nodes[ index ]
         if index == 0:
             plt.scatter( node[0], node[1], s=50, marker='x', c= 'r' , linewidths=2)
@@ -113,4 +115,5 @@ if __name__ == '__main__':
     show_waypoints()
     show_tree()
     show_positions()
+    plt.scatter( 28.134797, 329.377173, s=200, marker='s', c= 'b' )
     plt.show()
