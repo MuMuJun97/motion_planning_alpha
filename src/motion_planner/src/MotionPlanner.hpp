@@ -150,10 +150,10 @@ public:
             p_fun_main -> vehicle_loc.y
         << std::endl;
 
-        if ( times_recorder > 1 )
-        {
-            return;
-        }
+        // if ( times_recorder > 1 )
+        // {
+        //     return;
+        // }
 
         //TODO record reference path of once motion planning.
         reference_path_out << p_fun_main -> local_reference_path.size() << std::endl;

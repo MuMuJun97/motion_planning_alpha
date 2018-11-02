@@ -166,44 +166,44 @@ public://parameters used in the planner
        * if distance between two nodes is smaller than this, 
        * they are considered as one nodes.
        */
-      static const double PERCISION = 1; 
+      static constexpr double PERCISION = 1; 
       /*
        * length of local reference path
        */
-      static const double THRESHOLD = 40;
+      static constexpr double THRESHOLD = 40;
       /*
        * number of nodes in local reference path
        */
-      static const double JOINTS_NUMBER = 4;
+      static constexpr double JOINTS_NUMBER = 4;
       /*
        * the max longitudinal acceleration
        */
-      static const double LONGITUDINAL_ACC = 3;
+      static constexpr double LONGITUDINAL_ACC = 3;
       /*
        * the max lateral acceleration
        */
-      static const double LATERAL_ACC = 2;
+      static constexpr double LATERAL_ACC = 2;
       /*
        * the coefficient of deceleration process, velocity of end point == 0
        * duration of the whole deceleration process = sqrt( start_velocity / coefficient )
        */
-      static const double DEC_COEFF = 1;
+      static constexpr double DEC_COEFF = 1;
       /*
        * 
        */
-      static const double VEHICLE_BOX_LENGTH = 5;
+      static constexpr double VEHICLE_BOX_LENGTH = 5;
       /*
        * 
        */
-      static const double VEHICLE_BOX_WIDTH = 2.2;
+      static constexpr double VEHICLE_BOX_WIDTH = 2.2;
       /*
        * 
        */
-      static const double VEHICLE_BOX_RESOLUTION = 0.18;
+      static constexpr double VEHICLE_BOX_RESOLUTION = 0.18;
       /*
        * Waypoints density ( number/m), no including the end point of each segement.
        */
-      static const double WAYPOINTS_DENSITY = 0.4;
+      static constexpr double WAYPOINTS_DENSITY = 0.3;
       /*
        * selected path
        */

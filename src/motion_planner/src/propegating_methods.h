@@ -25,13 +25,15 @@ public:
     fun_simple** p_func_method_propegating;
 private:
     /*
-     * paremeters for clothoid curve.
-     */
-    //double k,dk,L;
-    /*
      * engine for the random sample.
      */
     std::random_device ran_device;
+public:
+    /*
+     * paremeters for clothoid curve.
+     */
+    static constexpr double NODES_DENSITY = 0.25;
+
 
 };
 

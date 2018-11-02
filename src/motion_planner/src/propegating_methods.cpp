@@ -22,7 +22,7 @@ bool propegating_methods::curve_propegation(
     buildClothoid(x, y, angle, sx, sy, sangle, k, dk, L);
 
     std::vector<double> X, Y, Theta;
-    int npts = round(L * func_simplified::fun_simple::WAYPOINTS_DENSITY);
+    int npts = ceil(L * NODES_DENSITY);
     pointsOnClothoid( x, y, angle, k, dk, L, npts, X, Y, Theta );
     
     type_road_point ps;

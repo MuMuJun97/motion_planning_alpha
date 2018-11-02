@@ -185,7 +185,7 @@ void fun_simple::initialize_tree()
         std::cout<< "[IN(FUN) initialize_tree]" << "[>>>>INFO<<<<] " <<
             "initialized the tree"
             <<endl;
-    }else if ( m_tree.size > 0 ){
+    }else if ( m_tree.size() > 0 ){
 
         trim_tree();
     }else{
@@ -340,7 +340,7 @@ bool fun_simple::yield_selected_path(
         Clothoid::pointsOnClothoid(
             begin -> x, begin -> y, begin -> theta,
             end -> k, end -> dk, end -> L,
-            round( it->L * WAYPOINTS_DENSITY ), X, Y, Theta
+            ceil( it->L * WAYPOINTS_DENSITY ), X, Y, Theta
         );
 
         X.push_back( end -> x);
@@ -537,7 +537,7 @@ bool fun_simple::repropagating()
         vehicle_loc_updated.y,
         vehicle_loc_updated.angle,
         k, dk, L,
-        round(L * WAYPOINTS_DENSITY), X,Y,Theta);
+        ceil(L * WAYPOINTS_DENSITY), X,Y,Theta);
 
     //TODO delete the useless points in the selected path.
     selected_path.erase(

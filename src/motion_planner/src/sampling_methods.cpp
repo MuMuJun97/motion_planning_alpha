@@ -21,9 +21,9 @@ bool sampling_methods::sampling_nearby_reference_path(std::vector<type_road_poin
     int selected_index_in_reference_path;
     while (true) {
         if (goal_bias(mt)>0.9)
-            selected_index_in_reference_path=uniform_dist(mt);
+            selected_index_in_reference_path = uniform_dist(mt);
         else
-            selected_index_in_reference_path= num_points_in_reference_path;
+            selected_index_in_reference_path = num_points_in_reference_path;
         //R0=(*p_func_from_sampling)->sampling_parameters[selected_index_in_reference_path].first;
         n++;
         double ra=norm_dist(mt);
