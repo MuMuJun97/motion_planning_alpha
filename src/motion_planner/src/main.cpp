@@ -276,7 +276,7 @@ int main(int argc, char** argv)
         talker.get_publisher( "/planner/way_points" ).publish( 
             talker.generate_msg_to_controller( 
                 planner.p_fun_main->selected_path, 
-                planner.p_fun_main->speed.speed ) 
+                planner.p_fun_main->speed.speed )
         );
         
         ROS_INFO("Finished publish way points");

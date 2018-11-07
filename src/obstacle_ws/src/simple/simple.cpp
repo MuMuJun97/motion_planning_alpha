@@ -40,9 +40,12 @@ public:
         float x_x = cloud[i].x;
         float y_y = cloud[i].y;
         float z_z = cloud[i].z;
-        if(fabs(x_x) <= 40 && fabs(x_x) >= 2 && fabs(y_y) <= 40 && fabs(y_y) >= 1 && z_z < 3){
-            Position position(x_x, y_y);
-            map.atPosition("obstacle", position) = 1;
+        if(fabs(x_x) <= 40 && fabs(y_y) <= 40 && z_z < 3){
+            if( fabs(x_x) > 8 || fabs(y_y) > 1 )
+            {
+              Position position(x_x, y_y);
+              map.atPosition("obstacle", position) = 1;
+            }
         }  
     }
     nav_msgs::OccupancyGrid result;

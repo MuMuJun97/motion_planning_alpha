@@ -33,21 +33,14 @@ bool propegating_methods::curve_propegation(
        ps.angle = Theta[i];
        if( (*p_func_method_propegating)->collision_check(ps) )
        {
-           if ( !new_nodes.empty() ){
-               new_nodes[ new_nodes.size() - 1 ].state = 2;
-               return true;
-           }
            return false;
        }
-       else if ( ! (*p_func_method_propegating)->passability_check(ps) )
+
+       if ( ! (*p_func_method_propegating)->passability_check(ps) )
        {
-           if ( !new_nodes.empty() )
-           {
-               new_nodes[ new_nodes.size() - 1 ].state = 2;
-               return true;
-           }
            return false;
        }
+
        type_node_point tnp;
        tnp.x = X[i]; tnp.y = Y[i]; tnp.theta = Theta[i];
        tnp.k = k + L / npts * (i-1) * dk; tnp.dk = dk, tnp.L = L / npts;

@@ -3,7 +3,7 @@
 using namespace std;
 sampling_methods::sampling_methods()
 {
-    R0=1.5;
+    R0=3;
     Sigma_R=1;
     Sigma_T=1;
     // p_func_from_sampling=new function_methods();
@@ -20,10 +20,10 @@ bool sampling_methods::sampling_nearby_reference_path(std::vector<type_road_poin
     int n=0;
     int selected_index_in_reference_path;
     while (true) {
-        if (goal_bias(mt)>0.9)
+        if (goal_bias(mt)>0.8)
             selected_index_in_reference_path = uniform_dist(mt);
         else
-            selected_index_in_reference_path = num_points_in_reference_path;
+            selected_index_in_reference_path = 0;
         //R0=(*p_func_from_sampling)->sampling_parameters[selected_index_in_reference_path].first;
         n++;
         double ra=norm_dist(mt);

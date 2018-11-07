@@ -23,7 +23,7 @@ def show_tree():
             child = [ child_x, child_y ]
             children.append( child )
 
-    for no in range( len(sums) ):
+    for no in [2, 3]:
         gap = sum(sums[0:no])
         number = sums[no]
         p_parts = parents[gap: gap + number]
@@ -49,7 +49,7 @@ def show_waypoints():
             point = [ point_x, point_y ]
             points.append( point )
 
-    for no in range( len(sums) ):
+    for no in [2, 3]:
         points_X = []
         points_Y = []
         gap = sum(sums[0:no])
@@ -115,5 +115,7 @@ if __name__ == '__main__':
     show_waypoints()
     show_tree()
     show_positions()
-    plt.scatter( 28.134797, 329.377173, s=200, marker='s', c= 'b' )
+    plt.scatter( 28.14, 327.38, s=200, marker='s', c= 'b' )
+    plt.scatter( 27.15, 334.30, s=200, marker='s', c= 'b' )
+    plt.scatter( 28.131717, 329, s=200, marker='s', c= 'b' )
     plt.show()

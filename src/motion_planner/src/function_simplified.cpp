@@ -51,9 +51,9 @@ bool fun_simple::collision_check(type_road_point point)
 
     if (local_grid_map.width > point_width && 
         local_grid_map.height > point_height)
-    {
+    {   
         if (local_grid_map.data.at(
-            point_height*local_grid_map.width + point_width) > 0)
+            point_height*local_grid_map.width + point_width) > 50)
         {
             std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] ";
             printf( 
@@ -77,24 +77,37 @@ bool fun_simple::collision_check(type_road_point point)
 
 bool fun_simple::passability_check( type_road_point point )
 {
+    // std::cout<< "[IN(FUN) passability_check]" << "[>>>>INFO<<<<]" <<
+    //     "passability check"
+    // <<endl;
+
     int box_length = ceil( VEHICLE_BOX_LENGTH / VEHICLE_BOX_RESOLUTION );
     int box_width = ceil( VEHICLE_BOX_WIDTH  / VEHICLE_BOX_RESOLUTION );
     std::vector<double> RT = yield_ratation_matrix( 0, point.angle );
+    // std::cout<< "[IN(FUN) passability_check]" << "[>>>>INFO<<<<]" <<
+    //     "coordination transforming"
+    // <<endl;
     for (int l = 0; l < box_length; l++)
     {
         double unit_x = VEHICLE_BOX_LENGTH / 2 - l * VEHICLE_BOX_RESOLUTION;
+        // std::cout<< "[IN(FUN) passability_check]" << "[>>>>INFO<<<<]" <<
+        //     "collisions check"
+        // <<endl;
         for ( int w = 0; w < box_width; w++)
         {
             double unit_y = VEHICLE_BOX_WIDTH / 2 - w * VEHICLE_BOX_RESOLUTION;
             double tfd_unit_x = RT[0] * unit_x + RT[1] * unit_y + point.x;
             double tfd_unit_y = RT[2] * unit_x + RT[3] * unit_y + point.y;
             type_road_point trp;
-            trp.x = tfd_unit_x; 
+            trp.x = tfd_unit_x;
             trp.y = tfd_unit_y;
             trp.angle = point.angle;
+            
             if ( collision_check( trp ) )
             {
-                std::cout<< "[IN(FUN) passability_check]" << "[>>>>INFO<<<<]\n";
+                std::cout<< "[IN(FUN) passability_check]" << "[>>>>INFO<<<<]" <<
+                    "Cannot pass!!!"
+                <<endl;
                 return false;
             }
         }
@@ -215,7 +228,7 @@ void fun_simple::initialize_tree()
             "initialized the tree"
         <<endl;
 
-    }else if ( m_tree.size() > 0 ){
+    }else if ( m_tree.size() > 1 ){
 
         trim_tree();
     }else{

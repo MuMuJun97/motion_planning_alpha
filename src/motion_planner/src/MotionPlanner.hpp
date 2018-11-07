@@ -222,6 +222,8 @@ public:
         printf("Starting Propagating tree\n");
         ros::Duration timeout(PROPAGATION_TIME);
         ros::Time start_time = ros::Time::now();
+        int n = 0;
+        int fn = 0;
 
         while ( ros::Time::now() - start_time < timeout )
         {
@@ -238,18 +240,23 @@ public:
 
             if ( flag_sample )
             {
+                n++;
+                printf( "sampled %d th node( %f, %f, %f)\n", n, 
+                    p_sample_main->sample_node.x, p_sample_main->sample_node.y, p_sample_main->sample_node.angle);
                 // TODO Parent-searching.
                 flag_search_parent = p_search_main->searching_parent_node();
             }
 
             if ( flag_search_parent )
             {
-
+                printf( "found the parent\n" );
                 // TODO Curve-propegation and collision-checking.
                 flag_prop = p_propegate_main -> curve_propegation(
                     p_search_main -> parent_node, 
                     p_sample_main -> sample_node, 
                     new_nodes);
+                printf( "new_nodes size isp: %lud \n", new_nodes.size() );
+                if ( !flag_prop ) { fn++; printf( "collide %d th node\n", fn);}
             }
 
             if( flag_prop )
@@ -261,6 +268,7 @@ public:
                 {
                     if( p_fun_main->add_node_into_tree( new_nodes[i] ) )
                     {
+                        printf( "add a node into tree\n" );
                         it = p_fun_main -> m_tree.append_child( it, new_nodes[i]);
                     }
                     else
@@ -271,6 +279,7 @@ public:
             }
             
             sample_nodes.push_back( p_sample_main -> sample_node );
+            printf( "sampled nodes size is: %lud \n", sample_nodes.size() );
             
         }
         printf("Finished  Propagating tree\n");
