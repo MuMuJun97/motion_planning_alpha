@@ -55,7 +55,7 @@ public:
     double uRADIUS_0 = 3;
     double uSIGMA_R = 3.3;
 
-    double uTHETA_0 = 90;
+    double uTHETA_0 = - M_PI / 2;
     double uSIGMA_T = 0.78;
 
     double UNSAFE_ATTENTION = 0.6;

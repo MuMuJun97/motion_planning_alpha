@@ -28,8 +28,6 @@ bool sampling_methods::sampling_nearby_reference_path(std::vector<type_road_poin
     std::vector<int> unsafe_joints_index;
     std::vector<int> normal_joints_index;
 
-    std::cout<< " >>>> here 0 " << std::endl;
-
     for ( int i = 0; i < reference_path.size(); i++ )
     {
         if ( reference_path[i].state == 3 )
@@ -56,7 +54,7 @@ bool sampling_methods::sampling_nearby_reference_path(std::vector<type_road_poin
             int index = normal_joints_dist( mt );
             selected_index_in_reference_path = normal_joints_index[ index ];
             
-            r = abs( normal_radius_dist( mt ) );
+            r = fabs( normal_radius_dist( mt ) );
             theta = normal_theta_dist( mt );
             heading = normal_heading_dist( mt );
         }
@@ -70,7 +68,7 @@ bool sampling_methods::sampling_nearby_reference_path(std::vector<type_road_poin
                 int sign = sign_dist( mt );
                 if ( sign == 0 ) sign = -1;
 
-                r = sign * abs( unsafe_radius_dist( mt ) );
+                r = sign * fabs( unsafe_radius_dist( mt ) );
                 theta = unsafe_theta_dist( mt );
                 heading = unsafe_heading_dist( mt );
             }
@@ -79,7 +77,7 @@ bool sampling_methods::sampling_nearby_reference_path(std::vector<type_road_poin
                 int index = normal_joints_dist( mt );
                 selected_index_in_reference_path = normal_joints_index[ index ];
                 
-                r = abs( normal_radius_dist( mt ) );
+                r = fabs( normal_radius_dist( mt ) );
                 theta = normal_theta_dist( mt );
                 heading = normal_heading_dist( mt );
             }
