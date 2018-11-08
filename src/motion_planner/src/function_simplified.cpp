@@ -53,7 +53,7 @@ bool fun_simple::collision_check(type_road_point point)
         local_grid_map.height > point_height)
     {   
         if (local_grid_map.data.at(
-            point_height*local_grid_map.width + point_width) > 50)
+            point_height*local_grid_map.width + point_width) > 10)
         {
             std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] ";
             printf( 
@@ -768,20 +768,29 @@ void fun_simple::set_local_reference_path()
             k, dk, L, ceil(L), X, Y, Theta
         );
 
+        X.push_back( end.x ); Y.push_back( end.y ); Theta.push_back( end.angle );
+
         for ( int j = 0; j < X.size(); j++ )
         {
             type_road_point trp;
-            trp.x = X[j]; trp.y = Y[j]; trp.angle = Theta[j];
+            trp.x = X[j]; trp.y = Y[j]; trp.angle = Theta[j]; trp.state = 3;
 
-            if ( collision_check(trp) )
+            if ( !passability_check(trp) )
             {
                 if ( norm_sqrt( trp, end ) <= PERCISION*2 )
                 {
                     local_reference_path[i].x = trp.x;
                     local_reference_path[i].y = trp.y;
                     local_reference_path[i].angle = trp.angle;
+                    local_reference_path[i].state = 3;
                 }else if ( norm_sqrt( trp, begin ) <= PERCISION*2 )
                 {
+                    if( i > 0 )
+                    {
+                        local_reference_path[i-1].state = 3;
+                    }else{
+                        local_reference_path[i].state = 3;
+                    }
                     break;
                 }
                 else{

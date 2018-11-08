@@ -42,6 +42,30 @@ public:
      */
     double R0,Sigma_R,Sigma_T;
     fun_simple** p_func_from_sampling;
+
+    double nRADIUS_0 = 2.7;
+    double nSIGMA_R = 1.4;
+
+    double nTHETA_0 = 0;
+    double nSIGMA_T = 0.4;
+
+    double nHEADING_0 = 0;
+    double nSIGMA_H = M_PI / 48;
+
+    double uRADIUS_0 = 3;
+    double uSIGMA_R = 3.3;
+
+    double uTHETA_0 = 90;
+    double uSIGMA_T = 0.78;
+
+    double UNSAFE_ATTENTION = 0.6;
+    double NORMAL_ATTENTION = 0.4;
+
+    double uHEADING_0 = 0;
+    double uSIGMA_H = M_PI / 24;
+
+    int THRESHOLD = 10;
+
 private:
     /*
      * engine for the random sample.

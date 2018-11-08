@@ -23,7 +23,7 @@ def show_tree():
             child = [ child_x, child_y ]
             children.append( child )
 
-    for no in [2, 3]:
+    for no in [20, len(sums)-1]:
         gap = sum(sums[0:no])
         number = sums[no]
         p_parts = parents[gap: gap + number]
@@ -49,7 +49,7 @@ def show_waypoints():
             point = [ point_x, point_y ]
             points.append( point )
 
-    for no in [2, 3]:
+    for no in [20, len(sums)-1]:
         points_X = []
         points_Y = []
         gap = sum(sums[0:no])
@@ -80,7 +80,7 @@ def show_reference_path():
             nodes_Y.append( node_y )
             nodes.append( node )
 
-    for index in range( sums[0] ):
+    for index in [20 , len(sums)-1]:
         node = nodes[ index ]
         if index == 0:
             plt.scatter( node[0], node[1], s=50, marker='x', c= 'r' , linewidths=2)
@@ -115,7 +115,4 @@ if __name__ == '__main__':
     show_waypoints()
     show_tree()
     show_positions()
-    plt.scatter( 28.14, 327.38, s=200, marker='s', c= 'b' )
-    plt.scatter( 27.15, 334.30, s=200, marker='s', c= 'b' )
-    plt.scatter( 28.131717, 329, s=200, marker='s', c= 'b' )
     plt.show()
