@@ -272,7 +272,7 @@ std::vector<tree<type_node_point>::iterator> fun_simple::select_path_end_nodes()
         tree<type_node_point>::iterator it;
         for( it=m_tree.begin();it!=m_tree.end();it++ )
         {   
-            if ( is_goal(*it) && it -> state == required_states[state_index] )
+            if ( it->rift != 1e100 && it -> state == required_states[state_index] )
             {
                 candidate_ends.push_back(it);
             }
@@ -285,16 +285,16 @@ std::vector<tree<type_node_point>::iterator> fun_simple::select_path_end_nodes()
 
         if( candidate_ends.empty() )
         {
-            tree<type_node_point>::leaf_iterator lit = m_tree.begin_leaf();
-            tree<type_node_point>::leaf_iterator end = m_tree.end_leaf();
-            while ( lit != end )
-            {
-                if ( lit -> state == required_states[state_index] )
+            double min = 1e100;
+            tree<type_node_point>::iterator min_it;
+            for( it=m_tree.begin();it!=m_tree.end();it++ )
+            {   
+                if ( it->semi_rift < min && it -> state == required_states[state_index] )
                 {
-                    candidate_ends.push_back( lit );
+                    min = it->semi_rift; min_it = it;
                 }
-                ++lit;
             }
+            candidate_ends.push_back(min_it);
         }
 
         ++state_index;
@@ -342,9 +342,18 @@ tree<type_node_point>::iterator fun_simple::select_path_end_node(
         cost_dk /= ( candidate_path.size() + 1 );
         cost_k /= ( candidate_path.size() + 1 );
 
-        path_cost.diff_curvature = cost_k;
-        path_cost.dk = cost_dk;
-        path_cost.length = cost_L;
+        double rift = candidate_ends[i]->semi_rift, rift_dk = 0, rift_k = 0;
+
+        if ( candidate_ends[i]->rift < 1e100 )
+        {
+            rift = candidate_ends[i]->rift;
+            rift_k = candidate_ends[i]->rift_k;
+            rift_dk = candidate_ends[i]->rift_dk;
+        }
+
+        path_cost.diff_curvature = cost_k + rift_k;
+        path_cost.dk = cost_dk + rift_dk;
+        path_cost.length = cost_L + rift;
         path_cost.index = i;
 
         candidate_paths_costs.push_back(path_cost);

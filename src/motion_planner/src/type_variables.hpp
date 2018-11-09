@@ -31,6 +31,10 @@ typedef struct type_node_point
     double v;
     bool flag_effective;
     double cost;
+    double rift = 1e100;
+    double rift_k = 0;
+    double rift_dk = 0;
+    double semi_rift = 1e100;
     double k,dk,L;
     bool size = false;
     /* 0 means free, 1 means transit (can pass but no stop), 

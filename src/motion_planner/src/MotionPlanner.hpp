@@ -225,6 +225,16 @@ public:
         int n = 0;
         int fn = 0;
 
+        std::vector<type_node_point> temp;
+        if ( p_propegate_main -> curve_propegation(
+                p_fun_main->m_tree.begin(), p_fun_main->local_goal, temp) )
+        {
+            p_fun_main->m_tree.begin() -> rift = temp[ temp.size()-1 ].cost;
+        }
+        p_fun_main->m_tree.begin()->semi_rift = 
+            norm_sqrt( transform_from_node_to_point( 
+                *(p_fun_main->m_tree.begin()) ), p_fun_main->local_goal );
+
         while ( ros::Time::now() - start_time < timeout )
         {
             bool 
@@ -270,6 +280,25 @@ public:
                     {
                         printf( "add a node into tree\n" );
                         it = p_fun_main -> m_tree.append_child( it, new_nodes[i]);
+
+                        if ( norm_sqrt( transform_from_node_to_point(*it), p_fun_main->local_goal ) < p_fun_main->goal_size )
+                        {
+                            it -> rift = 0;
+                            it ->semi_rift = 0;
+                        }else{
+
+                            std::vector<type_node_point> temp;
+                            if ( p_propegate_main -> curve_propegation(
+                                    it, p_fun_main->local_goal, temp) )
+                            {
+                                it -> rift = temp[ temp.size()-1 ].cost - it->cost;
+                                it -> rift_dk = temp[ temp.size()-1 ].dk;
+                                it -> rift_k = temp[0].k + it->rift * it -> rift_dk;
+                            }else{
+                                it -> state = 2;
+                            }
+                            it->semi_rift = norm_sqrt( transform_from_node_to_point(*it), p_fun_main->local_goal );
+                        }
                     }
                     else
                     {
