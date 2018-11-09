@@ -152,11 +152,11 @@ private:
         _fun_simple -> local_grid_map.width = msg->info.width;
         _fun_simple -> local_grid_map.height = msg->info.height;
         _fun_simple -> local_grid_map.resolution = msg->info.resolution;
+
         for(int i=0; i< msg->info.width * msg->info.height; i++)
         {
             _fun_simple -> local_grid_map.data.push_back(msg->data[i]);
         }
-
         _fun_simple -> local_grid_map.size = true;
     }
 

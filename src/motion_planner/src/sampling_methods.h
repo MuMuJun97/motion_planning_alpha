@@ -52,11 +52,11 @@ public:
     double nHEADING_0 = 0;
     double nSIGMA_H = M_PI / 48;
 
-    double uRADIUS_0 = 3;
-    double uSIGMA_R = 3.3;
+    double uRADIUS_0 = 3.3;
+    double uSIGMA_R = 1.1;
 
     double uTHETA_0 = - M_PI / 2;
-    double uSIGMA_T = 0.78;
+    double uSIGMA_T = M_PI / 8;
 
     double UNSAFE_ATTENTION = 0.6;
     double NORMAL_ATTENTION = 0.4;

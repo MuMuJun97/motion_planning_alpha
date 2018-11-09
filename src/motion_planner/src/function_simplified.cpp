@@ -30,7 +30,7 @@ bool fun_simple::collision_check(type_road_point point)
     double delta_y = point.y - global_coord.y;
     std::vector<double> RT = yield_ratation_matrix( global_coord.angle, 0 );
     double tfd_x = RT[0] * delta_x + RT[1] * delta_y;
-    double tfd_y = RT[2] * delta_x + RT[3] * delta_y;
+    double tfd_y = - ( RT[2] * delta_x + RT[3] * delta_y );
 
     //TODO find the position of the point in the grid map.
     // std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] " <<
@@ -40,16 +40,16 @@ bool fun_simple::collision_check(type_road_point point)
     double map_height = local_grid_map.height * local_grid_map.resolution;
     double map_width  = local_grid_map.width * local_grid_map.resolution;
 
-    if ( fabs(tfd_x) > map_height/2 || fabs(tfd_y) > map_width/2 )
+    if ( fabs(tfd_x) > map_width/2 || fabs(tfd_y) > map_height/2 )
     {
         return false;
     }
 
     unsigned long point_height = (unsigned long) (
-        ( map_height / 2 - tfd_x ) / local_grid_map.resolution 
+        ( map_height / 2 + tfd_y ) / local_grid_map.resolution 
     );
     unsigned long point_width = (unsigned long) (
-        ( map_height / 2 + tfd_y ) / local_grid_map.resolution 
+        ( map_width / 2 + tfd_x ) / local_grid_map.resolution 
     );
     
     //TODO check if there is collision. 
@@ -210,7 +210,7 @@ bool fun_simple::add_node_into_tree(type_node_point new_node)
 void fun_simple::setup()
 {
     delta_drain = 0.1;
-    goal_size = 1;
+    goal_size = 6;
     weight_dk = 0.3;
     weight_diff_curvature = 0.3;
     weight_length = 0.4;

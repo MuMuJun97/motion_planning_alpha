@@ -68,8 +68,8 @@ bool sampling_methods::sampling_nearby_reference_path(std::vector<type_road_poin
                 int sign = sign_dist( mt );
                 if ( sign == 0 ) sign = -1;
 
-                r = sign * fabs( unsafe_radius_dist( mt ) );
-                theta = unsafe_theta_dist( mt );
+                r = fabs( unsafe_radius_dist( mt ) );
+                theta = sign * unsafe_theta_dist( mt );
                 heading = unsafe_heading_dist( mt );
             }
             else
@@ -88,7 +88,7 @@ bool sampling_methods::sampling_nearby_reference_path(std::vector<type_road_poin
         type_road_point trp = reference_path[ selected_index_in_reference_path ];
 
         sample_node.x = trp.x + r * cos( trp.angle + theta );
-
+        printf( ">>> x: %f, r: %f, angle: %f, theta: %f", trp.x, r, trp.angle, theta);
         sample_node.y = trp.y + r * sin( trp.angle + theta);
 
         sample_node.angle = trp.angle + heading;

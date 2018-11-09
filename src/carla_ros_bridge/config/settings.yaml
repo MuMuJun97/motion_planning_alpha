@@ -48,7 +48,7 @@ carla:
         RotationFrequency: 10
         UpperFovLimit: 7
         LowerFovLimit: -16
-        PositionX: 0.2
+        PositionX: 0
         PositionY: 0
         PositionZ: 2.00
         RotationPitch: 0
