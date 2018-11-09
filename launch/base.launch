@@ -7,15 +7,7 @@
   <param name ="/use_sim_time" value="true"/>
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find carla_ros_bridge)/config/carla_default_rviz.cfg.rviz"/>
 
-  <!-- Ground segmentation -->
-  <node name="ground_segmentation_config" pkg="linefit_ground_segmentation_ros" type="ground_segmentation_node">
-    <rosparam command="load" file="$(find linefit_ground_segmentation_ros)/launch/segmentation_params.yaml"/>
-    <param name="input_topic" value="/lidar_0" />
-    <param name="ground_output_topic" value="ground_cloud" />
-    <param name="obstacle_output_topic" value="obstacle_cloud" />
-  </node>
-
-  <node pkg="linefit_ground_segmentation_ros" name="ground_segmentation_node" type="ground_segmentation_node"/>
+  <!-- Obstacle SIMPLE -->
   <node pkg="simple" name="grid_test" type="grid_test" />
   
   <!-- Global planner -->

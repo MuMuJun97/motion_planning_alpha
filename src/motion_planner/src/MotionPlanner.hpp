@@ -266,7 +266,7 @@ public:
                 it = p_search_main -> parent_node;
                 for (int i = 0; i < new_nodes.size(); i++)
                 {
-                    if( p_fun_main->add_node_into_tree( new_nodes[i] ) )
+                    if ( p_fun_main->add_node_into_tree( new_nodes[i] ) )
                     {
                         printf( "add a node into tree\n" );
                         it = p_fun_main -> m_tree.append_child( it, new_nodes[i]);

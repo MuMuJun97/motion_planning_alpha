@@ -40,8 +40,8 @@ public:
         float x_x = cloud[i].x;
         float y_y = cloud[i].y;
         float z_z = cloud[i].z;
-        if(fabs(x_x) <= 40 && fabs(y_y) <= 10 && z_z < 3){
-            if( fabs(x_x) > 3 || fabs(y_y) > 1  )
+        if(fabs(x_x) <= 40 && fabs(y_y) <= 10 && z_z < 0.5 && z_z > -1.9){
+            if( fabs(x_x) > 3 || fabs(y_y) > 1.1  )
             {
               Position position(x_x, y_y);
               map.atPosition("obstacle", position) = 1;
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
   // Initialize node and publisher.
   ros::init(argc, argv, "grid_map_simple_demo");
   ros::NodeHandle nh("~");
-  std::string input_topic = "/ground_segmentation_config/obstacle_cloud";
+  std::string input_topic = "/lidar_0";
   std::string output_topic = "obstacle_grid_map";
   ros::Subscriber sub;
   OccupancyGridNode girdNode(nh, output_topic, false);
