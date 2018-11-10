@@ -420,6 +420,23 @@ bool fun_simple::yield_selected_path(
 
     std::reverse( path_its.begin(), path_its.end() );
 
+    if ( path_end -> rift < 1e100 )
+    {
+
+        type_node_point lg;
+        double k, dk, L;
+        std::cout<< "here 1"<< std::endl;
+        Clothoid::buildClothoid(
+            path_end->x, path_end->y, path_end->theta,
+            local_goal.x, local_goal.y, local_goal.angle,
+            k, dk, L );
+        lg.x = local_goal.x; lg.y = local_goal.y; lg.theta = local_goal.angle;
+        lg.k = k; lg.dk = dk; lg.L = L;
+        lg.cost = path_end->cost + lg.L;
+        tree<type_node_point>::iterator lgit = m_tree.append_child(path_end, lg);
+        path_its.push_back( lgit );
+    }
+
     std::cout<< "[IN(FUN) yield_selected_path]" << "[>>>>INFO<<<<] " <<
         "check passability of the path, path size: " << path_its.size()
     <<endl;
@@ -436,8 +453,8 @@ bool fun_simple::yield_selected_path(
         Clothoid::pointsOnClothoid(
             begin -> x, begin -> y, begin -> theta,
             end -> k, end -> dk, end -> L,
-            ceil( end -> L * WAYPOINTS_DENSITY ), X, Y, Theta
-        );
+            ceil( end -> L * WAYPOINTS_DENSITY ), X, Y, Theta);
+
         std::cout<< " built curve " << std::endl;
         X.push_back( end -> x);
         Y.push_back( end -> y);
