@@ -57,11 +57,28 @@ bool fun_simple::collision_check(type_road_point point)
     //     "check if there is a collision"
     // <<std::endl;
 
-    if ( local_grid_map.width > point_width && 
-         local_grid_map.height > point_height )
+    int cell_index = point_height*local_grid_map.width + point_width;
+
+    if( cell_index >= local_grid_map.data.size() )
+    {
+        std::cout<< "out of grid map scope" << std::endl;
+    }
+
+    if ( cell_index < local_grid_map.data.size() )
     {   
-        if (local_grid_map.data[
-                point_height*local_grid_map.width + point_width] >= 1)
+        int value = 0;
+        std::cout<< "here 5.1" << std::endl;
+        try
+        {
+            value = local_grid_map.data[ cell_index ];
+        }
+        catch( std::exception& e )
+        {
+            std::cout<< "Exception: " << e.what() << std::endl;
+            return false;
+        }
+
+        if (value >= 1)
         {
             std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] ";
             printf( 
@@ -74,12 +91,11 @@ bool fun_simple::collision_check(type_road_point point)
 
             return true;
         }
+        std::cout<< "here 5.2" << std::endl;
     }
-
     // std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] " <<
     //     "finished collision check"
     // <<std::endl;
-
     return false;
 }
 
@@ -210,7 +226,7 @@ bool fun_simple::add_node_into_tree(type_node_point new_node)
 void fun_simple::setup()
 {
     delta_drain = 0.1;
-    goal_size = 6;
+    goal_size = 2;
     weight_dk = 0.3;
     weight_diff_curvature = 0.3;
     weight_length = 0.4;
@@ -272,7 +288,7 @@ std::vector<tree<type_node_point>::iterator> fun_simple::select_path_end_nodes()
         tree<type_node_point>::iterator it;
         for( it=m_tree.begin();it!=m_tree.end();it++ )
         {   
-            if ( it->rift != 1e100 && it -> state == required_states[state_index] )
+            if ( it->rift < 1e100 && it -> state == required_states[state_index] )
             {
                 candidate_ends.push_back(it);
             }
@@ -336,10 +352,10 @@ tree<type_node_point>::iterator fun_simple::select_path_end_node(
 
         for( int j = 0; j < candidate_path.size(); j++ )
         {
-            cost_dk += candidate_path[j].dk;
+            cost_dk += fabs( candidate_path[j].dk );
             cost_k += candidate_path[j].k;
         }
-        cost_dk /= ( candidate_path.size() + 1 );
+        cost_dk /= ( candidate_path.size() + 0 );
         cost_k /= ( candidate_path.size() + 1 );
 
         double rift = candidate_ends[i]->semi_rift, rift_dk = 0, rift_k = 0;
@@ -352,7 +368,7 @@ tree<type_node_point>::iterator fun_simple::select_path_end_node(
         }
 
         path_cost.diff_curvature = cost_k + rift_k;
-        path_cost.dk = cost_dk + rift_dk;
+        path_cost.dk = cost_dk + fabs( rift_dk );
         path_cost.length = cost_L + rift;
         path_cost.index = i;
 
@@ -420,12 +436,10 @@ bool fun_simple::yield_selected_path(
 
     std::reverse( path_its.begin(), path_its.end() );
 
-    if ( path_end -> rift < 1e100 )
+    if ( path_end -> rift < 1e100 && (!is_goal(*path_end)) )
     {
-
         type_node_point lg;
         double k, dk, L;
-        std::cout<< "here 1"<< std::endl;
         Clothoid::buildClothoid(
             path_end->x, path_end->y, path_end->theta,
             local_goal.x, local_goal.y, local_goal.angle,
@@ -488,7 +502,8 @@ bool fun_simple::yield_selected_path(
                 }
                 std::cout<< " erase end " << std::endl;
                 m_tree.erase(end);
-                selected_path.clear();
+
+                selected_path[ selected_path.size()-1 ].state = 2;
 
                 std::cout<< "[IN(FUN) yield_selected_path]" << "[>>>>INFO<<<<] " <<
                     "fail to select best path"
@@ -522,6 +537,9 @@ bool fun_simple::search_best_path()
 
         return false;
     }
+
+    ros::Duration timeout(0.02);
+    ros::Time start_time = ros::Time::now();
     
     do
     {
@@ -530,7 +548,7 @@ bool fun_simple::search_best_path()
     
         selected_path_end = select_path_end_node( candidate_ends );
 
-    }while( !yield_selected_path( selected_path_end ) );
+    }while( !yield_selected_path( selected_path_end ) && ros::Time::now() - start_time < timeout );
     
     return true;
 }
@@ -607,7 +625,7 @@ bool fun_simple::repropagating()
     vehicle_loc_updated.x = vehicle_loc.x;
     vehicle_loc_updated.y = vehicle_loc.y;
 
-    if( norm_sqrt( vehicle_loc_updated, global_coord ) <= PERCISION )
+    if( norm_sqrt( vehicle_loc_updated, global_coord ) == 0 )
     {
         return true;
     }
@@ -618,9 +636,9 @@ bool fun_simple::repropagating()
     <<std::endl;
 
     double k ,dk ,L;
-    double cost = 0;
     int index = -1, selected_index = -1;
     std::vector<std::pair<double,int> > save_cost;
+    std::vector<std::pair<type_path_cost,int> > costs;
     std::vector<double> X,Y,Theta;
 
     //TODO calculate the cost from updated vehicle location to each points in 
@@ -636,48 +654,91 @@ bool fun_simple::repropagating()
             vehicle_loc_updated.y,
             vehicle_loc_updated.angle,
             tps.x, tps.y, tps.angle, k, dk, L);
-        cost = L * fun_simple::weight_length + dk * fun_simple::weight_dk +
-                dk * L * fun_simple::weight_diff_curvature;
-        index = i;
-        save_cost.push_back(std::make_pair(cost, index));
+        type_path_cost cost;
+        //TODO check steering radius of the car.
+
+        cost.length = L; cost.dk = fabs(dk); cost.diff_curvature = 2*k + dk * L;
+        costs.push_back( std::make_pair( cost, i ) );
     }
 
-    //TODO search and pick up the point that is nearest to vehicle.
-    std::sort(save_cost.begin(), save_cost.end(),smalltogreat);
-    selected_index = save_cost.begin()->second;
-
-    //TODO generate additional points on the trajectory from updated vehicle location 
-    //     to the nearest point.
-    Clothoid::buildClothoid(
-        vehicle_loc_updated.x, 
-        vehicle_loc_updated.y,
-        vehicle_loc_updated.angle,
-        selected_path.at(selected_index).x, 
-        selected_path.at(selected_index).y, 
-        selected_path.at(selected_index).angle,
-        k, dk, L
-    );
-    Clothoid::pointsOnClothoid(
-        vehicle_loc_updated.x, 
-        vehicle_loc_updated.y,
-        vehicle_loc_updated.angle,
-        k, dk, L,
-        ceil(L * WAYPOINTS_DENSITY), X,Y,Theta);
-
-    //TODO delete the useless points in the selected path.
-    selected_path.erase(
-        selected_path.begin(), 
-        selected_path.begin()+selected_index);
-
-    //TODO add the additional points to the selected path
-    for(int k = X.size()-1; k >= 0; k--)
+    int sum_dk = 1e-100, sum_k = 1e-100, sum_L = 1e-100;
+    for (int i = 0; i < costs.size(); i++)
     {
-        type_road_point tps;
-        tps.x = X[k];
-        tps.y = Y[k];
-        tps.angle = Theta[k];
-        selected_path.insert(selected_path.begin(),tps);
+        sum_L += costs[i].first.length;
+        sum_dk += costs[i].first.dk;
+        sum_k += costs[i].first.diff_curvature;
     }
+
+    for (int i = 0; i < costs.size(); i++)
+    {
+        double ctg = 
+            costs[i].first.length/sum_L * 0.3 + costs[i].first.dk/sum_dk * 0.3 
+            + costs[i].first.diff_curvature/sum_k * 0.4;
+        save_cost.push_back( std::make_pair(ctg, costs[i].second) );
+    }
+
+    //TODO search and pick up the point that is near to vehicle and passability.
+    std::sort(save_cost.begin(), save_cost.end(),smalltogreat);
+
+    bool passable = true;
+    for (int i = 0; i < save_cost.size(); i++){
+
+        selected_index = save_cost[i].second;
+
+        //TODO generate additional points on the trajectory from updated vehicle location 
+        //     to the nearest point.
+        Clothoid::buildClothoid(
+            vehicle_loc_updated.x, 
+            vehicle_loc_updated.y,
+            vehicle_loc_updated.angle,
+            selected_path.at(selected_index).x, 
+            selected_path.at(selected_index).y, 
+            selected_path.at(selected_index).angle,
+            k, dk, L
+        );
+        Clothoid::pointsOnClothoid(
+            vehicle_loc_updated.x, 
+            vehicle_loc_updated.y,
+            vehicle_loc_updated.angle,
+            k, dk, L,
+            ceil(L * WAYPOINTS_DENSITY), X,Y,Theta);
+        
+        //TODO check passability of repropagating curve.
+        passable = true;
+        for(int k = X.size()-1; k >= 0; k--)
+        {
+            type_road_point tps;
+            tps.x = X[k];
+            tps.y = Y[k];
+            tps.angle = Theta[k];
+            if ( !passability_check( tps ) )
+            {
+                passable = false;
+            }
+        }
+        if ( !passable ) continue;
+
+        //TODO delete the useless points in the selected path.
+        selected_path.erase(
+            selected_path.begin(), 
+            selected_path.begin()+selected_index);
+
+        //TODO add the additional points to the selected path
+        for(int k = X.size()-1; k >= 0; k--)
+        {
+            type_road_point tps;
+            tps.x = X[k];
+            tps.y = Y[k];
+            tps.angle = Theta[k];
+            selected_path.insert(selected_path.begin(),tps);
+        }
+
+        if ( passable ) break;
+
+    }
+
+    if ( !passable ) return false;
+    
     return true;
 }
 

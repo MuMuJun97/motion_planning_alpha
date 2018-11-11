@@ -7,7 +7,9 @@
 #include <iostream>
 #include <random>
 #include <math.h>
+#include <exception>
 #include "utility_func.hpp"
+#include "ros/ros.h"
 using namespace Clothoid;
 using namespace Eigen;
 using namespace utility_functions;

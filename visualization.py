@@ -23,7 +23,7 @@ def show_tree():
             child = [ child_x, child_y ]
             children.append( child )
 
-    for no in range( len( sums ) ):
+    for no in []: #range( len( sums ) )
         gap = sum(sums[0:no])
         number = sums[no]
         p_parts = parents[gap: gap + number]
@@ -49,7 +49,7 @@ def show_waypoints():
             point = [ point_x, point_y ]
             points.append( point )
 
-    for no in [1,2]:
+    for no in range( len( sums ) ):
         points_X = []
         points_Y = []
         gap = sum(sums[0:no])
