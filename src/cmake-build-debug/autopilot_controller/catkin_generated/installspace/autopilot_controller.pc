@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: autopilot_controller
+Description: Description of autopilot_controller
+Version: 0.0.1
+Cflags: -I/usr/include
+Libs: -L/usr/local/lib -lautopilot_controller /usr/lib/x86_64-linux-gnu/libboost_system.so /usr/lib/x86_64-linux-gnu/libglut.so /usr/lib/x86_64-linux-gnu/libXmu.so /usr/lib/x86_64-linux-gnu/libXi.so
+Requires: autopilot_msgs boost roscpp rospy std_msgs tf

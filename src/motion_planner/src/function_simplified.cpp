@@ -59,7 +59,7 @@ bool fun_simple::collision_check(type_road_point point)
 
     int cell_index = point_height*local_grid_map.width + point_width;
 
-    if( cell_index >= local_grid_map.data.size() )
+    if( cell_index >= local_grid_map.data.size() && cell_index < 0 )
     {
         std::cout<< "out of grid map scope" << std::endl;
     }
@@ -70,6 +70,7 @@ bool fun_simple::collision_check(type_road_point point)
         std::cout<< "here 5.1" << std::endl;
         try
         {
+            std::cout<< "grid pos: " << cell_index <<std::endl;
             value = local_grid_map.data[ cell_index ];
         }
         catch( std::exception& e )

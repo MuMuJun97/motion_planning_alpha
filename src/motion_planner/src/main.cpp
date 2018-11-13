@@ -149,6 +149,8 @@ private:
     void grid_map_callback(
         const nav_msgs::OccupancyGrid::ConstPtr& msg
     ){
+        _fun_simple -> local_grid_map.data.clear();
+
         _fun_simple -> local_grid_map.width = msg->info.width;
         _fun_simple -> local_grid_map.height = msg->info.height;
         _fun_simple -> local_grid_map.resolution = msg->info.resolution;

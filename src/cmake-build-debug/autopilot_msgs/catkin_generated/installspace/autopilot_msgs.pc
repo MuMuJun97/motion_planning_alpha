@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: autopilot_msgs
+Description: Description of autopilot_msgs
+Version: 1.0.0
+Cflags: -I/usr/local/include
+Libs: -L/usr/local/lib 
+Requires: message_runtime std_msgs sensor_msgs nav_msgs geometry_msgs
