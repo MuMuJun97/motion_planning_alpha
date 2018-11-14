@@ -155,7 +155,7 @@ public://parameters used in the planner
       /*
        * goal region limitation
        */
-      double goal_size;
+      double goal_size = 2;
       /*
        * weight coff for the selection of the parameters
        */

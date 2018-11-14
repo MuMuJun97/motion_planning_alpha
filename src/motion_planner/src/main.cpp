@@ -84,8 +84,10 @@ public:
                 selected_path.at(i).y;
             
             waypoints_msg.points.push_back( routenode );
-            waypoints_msg.speeds.push_back( selected_path.at(i).speed );
+            waypoints_msg.speeds.push_back( 5 );
+            std::cout<< "speed is: "<< selected_path.at(i).speed<< " ";
         }
+        std::cout<< std::endl;
 
         return waypoints_msg;
     }
@@ -120,27 +122,27 @@ private:
     void initializeSubscribers()
     {
         ros::Subscriber sub_0 = _nh.subscribe(
-            "/grid_test/obstacle_grid_map", 10, &Listener::grid_map_callback, this
+            "/grid_test/obstacle_grid_map", 1, &Listener::grid_map_callback, this
         );
         _subs.push_back( make_pair( "/grid_test/obstacle_grid_map", sub_0 ) );
 
         ros::Subscriber sub_1 = _nh.subscribe(
-            "/route/path", 10, &Listener::global_path_callback, this
+            "/route/path", 1, &Listener::global_path_callback, this
         );
         _subs.push_back( make_pair( "/route/path", sub_1 ) );
 
         ros::Subscriber sub_2 = _nh.subscribe(
-            "/localization/motion_state", 10, &Listener::vehicle_odometry_callback, this
+            "/localization/motion_state", 1, &Listener::vehicle_odometry_callback, this
         );
         _subs.push_back( make_pair( "/localization/motion_state", sub_2 ) );
 
         ros::Subscriber sub_3 = _nh.subscribe(
-            "/motion/goal", 10, &Listener::motion_goal_callback, this
+            "/motion/goal", 1, &Listener::motion_goal_callback, this
         );
         _subs.push_back( make_pair( "/motion/goal", sub_3 ) );
 
         ros::Subscriber sub_4 = _nh.subscribe(
-            "motion/speed", 10, &Listener::motion_speed_callback, this
+            "motion/speed", 1, &Listener::motion_speed_callback, this
         );
         _subs.push_back( make_pair( "/motion/speed", sub_4 ) );
 
@@ -150,7 +152,6 @@ private:
         const nav_msgs::OccupancyGrid::ConstPtr& msg
     ){
         _fun_simple -> local_grid_map.data.clear();
-
         _fun_simple -> local_grid_map.width = msg->info.width;
         _fun_simple -> local_grid_map.height = msg->info.height;
         _fun_simple -> local_grid_map.resolution = msg->info.resolution;
@@ -208,13 +209,13 @@ private:
         const autopilot_msgs::MotionState::ConstPtr& msg
     ){
         _fun_simple -> vehicle_loc.x = msg -> odom.pose.pose.position.x;
-        _fun_simple -> vehicle_loc.y = fabs( msg -> odom.pose.pose.position.y );
+        _fun_simple -> vehicle_loc.y = msg -> odom.pose.pose.position.y;
 
         tf::Quaternion quat(
-        msg->odom.pose.pose.orientation.x,
-        msg->odom.pose.pose.orientation.y,
-        msg->odom.pose.pose.orientation.z,
-        msg->odom.pose.pose.orientation.w
+            msg->odom.pose.pose.orientation.x,
+            msg->odom.pose.pose.orientation.y,
+            msg->odom.pose.pose.orientation.z,
+            msg->odom.pose.pose.orientation.w
         );
         tf::Matrix3x3 matrix3x3(quat);
         double roll, pitch, yaw;

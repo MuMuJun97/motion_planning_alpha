@@ -230,6 +230,13 @@ public:
                 p_fun_main->m_tree.begin(), p_fun_main->local_goal, temp) )
         {
             p_fun_main->m_tree.begin() -> rift = temp[ temp.size()-1 ].cost;
+            p_fun_main->m_tree.begin() -> rift_dk = temp[ temp.size()-1 ].dk;
+            p_fun_main->m_tree.begin() -> rift_k = 
+                temp[0].k + p_fun_main->m_tree.begin()->rift * p_fun_main->m_tree.begin() -> rift_dk;
+        }
+        else
+        {
+            p_fun_main->m_tree.begin() -> state = 2;
         }
         p_fun_main->m_tree.begin()->semi_rift = 
             norm_sqrt( transform_from_node_to_point( 

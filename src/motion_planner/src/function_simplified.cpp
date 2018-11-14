@@ -279,7 +279,7 @@ std::vector<tree<type_node_point>::iterator> fun_simple::select_path_end_nodes()
         required_states[1] = 2; required_states[2] = 1;
     }
     int state_index = 0;
-    while( candidate_ends.empty() || state_index < 3 )
+    while( candidate_ends.empty() && state_index < 3 )
     {
         //TODO select node with free state and nearby the local goal as possible end nodes
         std::cout<< "[IN(FUN) select_path_end_nodes]" << "[>>>>INFO<<<<] " <<
@@ -345,8 +345,12 @@ tree<type_node_point>::iterator fun_simple::select_path_end_node(
             pit = m_tree.parent( pit );
         }
 
-        double end_k = candidate_path[0].k + 
+        double end_k = 0;
+        if ( candidate_path.size() >= 1 )
+        {
+            end_k = candidate_path[0].k + 
             candidate_path[0].dk * ( candidate_path[0].L - candidate_path[1].L );
+        }
         double cost_dk = 0;
         double cost_k = end_k;
         double cost_L = candidate_ends[i] -> L;
@@ -356,8 +360,6 @@ tree<type_node_point>::iterator fun_simple::select_path_end_node(
             cost_dk += fabs( candidate_path[j].dk );
             cost_k += candidate_path[j].k;
         }
-        cost_dk /= ( candidate_path.size() + 0 );
-        cost_k /= ( candidate_path.size() + 1 );
 
         double rift = candidate_ends[i]->semi_rift, rift_dk = 0, rift_k = 0;
 
@@ -368,9 +370,13 @@ tree<type_node_point>::iterator fun_simple::select_path_end_node(
             rift_dk = candidate_ends[i]->rift_dk;
         }
 
-        path_cost.diff_curvature = cost_k + rift_k;
-        path_cost.dk = cost_dk + fabs( rift_dk );
-        path_cost.length = cost_L + rift;
+        cost_dk += fabs( rift_dk );
+        cost_k += rift_k;
+        cost_L += rift;
+
+        path_cost.diff_curvature = cost_k / ( candidate_path.size() + 2 );
+        path_cost.dk = cost_dk / ( candidate_path.size() + 1 ) ;
+        path_cost.length = cost_L;
         path_cost.index = i;
 
         candidate_paths_costs.push_back(path_cost);
@@ -434,6 +440,7 @@ bool fun_simple::yield_selected_path(
         path_its.push_back( it );
         it = m_tree.parent( it );
     }
+    std::cout<<std::endl;
 
     std::reverse( path_its.begin(), path_its.end() );
 
@@ -562,6 +569,22 @@ void fun_simple::trim_tree()
     tree<type_node_point>::iterator it, first_child;
     
     it = selected_path_end;
+
+    if ( it == m_tree.begin() )
+    {
+        m_tree.clear();
+        tree<type_node_point>::iterator top,first;
+        type_node_point pts;
+        pts.x=global_coord.x;
+        pts.y=global_coord.y;
+        pts.theta=global_coord.angle;
+        pts.cost=0;
+        pts.flag_effective=true;
+        top=m_tree.begin();
+        first=m_tree.insert(top,pts);
+        return;
+    }
+
     while( m_tree.is_valid(it) && m_tree.parent(it) != m_tree.begin() )
     {
         it = m_tree.parent(it);
@@ -757,8 +780,15 @@ void fun_simple::set_local_reference_path()
     int index = -1;
     for (int i = 0; i < global_path.size(); i++)
     {
-        double temp = norm_sqrt(global_coord, global_path[i]);
-        if ( temp <= PERCISION*2 )
+        type_road_point gpp = global_path[i];
+        double delta_x = gpp.x - global_coord.x;
+        double delta_y = gpp.y - global_coord.y;
+        std::vector<double> RT = yield_ratation_matrix( global_coord.angle, 0 );
+        double tfd_x = RT[0] * delta_x + RT[1] * delta_y;
+        double tfd_y = - ( RT[2] * delta_x + RT[3] * delta_y );
+        
+        // double temp = norm_sqrt(global_coord, global_path[i]);
+        if ( fabs(tfd_x) <= PERCISION )
         {
             index = i;
             break;
@@ -946,6 +976,10 @@ type_road_point fun_simple::yield_joint_by_distance(
 void fun_simple::yield_expected_speeds()
 {
     int mode = 1;
+    if ( selected_path.size() < 1 )
+    {
+        std::cout<< " selected_path size is 0, no need to yield speeds \n"; 
+    }
     type_road_point the_end_point = selected_path[ selected_path.size() - 1 ];
     if ( norm_sqrt( goal_point, the_end_point ) <= goal_size ||
          the_end_point.state == 2)

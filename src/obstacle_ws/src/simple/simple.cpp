@@ -19,7 +19,7 @@ public:
   OccupancyGridNode(ros::NodeHandle& nh,
                     const std::string& grid_map_topic,
                     const bool& latch = false){
-    obstacle_grid_map = nh.advertise< nav_msgs::OccupancyGrid>(grid_map_topic, 1, latch);
+    obstacle_grid_map = nh.advertise< nav_msgs::OccupancyGrid>(grid_map_topic, 1, false);
   }
 
   void grid_call_back(const pcl::PointCloud<pcl::PointXYZ>& cloud){

@@ -2,7 +2,7 @@ carla:
   host: localhost
   port: 2000
   QualityLevel: Low  # Low or Epic
-  SynchronousMode: True
+  SynchronousMode: False # True
   SendNonPlayerAgentsInfo: True
   NumberOfVehicles: 1
   NumberOfPedestrians: 1

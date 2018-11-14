@@ -49,7 +49,7 @@ def show_waypoints():
             point = [ point_x, point_y ]
             points.append( point )
 
-    for no in range( len( sums ) ):
+    for no in range( len( sums ) ): #range( len( sums ) )
         points_X = []
         points_Y = []
         gap = sum(sums[0:no])
@@ -98,7 +98,7 @@ def show_positions():
         for line in pos_file:
             splits = line.split( '\n' )[0].split( ',' )
             position_x = float( splits[0] ) 
-            position_y = abs( float( splits[1] ) )
+            position_y = float( splits[1] )
             position = [ position_x, position_y ]
             positions_X.append( position_x )
             positions_Y.append( position_y )

@@ -65,7 +65,7 @@ def Loc_callback(Location):
     print("Location callback")
     flag = True
     Location.x = Location.x / (1 + beta)
-    Location.y = - Location.y / (1 + alpha)
+    Location.y = Location.y / (1 + alpha)
     for i in range(len(list_points)):
         if Location.x == list_points[i][0] and Location.y == list_points[i][1]:
             flag = False
@@ -112,9 +112,9 @@ def listener():
 
 
 def talker():
-    pub = rospy.Publisher('/route/path', RoutePath, queue_size=5000, latch=True)
-    motion_goal_pub = rospy.Publisher( '/motion/goal', RouteNode, queue_size=5000, latch=True )
-    visualization_pub = rospy.Publisher('/route/path_visualization', MarkerArray, queue_size=5000, latch=True)
+    pub = rospy.Publisher('/route/path', RoutePath, queue_size=1, latch=True)
+    motion_goal_pub = rospy.Publisher( '/motion/goal', RouteNode, queue_size=1, latch=True )
+    visualization_pub = rospy.Publisher('/route/path_visualization', MarkerArray, queue_size=1, latch=True)
     path_arrows = MarkerArray()
     rp = RoutePath()
     final_path = rp.goals
@@ -123,7 +123,7 @@ def talker():
         node = RouteNode()
 
         node.x = list_points[i][0] * (1 + beta)
-        node.y = - list_points[i][1] * (1 + alpha)
+        node.y = list_points[i][1] * (1 + alpha)
         node.latitude = list_points[i][2]
         node.longitude = list_points[i][3]
         final_path.append(node)

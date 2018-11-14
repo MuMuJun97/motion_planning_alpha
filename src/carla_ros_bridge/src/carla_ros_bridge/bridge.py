@@ -140,10 +140,10 @@ class CarlaRosBridge(object):
         if topic not in self.publishers:
             if topic == 'tf':
                 self.publishers[topic] = rospy.Publisher(
-                    topic, TFMessage, queue_size=100)
+                    topic, TFMessage, queue_size=1, latch=False)
             else:
                 self.publishers[topic] = rospy.Publisher(
-                    topic, type(msg), queue_size=10)
+                    topic, type(msg), queue_size=1, latch=False)
 
         if topic == 'tf':
             # transform are merged in same message
@@ -267,14 +267,14 @@ class CarlaRosBridge(object):
         location = measurements.player_measurements.transform.location
 
         quat = tf.transformations.quaternion_from_euler(
-            np.radians(rotation.roll),
+            np.radians( - rotation.roll),
             np.radians(rotation.pitch),
-            np.radians(rotation.yaw)
+            np.radians( - rotation.yaw)
         )
 
         odometry = Odometry()
         odometry.pose.pose.position.x = location.x
-        odometry.pose.pose.position.y = location.y
+        odometry.pose.pose.position.y = - location.y
         odometry.pose.pose.position.z = location.z
         odometry.pose.pose.orientation.x = quat[0]
         odometry.pose.pose.orientation.y = quat[1]
@@ -282,7 +282,7 @@ class CarlaRosBridge(object):
         odometry.pose.pose.orientation.w = quat[3]
         
         odometry.twist.twist.linear.x = current_velocity[0]
-        odometry.twist.twist.linear.y = current_velocity[1]
+        odometry.twist.twist.linear.y = - current_velocity[1]
         odometry.twist.twist.linear.z = current_velocity[2]
 
         self.player_odometry = odometry
@@ -293,9 +293,9 @@ class CarlaRosBridge(object):
         acceleration = measurements.player_measurements.acceleration
         rotation = measurements.player_measurements.transform.rotation
         quat = tf.transformations.quaternion_from_euler(
-            np.radians(rotation.roll),
+            np.radians( - rotation.roll),
             np.radians(rotation.pitch),
-            np.radians(rotation.yaw - 90)
+            np.radians( - rotation.yaw - 90 )
         )
         imu = Imu()
         imu.orientation.x = quat[0]
@@ -303,7 +303,7 @@ class CarlaRosBridge(object):
         imu.orientation.z = quat[2]
         imu.orientation.w = quat[3]
 
-        imu.angular_velocity.x = (
+        imu.angular_velocity.x =  - (
             np.radians( rotation.roll - last_rotation[0] ) /
             ( measurements.game_timestamp - last_rotation[3] ) * 1e3
         )
@@ -311,13 +311,13 @@ class CarlaRosBridge(object):
             np.radians( rotation.pitch - last_rotation[1] ) /
             ( measurements.game_timestamp - last_rotation[3] ) * 1e3
         )
-        imu.angular_velocity.z = (
+        imu.angular_velocity.z = - (
             np.radians( rotation.yaw - last_rotation[2] ) /
             ( measurements.game_timestamp - last_rotation[3] ) * 1e3
         )
 
         imu.linear_acceleration.x = acceleration.x
-        imu.linear_acceleration.y = acceleration.y
+        imu.linear_acceleration.y = - acceleration.y
         imu.linear_acceleration.z = acceleration.z
 
         # generate odometry msg

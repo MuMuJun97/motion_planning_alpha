@@ -2,187 +2,187 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="true">
     <generated>
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrTrack" />
-      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_RouteMap" />
-      <config projectName="Project" targetName="visualization_msgs_generate_messages_nodejs" />
-      <config projectName="Project" targetName="nav_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="roscpp_generate_messages_py" />
-      <config projectName="Project" targetName="tf2_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="_run_tests_cv_bridge_gtest_cv_bridge-utest" />
-      <config projectName="Project" targetName="run_tests_cv_bridge" />
-      <config projectName="Project" targetName="actionlib_generate_messages_nodejs" />
-      <config projectName="Project" targetName="clean_test_results" />
-      <config projectName="Project" targetName="nav_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="visualization_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="delphi_esr_msgs_gencpp" />
-      <config projectName="Project" targetName="octomap_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="_run_tests_cv_bridge_nosetests_python_bindings.py" />
-      <config projectName="Project" targetName="octomap_msgs_generate_messages_nodejs" />
-      <config projectName="Project" targetName="geometry_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="delphi_esr_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="run_tests_cv_bridge_gtest_cv_bridge-utest" />
-      <config projectName="Project" targetName="map_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="autopilot_msgs_gennodejs" />
-      <config projectName="Project" targetName="octomap_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="geometry_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="autopilot_msgs_genlisp" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrTrackMotionPower" />
-      <config projectName="Project" targetName="map_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="autopilot_msgs_generate_messages" />
-      <config projectName="Project" targetName="actionlib_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="tf2_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="autopilot_msgs_generate_messages_nodejs" />
-      <config projectName="Project" targetName="topic_tools_generate_messages_eus" />
-      <config projectName="Project" targetName="cv_bridge-utest" />
-      <config projectName="Project" targetName="run_tests_cv_bridge_nosetests_enumerants.py" />
-      <config projectName="Project" targetName="image_geometry" />
-      <config projectName="Project" targetName="actionlib_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="nav_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_MotionState" />
-      <config projectName="Project" targetName="delphi_esr_msgs_geneus" />
-      <config projectName="Project" targetName="_catkin_empty_exported_target" />
-      <config projectName="Project" targetName="octomap_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="tf2_msgs_generate_messages_nodejs" />
-      <config projectName="Project" targetName="actionlib_generate_messages_py" />
-      <config projectName="Project" targetName="autopilot_controller_controller_watchdog_controller_watchdog" />
-      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_nodejs" />
-      <config projectName="Project" targetName="actionlib_generate_messages_eus" />
-      <config projectName="Project" targetName="roscpp_generate_messages_nodejs" />
-      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="_run_tests_image_geometry" />
-      <config projectName="Project" targetName="cv_bridge_boost" />
-      <config projectName="Project" targetName="download_extra_data" />
-      <config projectName="Project" targetName="autopilot_controller_common_common" />
-      <config projectName="Project" targetName="run_tests_cv_bridge_nosetests_python_bindings.py" />
-      <config projectName="Project" targetName="clean_test_results_image_geometry" />
-      <config projectName="Project" targetName="image_geometry-utest" />
-      <config projectName="Project" targetName="map_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="std_srvs_generate_messages_cpp" />
-      <config projectName="Project" targetName="geometry_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_Map2WGS" />
-      <config projectName="Project" targetName="geometry_msgs_generate_messages_nodejs" />
-      <config projectName="Project" targetName="actionlib_generate_messages_lisp" />
-      <config projectName="Project" targetName="actionlib_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="cv_bridge" />
-      <config projectName="Project" targetName="run_tests_image_geometry_gtest_image_geometry-utest" />
-      <config projectName="Project" targetName="motion_planner" />
-      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_RouteNode" />
-      <config projectName="Project" targetName="actionlib_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="sensor_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrValid1" />
-      <config projectName="Project" targetName="std_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrValid2" />
-      <config projectName="Project" targetName="_run_tests_cv_bridge_gtest" />
-      <config projectName="Project" targetName="run_tests_cv_bridge_nosetests_conversions.py" />
-      <config projectName="Project" targetName="topic_tools_generate_messages_py" />
-      <config projectName="Project" targetName="actionlib_generate_messages_cpp" />
-      <config projectName="Project" targetName="tf2_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="gmock_main" />
-      <config projectName="Project" targetName="_run_tests_cv_bridge" />
-      <config projectName="Project" targetName="gtest_main" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus1" />
-      <config projectName="Project" targetName="_run_tests_image_geometry_nosetests_directed.py" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus3" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus2" />
-      <config projectName="Project" targetName="std_srvs_generate_messages_eus" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus5" />
-      <config projectName="Project" targetName="run_tests_image_geometry" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus4" />
-      <config projectName="Project" targetName="AX7controller" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus7" />
-      <config projectName="Project" targetName="run_tests_cv_bridge_gtest" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus6" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus9" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus8" />
-      <config projectName="Project" targetName="sensor_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_RoutePath" />
-      <config projectName="Project" targetName="autopilot_msgs_geneus" />
-      <config projectName="Project" targetName="grid_map_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="autopilot_map_server_map_server" />
-      <config projectName="Project" targetName="autopilot_msgs_genpy" />
-      <config projectName="Project" targetName="visualization_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="tf_generate_messages_nodejs" />
-      <config projectName="Project" targetName="delphi_esr_msgs_genlisp" />
-      <config projectName="Project" targetName="delphi_esr_msgs_gennodejs" />
-      <config projectName="Project" targetName="clean_test_results_cv_bridge" />
-      <config projectName="Project" targetName="tf_generate_messages_eus" />
-      <config projectName="Project" targetName="topic_tools_generate_messages_nodejs" />
-      <config projectName="Project" targetName="nav_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="sensor_msgs_generate_messages_nodejs" />
-      <config projectName="Project" targetName="std_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="autopilot_msgs_gencpp" />
-      <config projectName="Project" targetName="gtest" />
-      <config projectName="Project" targetName="std_msgs_generate_messages_nodejs" />
-      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="run_tests_image_geometry_gtest" />
-      <config projectName="Project" targetName="sensor_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="std_srvs_generate_messages_nodejs" />
-      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_RouteArea" />
-      <config projectName="Project" targetName="autopilot_map_server_rtk_mapping" />
-      <config projectName="Project" targetName="std_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="tf_generate_messages_cpp" />
-      <config projectName="Project" targetName="delphi_esr_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="autopilot_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrVehicle2" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrVehicle3" />
-      <config projectName="Project" targetName="roscpp_generate_messages_eus" />
-      <config projectName="Project" targetName="gmock" />
-      <config projectName="Project" targetName="doxygen" />
-      <config projectName="Project" targetName="autopilot_controller_controller_Controller" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrVehicle1" />
-      <config projectName="Project" targetName="_run_tests_cv_bridge_nosetests_enumerants.py" />
-      <config projectName="Project" targetName="_run_tests_image_geometry_gtest_image_geometry-utest" />
-      <config projectName="Project" targetName="tests" />
-      <config projectName="Project" targetName="std_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="octomap_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="grid_test" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrVehicle4" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrVehicle5" />
-      <config projectName="Project" targetName="std_srvs_generate_messages_py" />
-      <config projectName="Project" targetName="grid_map_msgs_generate_messages_nodejs" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrEthTx" />
-      <config projectName="Project" targetName="delphi_esr_msgs_genpy" />
-      <config projectName="Project" targetName="_run_tests_cv_bridge_nosetests" />
-      <config projectName="Project" targetName="run_tests" />
-      <config projectName="Project" targetName="roscpp_generate_messages_cpp" />
-      <config projectName="Project" targetName="actionlib_msgs_generate_messages_nodejs" />
-      <config projectName="Project" targetName="topic_tools_generate_messages_cpp" />
-      <config projectName="Project" targetName="delphi_esr_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="topic_tools_generate_messages_lisp" />
-      <config projectName="Project" targetName="_run_tests_image_geometry_gtest" />
       <config projectName="Project" targetName="grid_map_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="tf2_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="autopilot_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="sensor_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="autopilot_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="map_msgs_generate_messages_py" />
-      <config projectName="Project" targetName="run_tests_cv_bridge_nosetests" />
-      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_WayPoints" />
-      <config projectName="Project" targetName="map_msgs_generate_messages_nodejs" />
-      <config projectName="Project" targetName="std_srvs_generate_messages_lisp" />
-      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_Location" />
-      <config projectName="Project" targetName="tf_generate_messages_lisp" />
-      <config projectName="Project" targetName="delphi_esr_msgs_generate_messages" />
-      <config projectName="Project" targetName="_run_tests_image_geometry_nosetests" />
-      <config projectName="Project" targetName="grid_map_msgs_generate_messages_lisp" />
-      <config projectName="Project" targetName="nav_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="gmock" />
       <config projectName="Project" targetName="_run_tests_cv_bridge_nosetests_conversions.py" />
-      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_WGS2Map" />
-      <config projectName="Project" targetName="roscpp_generate_messages_lisp" />
-      <config projectName="Project" targetName="grid_map_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="visualization_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="visualization_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="tf2_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="_run_tests_image_geometry_gtest" />
+      <config projectName="Project" targetName="roscpp_generate_messages_cpp" />
+      <config projectName="Project" targetName="actionlib_generate_messages_eus" />
+      <config projectName="Project" targetName="gtest_main" />
+      <config projectName="Project" targetName="nav_msgs_generate_messages_eus" />
+      <config projectName="Project" targetName="cv_bridge-utest" />
+      <config projectName="Project" targetName="clean_test_results_cv_bridge" />
+      <config projectName="Project" targetName="autopilot_controller_controller_Controller" />
+      <config projectName="Project" targetName="std_srvs_generate_messages_py" />
+      <config projectName="Project" targetName="tf_generate_messages_eus" />
+      <config projectName="Project" targetName="delphi_esr_msgs_gennodejs" />
+      <config projectName="Project" targetName="octomap_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrTrack" />
+      <config projectName="Project" targetName="run_tests_image_geometry_nosetests_directed.py" />
+      <config projectName="Project" targetName="autopilot_controller_common_common" />
+      <config projectName="Project" targetName="doxygen" />
+      <config projectName="Project" targetName="octomap_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="autopilot_map_server_rtk_mapping" />
+      <config projectName="Project" targetName="topic_tools_generate_messages_eus" />
+      <config projectName="Project" targetName="actionlib_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_RouteMap" />
+      <config projectName="Project" targetName="octomap_msgs_generate_messages_cpp" />
+      <config projectName="Project" targetName="_run_tests_cv_bridge_nosetests" />
+      <config projectName="Project" targetName="run_tests_cv_bridge_nosetests" />
+      <config projectName="Project" targetName="tf_generate_messages_nodejs" />
+      <config projectName="Project" targetName="autopilot_msgs_generate_messages" />
+      <config projectName="Project" targetName="topic_tools_generate_messages_py" />
+      <config projectName="Project" targetName="grid_map_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="clean_test_results" />
+      <config projectName="Project" targetName="image_geometry" />
+      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="std_msgs_generate_messages_eus" />
+      <config projectName="Project" targetName="autopilot_msgs_genpy" />
+      <config projectName="Project" targetName="cv_bridge" />
+      <config projectName="Project" targetName="actionlib_generate_messages_py" />
+      <config projectName="Project" targetName="visualization_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="run_tests_cv_bridge_gtest_cv_bridge-utest" />
+      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="actionlib_generate_messages_lisp" />
+      <config projectName="Project" targetName="delphi_esr_msgs_genlisp" />
+      <config projectName="Project" targetName="actionlib_msgs_generate_messages_eus" />
+      <config projectName="Project" targetName="visualization_msgs_generate_messages_cpp" />
+      <config projectName="Project" targetName="autopilot_msgs_gennodejs" />
+      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_eus" />
+      <config projectName="Project" targetName="_run_tests_cv_bridge_nosetests_enumerants.py" />
+      <config projectName="Project" targetName="map_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="actionlib_generate_messages_cpp" />
+      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_WayPoints" />
+      <config projectName="Project" targetName="sensor_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrValid2" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrValid1" />
+      <config projectName="Project" targetName="std_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus2" />
+      <config projectName="Project" targetName="nav_msgs_generate_messages_cpp" />
+      <config projectName="Project" targetName="grid_test" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus5" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus6" />
+      <config projectName="Project" targetName="run_tests_cv_bridge_nosetests_python_bindings.py" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus9" />
+      <config projectName="Project" targetName="delphi_esr_msgs_generate_messages_cpp" />
+      <config projectName="Project" targetName="tf_generate_messages_cpp" />
+      <config projectName="Project" targetName="delphi_esr_msgs_generate_messages" />
+      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="std_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="clean_test_results_image_geometry" />
+      <config projectName="Project" targetName="run_tests_image_geometry_gtest_image_geometry-utest" />
+      <config projectName="Project" targetName="sensor_msgs_generate_messages_eus" />
+      <config projectName="Project" targetName="_catkin_empty_exported_target" />
+      <config projectName="Project" targetName="run_tests" />
       <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_RouteEdge" />
+      <config projectName="Project" targetName="delphi_esr_msgs_geneus" />
+      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_Location" />
+      <config projectName="Project" targetName="run_tests_cv_bridge_nosetests_conversions.py" />
+      <config projectName="Project" targetName="autopilot_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="geometry_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="autopilot_msgs_generate_messages_eus" />
+      <config projectName="Project" targetName="tf2_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="run_tests_cv_bridge_gtest" />
+      <config projectName="Project" targetName="run_tests_image_geometry_gtest" />
+      <config projectName="Project" targetName="geometry_msgs_generate_messages_cpp" />
+      <config projectName="Project" targetName="std_msgs_generate_messages_cpp" />
+      <config projectName="Project" targetName="gtest" />
+      <config projectName="Project" targetName="visualization_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="sensor_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus7" />
+      <config projectName="Project" targetName="delphi_esr_msgs_generate_messages_eus" />
+      <config projectName="Project" targetName="std_srvs_generate_messages_eus" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus4" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus3" />
+      <config projectName="Project" targetName="autopilot_msgs_geneus" />
+      <config projectName="Project" targetName="gmock_main" />
+      <config projectName="Project" targetName="actionlib_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="AX7controller" />
+      <config projectName="Project" targetName="run_tests_cv_bridge_nosetests_enumerants.py" />
       <config projectName="Project" targetName="delphi_esr_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="actionlib_msgs_generate_messages_cpp" />
+      <config projectName="Project" targetName="_run_tests_image_geometry" />
+      <config projectName="Project" targetName="autopilot_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="rosgraph_msgs_generate_messages_cpp" />
+      <config projectName="Project" targetName="delphi_esr_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="tests" />
+      <config projectName="Project" targetName="_run_tests_cv_bridge" />
+      <config projectName="Project" targetName="geometry_msgs_generate_messages_eus" />
+      <config projectName="Project" targetName="tf2_msgs_generate_messages_cpp" />
+      <config projectName="Project" targetName="topic_tools_generate_messages_nodejs" />
+      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_WGS2Map" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_TrackMotionPower" />
+      <config projectName="Project" targetName="run_tests_image_geometry" />
+      <config projectName="Project" targetName="autopilot_controller_controller_watchdog_controller_watchdog" />
+      <config projectName="Project" targetName="cv_bridge_boost" />
+      <config projectName="Project" targetName="tf2_msgs_generate_messages_eus" />
+      <config projectName="Project" targetName="image_geometry-utest" />
+      <config projectName="Project" targetName="autopilot_map_server_map_server" />
+      <config projectName="Project" targetName="sensor_msgs_generate_messages_cpp" />
+      <config projectName="Project" targetName="autopilot_msgs_genlisp" />
+      <config projectName="Project" targetName="nav_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="_run_tests_cv_bridge_nosetests_python_bindings.py" />
+      <config projectName="Project" targetName="topic_tools_generate_messages_lisp" />
+      <config projectName="Project" targetName="delphi_esr_msgs_gencpp" />
+      <config projectName="Project" targetName="octomap_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="roscpp_generate_messages_py" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus1" />
+      <config projectName="Project" targetName="std_srvs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="tf2_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="roscpp_generate_messages_eus" />
+      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_RouteNode" />
       <config projectName="Project" targetName="run_tests_image_geometry_nosetests" />
       <config projectName="Project" targetName="autopilot_msgs_generate_messages_cpp" />
-      <config projectName="Project" targetName="geometry_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_TrackMotionPower" />
-      <config projectName="Project" targetName="delphi_esr_msgs_generate_messages_eus" />
-      <config projectName="Project" targetName="run_tests_image_geometry_nosetests_directed.py" />
+      <config projectName="Project" targetName="autopilot_msgs_gencpp" />
+      <config projectName="Project" targetName="sensor_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="run_tests_cv_bridge" />
+      <config projectName="Project" targetName="motion_planner" />
+      <config projectName="Project" targetName="geometry_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="delphi_esr_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="visualization_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="std_srvs_generate_messages_cpp" />
+      <config projectName="Project" targetName="autopilot_msgs_generate_messages_py" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrEthTx" />
+      <config projectName="Project" targetName="grid_map_msgs_generate_messages_eus" />
+      <config projectName="Project" targetName="grid_map_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="_run_tests_image_geometry_nosetests_directed.py" />
+      <config projectName="Project" targetName="topic_tools_generate_messages_cpp" />
+      <config projectName="Project" targetName="geometry_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="delphi_esr_msgs_genpy" />
+      <config projectName="Project" targetName="octomap_msgs_generate_messages_eus" />
+      <config projectName="Project" targetName="_run_tests_image_geometry_nosetests" />
+      <config projectName="Project" targetName="std_srvs_generate_messages_lisp" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrVehicle5" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrVehicle4" />
+      <config projectName="Project" targetName="roscpp_generate_messages_lisp" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrVehicle2" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrVehicle1" />
+      <config projectName="Project" targetName="_run_tests_cv_bridge_gtest_cv_bridge-utest" />
+      <config projectName="Project" targetName="map_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_RoutePath" />
+      <config projectName="Project" targetName="roscpp_generate_messages_nodejs" />
       <config projectName="Project" targetName="tf_generate_messages_py" />
+      <config projectName="Project" targetName="download_extra_data" />
+      <config projectName="Project" targetName="map_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_Map2WGS" />
+      <config projectName="Project" targetName="nav_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="tf_generate_messages_lisp" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrStatus8" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrTrackMotionPower" />
+      <config projectName="Project" targetName="_run_tests_cv_bridge_gtest" />
+      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_MotionState" />
+      <config projectName="Project" targetName="_delphi_esr_msgs_generate_messages_check_deps_EsrVehicle3" />
+      <config projectName="Project" targetName="actionlib_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="map_msgs_generate_messages_cpp" />
+      <config projectName="Project" targetName="std_msgs_generate_messages_nodejs" />
+      <config projectName="Project" targetName="_run_tests_image_geometry_gtest_image_geometry-utest" />
+      <config projectName="Project" targetName="grid_map_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="actionlib_generate_messages_nodejs" />
+      <config projectName="Project" targetName="nav_msgs_generate_messages_lisp" />
+      <config projectName="Project" targetName="_autopilot_msgs_generate_messages_check_deps_RouteArea" />
+      <config projectName="Project" targetName="visualization_msgs_generate_messages_eus" />
+      <config projectName="Project" targetName="map_msgs_generate_messages_eus" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -192,7 +192,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b308c63e-01b6-4286-a36f-1d27a9368806" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/carla_ros_bridge/config/settings.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/carla_ros_bridge/config/settings.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/carla_ros_bridge/src/carla_ros_bridge/bridge.py" beforeDir="false" afterPath="$PROJECT_DIR$/carla_ros_bridge/src/carla_ros_bridge/bridge.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/motion_planner/src/MotionPlanner.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/motion_planner/src/MotionPlanner.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/motion_planner/src/function_simplified.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/motion_planner/src/function_simplified.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/motion_planner/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/motion_planner/src/main.cpp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -206,44 +211,117 @@
     <session id="-1141307938">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+          <entry key="project.closed" value="2" />
+          <entry key="project.open.time.11" value="1" />
+          <entry key="project.open.time.14" value="1" />
           <entry key="project.open.time.4" value="1" />
-          <entry key="project.opened" value="1" />
+          <entry key="project.opened" value="3" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="cpp" value="1" />
+          <entry key="cpp" value="3" />
           <entry key="grid_test (disassembly)" value="2" />
-          <entry key="motion_planner (disassembly)" value="1" />
+          <entry key="h" value="4" />
+          <entry key="hpp" value="1" />
+          <entry key="motion_planner (disassembly)" value="3" />
+          <entry key="tcc" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Disassembly" value="3" />
-          <entry key="ObjectiveC" value="1" />
+          <entry key="Disassembly" value="5" />
+          <entry key="ObjectiveC" value="9" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="ObjectiveC" value="48" />
+          <entry key="ObjectiveC" value="107" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.cidr.testingFrameworks.usages" />
       <usages-collector id="statistics.vcs.git.usages" />
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="mm" value="48" />
+          <entry key="cpp" value="1" />
+          <entry key="mm" value="106" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/motion_planner/src/function_simplified.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="264">
-              <caret line="73" column="54" lean-forward="true" selection-start-line="73" selection-start-column="54" selection-end-line="73" selection-end-column="54" />
+            <state relative-caret-position="24">
+              <caret line="902" column="29" lean-forward="true" selection-start-line="902" selection-start-column="29" selection-end-line="902" selection-end-column="29" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/motion_planner/src/MotionPlanner.hpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="279">
+              <caret line="298" column="71" lean-forward="true" selection-start-line="298" selection-start-column="71" selection-end-line="298" selection-end-column="71" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///usr/include/c++/5/bits/stl_vector.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="164">
+              <caret line="177" selection-start-line="177" selection-end-line="177" />
+              <folding>
+                <element signature="e#31496#31522#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///usr/include/c++/5/bits/vector.tcc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="389">
+              <caret line="440" column="33" lean-forward="true" selection-start-line="440" selection-start-column="33" selection-end-line="440" selection-end-column="33" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/motion_planner/src/main.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="174">
+              <caret line="269" selection-start-line="269" selection-end-line="269" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/motion_planner/src/propegating_methods.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="709">
+              <caret line="57" column="30" lean-forward="true" selection-start-line="57" selection-start-column="30" selection-end-line="57" selection-end-column="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///usr/include/c++/5/bits/alloc_traits.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="174">
+              <caret line="516" selection-start-line="516" selection-end-line="516" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///usr/include/c++/5/ext/new_allocator.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="164">
+              <caret line="109" selection-start-line="109" selection-end-line="109" />
             </state>
           </provider>
         </entry>
@@ -252,6 +330,13 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/motion_planner/src/function_simplified.cpp" />
+      </list>
+    </option>
   </component>
   <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
   <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
@@ -1414,35 +1499,45 @@
       <option name="presentableId" value="Default" />
       <updated>1542024562682</updated>
       <workItem from="1542024565349" duration="3944000" />
+      <workItem from="1542177177984" duration="2216000" />
+      <workItem from="1542180662723" duration="8027000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="3944000" />
+    <option name="totallyTimeSpent" value="14187000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="65" y="-4" width="1855" height="1084" extended-state="6" />
-    <editor active="true" />
+    <frame x="64" y="-11" width="1857" height="1092" extended-state="6" />
     <layout>
-      <window_info id="Favorites" side_tool="true" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2498618" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25538972" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Database Changes" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" weight="0.5690377" />
-      <window_info anchor="bottom" id="Event Log" side_tool="true" />
-      <window_info anchor="bottom" id="CMake" weight="0.3294979" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.39958158" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39958158" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="right" id="Database" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.3294979" />
+      <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.5690377" />
+      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
+      <window_info anchor="bottom" id="Version Control" order="10" show_stripe_button="false" />
+      <window_info anchor="bottom" id="CMake" order="11" weight="0.32776618" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Database" order="3" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1457,11 +1552,48 @@
         <watch expression="cell_index" language="ObjectiveC" />
         <watch expression="local_grid_map.data" language="ObjectiveC" />
         <watch expression="local_grid_map" language="ObjectiveC" />
+        <watch expression="candidate_path[0].k" language="ObjectiveC" />
+        <watch expression="m_tree.begin()" language="ObjectiveC" />
+        <watch expression="selected_path_end" language="ObjectiveC" />
+        <watch expression="selected_path" language="ObjectiveC" />
+        <watch expression="selected_path[0]" language="ObjectiveC" />
+        <watch expression="selected_path.size()" language="ObjectiveC" />
+        <watch expression="selected_path_end" language="ObjectiveC" />
       </configuration>
     </watches-manager>
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="watch">
+      <expression>
+        <expression-string>selected_path_end</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>selected_path.size()</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>selected_path[0]</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>selected_path</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>m_tree.begin()</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>candidate_path[0].k</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>local_grid_map</expression-string>
         <language-id>ObjectiveC</language-id>
@@ -1479,6 +1611,21 @@
       </expression>
     </expressions>
     <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>tnp</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>new_nodes.push_back(tnp);</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>temp</expression-string>
+        <language-id>ObjectiveC</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>local_grid_map.data[20713]</expression-string>
         <language-id>ObjectiveC</language-id>
@@ -1504,8 +1651,60 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/motion_planner/src/function_simplified.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="73" column="54" lean-forward="true" selection-start-line="73" selection-start-column="54" selection-end-line="73" selection-end-column="54" />
+        <state relative-caret-position="24">
+          <caret line="902" column="29" lean-forward="true" selection-start-line="902" selection-start-column="29" selection-end-line="902" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/c++/5/bits/vector.tcc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="389">
+          <caret line="440" column="33" lean-forward="true" selection-start-line="440" selection-start-column="33" selection-end-line="440" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/c++/5/bits/stl_vector.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="164">
+          <caret line="177" selection-start-line="177" selection-end-line="177" />
+          <folding>
+            <element signature="e#31496#31522#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/c++/5/bits/alloc_traits.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="174">
+          <caret line="516" selection-start-line="516" selection-end-line="516" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/motion_planner/src/main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="174">
+          <caret line="269" selection-start-line="269" selection-end-line="269" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/motion_planner/src/MotionPlanner.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="279">
+          <caret line="298" column="71" lean-forward="true" selection-start-line="298" selection-start-column="71" selection-end-line="298" selection-end-column="71" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/c++/5/ext/new_allocator.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="164">
+          <caret line="109" selection-start-line="109" selection-end-line="109" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/motion_planner/src/propegating_methods.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="709">
+          <caret line="57" column="30" lean-forward="true" selection-start-line="57" selection-start-column="30" selection-end-line="57" selection-end-column="30" />
         </state>
       </provider>
     </entry>
