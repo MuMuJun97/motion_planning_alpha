@@ -58,7 +58,7 @@ def show_waypoints():
         for point in parts:
             points_X.append( point[0] )
             points_Y.append( point[1] )
-        plt.plot( points_X, points_Y ,linewidth=5)
+        plt.plot( points_X, points_Y ,linewidth=2)
 
 def show_reference_path():
     nodes = []

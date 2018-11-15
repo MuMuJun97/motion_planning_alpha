@@ -143,13 +143,14 @@ bool fun_simple::drivability_check( std::vector<double> curvatures)
         max_element( curvatures.begin(), curvatures.end() );
 
     double min_turning_radius = 1 / (*max_curvature);
-
-    printf( "min_turning_radius is: %f \n", min_turning_radius );
     
     if ( min_turning_radius < MINIMUM_TURNING_RADIUS )
+    {
+        printf( "min_turning_radius is: %f \n", min_turning_radius );
         return false;
-    else
-        return true;
+    }
+
+    return true;
 }
 
 std::vector<double> fun_simple::yield_ratation_matrix( double source, double target )
@@ -480,24 +481,19 @@ bool fun_simple::yield_selected_path(
 
     for (int i = 0; i < path_its.size()-1; i++ )
     {
-        std::cout<< " start " << std::endl;
         std::vector<double> X,Y,Theta;
         tree<type_node_point>::iterator begin = path_its[i];
         tree<type_node_point>::iterator end = path_its[i+1];
-
-        std::cout<< " build curve " <<  begin -> y << std::endl;
 
         Clothoid::pointsOnClothoid(
             begin -> x, begin -> y, begin -> theta,
             end -> k, end -> dk, end -> L,
             ceil( end -> L * WAYPOINTS_DENSITY ), X, Y, Theta);
 
-        std::cout<< " built curve " << std::endl;
         X.push_back( end -> x);
         Y.push_back( end -> y);
         Theta.push_back( end -> theta);
         
-        std::cout<< " check each point " << std::endl;
         for ( int i = 1; i < X.size(); i++ )
         {
             type_road_point trp;
@@ -505,7 +501,6 @@ bool fun_simple::yield_selected_path(
             trp.y = Y[i];
             trp.angle = Theta[i];
 
-            std::cout<< " check passability " << std::endl;
             if( !passability_check( trp ) )
             {
                 if ( i > 1 )
@@ -523,7 +518,6 @@ bool fun_simple::yield_selected_path(
                     tnp.size = true;
                     m_tree.append_child( begin, tnp );
                 }
-                std::cout<< " erase end " << std::endl;
                 m_tree.erase(end);
 
                 selected_path[ selected_path.size()-1 ].state = 2;
@@ -682,13 +676,31 @@ bool fun_simple::repropagating()
     <<std::endl;
 
     double k ,dk ,L;
-    int index = -1, selected_index = -1;
+    int selected_index = -1;
     std::vector<std::pair<double,int> > save_cost;
     std::vector<std::pair<type_path_cost,int> > costs;
     std::vector<double> X,Y,Theta;
 
     //TODO trim the selected path.
-    
+    int index = -1;
+    for (int i = selected_path.size()-1; i >= 0 ; i--)
+    {
+        type_road_point point = selected_path[i];
+        double delta_x = point.x - vehicle_loc_updated.x;
+        double delta_y = point.y - vehicle_loc_updated.y;
+        std::vector<double> RT = yield_ratation_matrix( vehicle_loc_updated.angle, 0 );
+        double tfd_x = RT[0] * delta_x + RT[1] * delta_y;
+        double tfd_y = RT[2] * delta_x + RT[3] * delta_y;
+
+        if ( tfd_x < 2 && fabs( tfd_y ) < 3 )
+        {
+            index = i; break;
+        }
+    }
+    if ( index >= 0 && index < selected_path.size() - 1 )
+    {
+        selected_path.erase( selected_path.begin(), selected_path.begin() + index+1 );
+    }
 
     //TODO calculate the cost from updated vehicle location to each points in 
     //     selected path.
@@ -1084,6 +1096,9 @@ double fun_simple::yield_expected_speed( type_road_point from, type_road_point h
             here.x, here.y, here.angle,
             k, dk, L );
         k_i = fabs( k + L * dk );
+
+        if ( k_i > 1 / MINIMUM_TURNING_RADIUS ) k_i = 1 / ( MINIMUM_TURNING_RADIUS * 1.5 );
+
         cur_vel = sqrt( LATERAL_ACC / k_i );
         velocity_candidates.push_back( cur_vel ) ;
 
@@ -1112,6 +1127,9 @@ double fun_simple::yield_expected_speed( type_road_point from, type_road_point h
             here.x, here.y, here.angle,
             k, dk, L );
         k_i = fabs( k + L * dk );
+
+        if ( k_i > 1 / MINIMUM_TURNING_RADIUS ) k_i = 1 / ( MINIMUM_TURNING_RADIUS * 1.5 );
+
         cur_vel = sqrt( LATERAL_ACC / k_i );
         velocity_candidates.push_back( cur_vel ) ;
 

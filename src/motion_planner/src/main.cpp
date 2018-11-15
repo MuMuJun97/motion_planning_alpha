@@ -84,7 +84,7 @@ public:
                 selected_path.at(i).y;
             
             waypoints_msg.points.push_back( routenode );
-            waypoints_msg.speeds.push_back( 5 );
+            waypoints_msg.speeds.push_back( selected_path.at(i).speed );
             std::cout<< "speed is: "<< selected_path.at(i).speed<< " ";
         }
         std::cout<< std::endl;
