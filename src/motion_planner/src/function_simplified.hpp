@@ -28,6 +28,10 @@ public:
      */
     bool passability_check( type_road_point );
     /*
+     * check if the path or the node is drivable.
+     */
+    bool drivability_check( std::vector<double> curvatures);
+    /*
      * yield ratation transform matrix(2x2), row-major order.
      */
     std::vector<double> yield_ratation_matrix( double source, double target );
@@ -79,7 +83,7 @@ public:
      * mode = 0: cruise situation
      * mode = 1: norm slow down
      */
-    double yield_expected_speed( type_road_point from, type_road_point here, int mode );
+    double yield_expected_speed( type_road_point from, type_road_point here, int mode, double mileage );
     /*
      * yield the expected velocity of selected path
      */
@@ -206,6 +210,10 @@ public://parameters used in the planner
        * Waypoints density ( number/m), no including the end point of each segement.
        */
       static constexpr double WAYPOINTS_DENSITY = 0.3;
+      /*
+       * minimum turning radius (m).
+       */
+      static constexpr double MINIMUM_TURNING_RADIUS = 6;
       /*
        * selected path
        */

@@ -387,7 +387,7 @@ class CarlaRosBridge(object):
 
     def generate_controller(self, measurements):
         control = measurements.player_measurements.autopilot_control
-        control.steer = - self.controller_msg['steering'].data[0] / 70
+        control.steer = self.controller_msg['steering'].data[0] / 70
         control.throttle = self.controller_msg['throttle'].data
         control.brake = self.controller_msg['brake'].data
         control.reverse = False

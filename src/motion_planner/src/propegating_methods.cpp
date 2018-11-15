@@ -21,6 +21,13 @@ bool propegating_methods::curve_propegation(
     double k, dk, L;
     buildClothoid(x, y, angle, sx, sy, sangle, k, dk, L);
 
+
+    std::vector<double> curvatures;
+    curvatures.push_back( fabs( k ) );
+    curvatures.push_back( fabs( k + dk * L) );
+    if ( !(*p_func_method_propegating)->drivability_check(curvatures) )
+        return false;
+
     std::vector<double> X, Y, Theta;
     int npts = ceil(L * NODES_DENSITY);if ( npts <= 0 ) npts = 1;
 

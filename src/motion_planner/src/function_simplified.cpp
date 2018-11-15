@@ -30,7 +30,7 @@ bool fun_simple::collision_check(type_road_point point)
     double delta_y = point.y - global_coord.y;
     std::vector<double> RT = yield_ratation_matrix( global_coord.angle, 0 );
     double tfd_x = RT[0] * delta_x + RT[1] * delta_y;
-    double tfd_y = - ( RT[2] * delta_x + RT[3] * delta_y );
+    double tfd_y = RT[2] * delta_x + RT[3] * delta_y;
 
     //TODO find the position of the point in the grid map.
     // std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] " <<
@@ -67,10 +67,8 @@ bool fun_simple::collision_check(type_road_point point)
     if ( cell_index < local_grid_map.data.size() )
     {   
         int value = 0;
-        std::cout<< "here 5.1" << std::endl;
         try
         {
-            std::cout<< "grid pos: " << cell_index <<std::endl;
             value = local_grid_map.data[ cell_index ];
         }
         catch( std::exception& e )
@@ -92,7 +90,6 @@ bool fun_simple::collision_check(type_road_point point)
 
             return true;
         }
-        std::cout<< "here 5.2" << std::endl;
     }
     // std::cout<< "[IN(FUN) collision_check]" << "[>>>>INFO<<<<] " <<
     //     "finished collision check"
@@ -138,6 +135,21 @@ bool fun_simple::passability_check( type_road_point point )
         }
     }
     return true;
+}
+
+bool fun_simple::drivability_check( std::vector<double> curvatures)
+{
+    std::vector<double>::iterator max_curvature = 
+        max_element( curvatures.begin(), curvatures.end() );
+
+    double min_turning_radius = 1 / (*max_curvature);
+
+    printf( "min_turning_radius is: %f \n", min_turning_radius );
+    
+    if ( min_turning_radius < MINIMUM_TURNING_RADIUS )
+        return false;
+    else
+        return true;
 }
 
 std::vector<double> fun_simple::yield_ratation_matrix( double source, double target )
@@ -311,7 +323,8 @@ std::vector<tree<type_node_point>::iterator> fun_simple::select_path_end_nodes()
                     min = it->semi_rift; min_it = it;
                 }
             }
-            candidate_ends.push_back(min_it);
+            if ( m_tree.is_valid(min_it) )
+                candidate_ends.push_back(min_it);
         }
 
         ++state_index;
@@ -346,19 +359,21 @@ tree<type_node_point>::iterator fun_simple::select_path_end_node(
         }
 
         double end_k = 0;
-        if ( candidate_path.size() >= 1 )
+        if ( candidate_path.size() > 1 )
         {
-            end_k = candidate_path[0].k + 
-            candidate_path[0].dk * ( candidate_path[0].L - candidate_path[1].L );
+            end_k = fabs( 
+                candidate_path[0].k + 
+                candidate_path[0].dk * (candidate_path[0].L - candidate_path[1].L) 
+            );
         }
         double cost_dk = 0;
         double cost_k = end_k;
-        double cost_L = candidate_ends[i] -> L;
+        double cost_L = candidate_ends[i] -> cost;
 
         for( int j = 0; j < candidate_path.size(); j++ )
         {
             cost_dk += fabs( candidate_path[j].dk );
-            cost_k += candidate_path[j].k;
+            cost_k += fabs( candidate_path[j].k );
         }
 
         double rift = candidate_ends[i]->semi_rift, rift_dk = 0, rift_k = 0;
@@ -371,7 +386,7 @@ tree<type_node_point>::iterator fun_simple::select_path_end_node(
         }
 
         cost_dk += fabs( rift_dk );
-        cost_k += rift_k;
+        cost_k += fabs( rift_k );
         cost_L += rift;
 
         path_cost.diff_curvature = cost_k / ( candidate_path.size() + 2 );
@@ -593,11 +608,17 @@ void fun_simple::trim_tree()
 
     tree<type_node_point>::sibling_iterator sib = m_tree.begin(m_tree.begin());
     tree<type_node_point>::sibling_iterator end = m_tree.end(m_tree.begin());
+    std::vector<tree<type_node_point>::iterator> need2deleted;
+
     while( sib != end )
     {
         if ( sib != first_child )
-            m_tree.erase(sib);
+            need2deleted.push_back(sib);
         ++sib;
+    }
+    for ( int i = 0; i < need2deleted.size(); i++ )
+    {
+        m_tree.erase( need2deleted[i] );
     }
 
     m_tree.begin() -> x = vehicle_loc.x;
@@ -632,27 +653,28 @@ void fun_simple::trim_tree()
 
 bool fun_simple::repropagating()
 {
-    if ( ! vehicle_loc.size )
-    {
-        std::cout<< "[IN(FUN) repropagating]" << "[>>>WARNING<<] " <<
-            "vehicle location is not updated, using the old one"
-        <<endl;
+    // if ( ! vehicle_loc.size )
+    // {
+    //     std::cout<< "[IN(FUN) repropagating]" << "[>>>WARNING<<] " <<
+    //         "vehicle location is not updated, using the old one"
+    //     <<endl;
 
-        return true;
+    //     return true;
 
-    }else{
-        vehicle_loc.size = false;
-    }
+    // }else{
+    //     vehicle_loc.size = false;
+    // }
 
     //TODO store the updated vehicle location.
     type_road_point vehicle_loc_updated;
     vehicle_loc_updated.x = vehicle_loc.x;
     vehicle_loc_updated.y = vehicle_loc.y;
+    vehicle_loc_updated.angle = vehicle_loc.angle;
 
-    if( norm_sqrt( vehicle_loc_updated, global_coord ) == 0 )
-    {
-        return true;
-    }
+    // if( norm_sqrt( vehicle_loc_updated, global_coord ) == 0 )
+    // {
+    //     return true;
+    // }
 
     std::cout<< "[IN(FUN) repropagating]" << "[>>>>INFO<<<<] " <<
         "Updated vehicle_loc (x: "<<vehicle_loc_updated.x<<", y: " << 
@@ -664,6 +686,9 @@ bool fun_simple::repropagating()
     std::vector<std::pair<double,int> > save_cost;
     std::vector<std::pair<type_path_cost,int> > costs;
     std::vector<double> X,Y,Theta;
+
+    //TODO trim the selected path.
+    
 
     //TODO calculate the cost from updated vehicle location to each points in 
     //     selected path.
@@ -680,8 +705,17 @@ bool fun_simple::repropagating()
             tps.x, tps.y, tps.angle, k, dk, L);
         type_path_cost cost;
         //TODO check steering radius of the car.
+        std::vector<double> curvatures;
+        curvatures.push_back( fabs(k) ); 
+        curvatures.push_back( fabs(k + L*dk) );
 
-        cost.length = L; cost.dk = fabs(dk); cost.diff_curvature = 2*k + dk * L;
+        if ( !drivability_check( curvatures ) )
+        {
+            printf( "skipping one \n" );
+            continue;
+        }
+
+        cost.length = L; cost.dk = fabs(dk); cost.diff_curvature = fabs(k) + fabs( k + dk * L );
         costs.push_back( std::make_pair( cost, i ) );
     }
 
@@ -696,8 +730,8 @@ bool fun_simple::repropagating()
     for (int i = 0; i < costs.size(); i++)
     {
         double ctg = 
-            costs[i].first.length/sum_L * 0.3 + costs[i].first.dk/sum_dk * 0.3 
-            + costs[i].first.diff_curvature/sum_k * 0.4;
+            costs[i].first.length/sum_L * 0.5 + costs[i].first.dk/sum_dk * 0.3 
+            + costs[i].first.diff_curvature/sum_k * 0.2;
         save_cost.push_back( std::make_pair(ctg, costs[i].second) );
     }
 
@@ -989,6 +1023,30 @@ void fun_simple::yield_expected_speeds()
         mode = 0;
     }
 
+    double mileage = 0; // total length of path
+    if ( mode == 1)
+    {
+        for ( int i = 0; i < selected_path.size(); i++ )
+        {
+            type_road_point from, here;
+            here = selected_path[i];
+            if ( i == 0 )
+            {   
+                from.x = vehicle_loc.x;
+                from.y = vehicle_loc.y;
+                from.angle = vehicle_loc.angle;
+            }else{
+                from = selected_path[i-1];
+            }
+            double _,__,L;
+            Clothoid::buildClothoid( 
+            from.x, from.y, from.angle,
+            here.x, here.y, here.angle,
+            _, __, L );
+            mileage += L;
+        }
+    }
+
     for ( int i = 0; i < selected_path.size(); i++ )
     {   
         type_road_point from, here;
@@ -1003,11 +1061,11 @@ void fun_simple::yield_expected_speeds()
             from = selected_path[i-1];
         }
         
-        selected_path[i].speed = yield_expected_speed(from, here, mode);
+        selected_path[i].speed = yield_expected_speed(from, here, mode, mileage);
     }
 }
 
-double fun_simple::yield_expected_speed( type_road_point from, type_road_point here, int mode )
+double fun_simple::yield_expected_speed( type_road_point from, type_road_point here, int mode, double mileage )
 {
     if ( norm_sqrt( goal_point, here ) <= goal_size )
     {
@@ -1025,7 +1083,7 @@ double fun_simple::yield_expected_speed( type_road_point from, type_road_point h
             from.x, from.y, from.angle,
             here.x, here.y, here.angle,
             k, dk, L );
-        k_i = k + L * dk;
+        k_i = fabs( k + L * dk );
         cur_vel = sqrt( LATERAL_ACC / k_i );
         velocity_candidates.push_back( cur_vel ) ;
 
@@ -1036,6 +1094,8 @@ double fun_simple::yield_expected_speed( type_road_point from, type_road_point h
         //TODO take the minmum
         vector<double>::iterator min_velocity = min_element(
             velocity_candidates.begin(), velocity_candidates.end());
+        
+        printf( "mode: %d | cur_vel: %f | uniacc_vel: %f | setspeed: %f \n", mode, cur_vel, uniacc_vel, speed.speed );
         
         return *min_velocity;
     }
@@ -1051,18 +1111,28 @@ double fun_simple::yield_expected_speed( type_road_point from, type_road_point h
             from.x, from.y, from.angle,
             here.x, here.y, here.angle,
             k, dk, L );
-        k_i = k + L * dk;
+        k_i = fabs( k + L * dk );
         cur_vel = sqrt( LATERAL_ACC / k_i );
         velocity_candidates.push_back( cur_vel ) ;
 
         //TODO calculate velocity by non-uniform deceleration
-        nunidcc_vel = pow( pow( from.speed, 3/2 ) - 3 * L / DEC_COEFF, 2/3 );
+        double vehicle_speed = sqrt( pow( vehicle_vel.vx, 2 ) + pow( vehicle_vel.vy, 2 ) );
+        double dec_coeff = vehicle_speed / pow( mileage, 2);
+
+        if ( 2*pow( dec_coeff, 2)*pow(mileage, 3) >= DEC_COEFF ) 
+            dec_coeff = sqrt( DEC_COEFF / pow(mileage, 3) / 2 );
+        
+        nunidcc_vel = from.speed - 2* sqrt( from.speed * dec_coeff) * L + dec_coeff*L*L;
+        if ( nunidcc_vel < 0 ) nunidcc_vel = 0;
+
         velocity_candidates.push_back( nunidcc_vel );
 
         //TODO take the minmum
         vector<double>::iterator min_velocity = min_element(
             velocity_candidates.begin(), velocity_candidates.end());
-        
+
+        printf( "mode: %d | cur_vel: %f | nunidcc_vel: %f\n", mode, cur_vel, nunidcc_vel );
+
         return *min_velocity;
     }
 }

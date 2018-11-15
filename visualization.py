@@ -23,7 +23,7 @@ def show_tree():
             child = [ child_x, child_y ]
             children.append( child )
 
-    for no in []: #range( len( sums ) )
+    for no in [len(sums)-13]: #range( len( sums ) )
         gap = sum(sums[0:no])
         number = sums[no]
         p_parts = parents[gap: gap + number]

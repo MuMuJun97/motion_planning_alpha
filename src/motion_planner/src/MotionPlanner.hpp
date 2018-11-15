@@ -222,25 +222,27 @@ public:
         printf("Starting Propagating tree\n");
         ros::Duration timeout(PROPAGATION_TIME);
         ros::Time start_time = ros::Time::now();
-        int n = 0;
         int fn = 0;
 
-        std::vector<type_node_point> temp;
-        if ( p_propegate_main -> curve_propegation(
-                p_fun_main->m_tree.begin(), p_fun_main->local_goal, temp) )
-        {
-            p_fun_main->m_tree.begin() -> rift = temp[ temp.size()-1 ].cost;
-            p_fun_main->m_tree.begin() -> rift_dk = temp[ temp.size()-1 ].dk;
-            p_fun_main->m_tree.begin() -> rift_k = 
-                temp[0].k + p_fun_main->m_tree.begin()->rift * p_fun_main->m_tree.begin() -> rift_dk;
+        tree<type_node_point>::iterator it;
+
+        for( it=p_fun_main->m_tree.begin();it!=p_fun_main->m_tree.end();it++ )
+        {   
+            std::vector<type_node_point> temp;
+            if ( p_propegate_main -> curve_propegation( 
+                 it, p_fun_main->local_goal, temp) )
+            {
+                it -> rift = temp[ temp.size()-1 ].cost;
+                it -> rift_dk = temp[ temp.size()-1 ].dk;
+                it -> rift_k = temp[0].k + it->rift * it -> rift_dk;
+            }
+            else
+            {
+                it -> state = 2;
+            }
+            it->semi_rift = norm_sqrt( 
+                transform_from_node_to_point( *it ), p_fun_main->local_goal );
         }
-        else
-        {
-            p_fun_main->m_tree.begin() -> state = 2;
-        }
-        p_fun_main->m_tree.begin()->semi_rift = 
-            norm_sqrt( transform_from_node_to_point( 
-                *(p_fun_main->m_tree.begin()) ), p_fun_main->local_goal );
 
         while ( ros::Time::now() - start_time < timeout )
         {
@@ -257,9 +259,6 @@ public:
 
             if ( flag_sample )
             {
-                n++;
-                printf( "sampled %d th node( %f, %f, %f)\n", n, 
-                    p_sample_main->sample_node.x, p_sample_main->sample_node.y, p_sample_main->sample_node.angle);
                 // TODO Parent-searching.
                 flag_search_parent = p_search_main->searching_parent_node();
             }
@@ -272,8 +271,6 @@ public:
                     p_search_main -> parent_node, 
                     p_sample_main -> sample_node, 
                     new_nodes);
-                printf( "new_nodes size isp: %lud \n", new_nodes.size() );
-                if ( !flag_prop ) { fn++; printf( "collide %d th node\n", fn);}
             }
 
             if( flag_prop )
@@ -315,7 +312,6 @@ public:
             }
             
             sample_nodes.push_back( p_sample_main -> sample_node );
-            printf( "sampled nodes size is: %lud \n", sample_nodes.size() );
             
         }
         printf("Finished  Propagating tree\n");
